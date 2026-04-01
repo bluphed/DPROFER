@@ -3,458 +3,1046 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Dprofer - Sistema de Inventario</title>
+    <title>Dprofer - Sistema de Inventario Profesional</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        .login-card {
-            max-width: 400px;
-            margin: 80px auto;
+        
+        /* Contenedor principal */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Tarjetas de estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
-        .header {
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card h3 {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-card p {
+            color: #666;
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        /* Tarjetas principales */
+        .card-modern {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .card-header-modern {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            padding: 20px;
-            border-radius: 15px 15px 0 0;
+            padding: 18px 25px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .card-header-modern i {
+            margin-right: 10px;
+        }
+        
+        .card-body-modern {
+            padding: 25px;
+        }
+        
+        /* Formulario */
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-control-modern, .form-select-modern {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .form-control-modern:focus, .form-select-modern:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42,82,152,0.1);
+        }
+        
+        /* Botones */
+        .btn-modern {
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: bold;
+            border: none;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        
+        .btn-success-modern {
+            background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+            color: white;
+        }
+        
+        .btn-danger-modern {
+            background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);
+            color: white;
+        }
+        
+        .btn-warning-modern {
+            background: linear-gradient(135deg, #ffc107 0%, #ffdd57 100%);
+            color: #333;
+        }
+        
+        /* Tabla */
+        .table-container {
+            overflow-x: auto;
+            max-height: 450px;
+            overflow-y: auto;
+            border-radius: 12px;
+        }
+        
+        .table-modern {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        .table-modern thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .table-modern th {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table-modern td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        
+        .table-modern tr:hover {
+            background: #f8f9fa;
+        }
+        
+        /* Badges */
+        .badge-stock-bajo {
+            background: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .badge-stock-normal {
+            background: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .badge-entrada {
+            background: #28a745;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+        }
+        
+        .badge-salida {
+            background: #dc3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+        }
+        
+        /* Alertas */
+        .alert-modern {
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        /* Buscador */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .search-box input {
+            padding-left: 45px;
+        }
+        
+        /* Autocompletado */
+        .autocomplete-list {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            width: calc(100% - 30px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .autocomplete-item:hover {
+            background: #f0f0f0;
+        }
+        
+        /* Header de usuario */
+        .user-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
         }
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .stat-card:hover { transform: translateY(-5px); }
-        .card {
-            background: white;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .card-header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 15px 20px;
-            font-weight: bold;
-        }
-        .btn {
-            border-radius: 10px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .table-container { overflow-x: auto; max-height: 400px; overflow-y: auto; }
-        .table th { background: #1e3c72; color: white; position: sticky; top: 0; }
-        .badge-stock-bajo { background: #dc3545; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .badge-stock-normal { background: #28a745; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            justify-content: center;
+        
+        .user-info {
+            display: flex;
             align-items: center;
-            z-index: 9999;
+            gap: 15px;
         }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #fff;
-            border-top-color: #1e3c72;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .user-email {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .stats-cards { grid-template-columns: repeat(2, 1fr); }
-            .header { flex-direction: column; gap: 10px; text-align: center; }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .btn-modern {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animated {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #2a5298;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading"><div class="spinner"></div></div>
-
-<!-- Pantalla de Login -->
-<div id="loginContainer">
-    <div class="login-card">
-        <div class="text-center mb-4">
-            <i class="fas fa-store fa-3x" style="color: #1e3c72;"></i>
-            <h2 class="mt-2">Dprofer</h2>
-            <p>Sistema de Inventario en la Nube</p>
-            <small class="text-success">✓ Datos seguros en Firebase</small>
-        </div>
-        <div id="loginError" class="alert alert-danger" style="display: none;"></div>
-        <div class="mb-3">
-            <input type="email" id="loginEmail" class="form-control" placeholder="Correo electrónico">
-        </div>
-        <div class="mb-3">
-            <input type="password" id="loginPassword" class="form-control" placeholder="Contraseña (mínimo 6 caracteres)">
-        </div>
-        <button class="btn btn-primary w-100 mb-2" onclick="iniciarSesion()">
-            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-        </button>
-        <button class="btn btn-secondary w-100" onclick="registrarUsuario()">
-            <i class="fas fa-user-plus"></i> Registrarse
-        </button>
-    </div>
-</div>
-
-<!-- App Principal -->
-<div id="appContainer" style="display: none;">
-    <div class="header">
-        <div>
-            <h1><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h1>
-            <p>Tus datos guardados en la nube</p>
-        </div>
-        <div>
-            <span class="user-email" id="userEmail"></span>
-            <button class="btn btn-sm btn-outline-light ms-2" onclick="cerrarSesion()">
-                <i class="fas fa-sign-out-alt"></i> Salir
-            </button>
-        </div>
-    </div>
-    
-    <div class="stats-cards">
-        <div class="stat-card">
-            <i class="fas fa-boxes fa-2x" style="color: #1e3c72;"></i>
-            <h3 id="totalProductos">0</h3>
-            <p>Total Productos</p>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-exclamation-triangle fa-2x" style="color: #dc3545;"></i>
-            <h3 id="stockBajo">0</h3>
-            <p>Stock Bajo</p>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-dollar-sign fa-2x" style="color: #28a745;"></i>
-            <h3 id="gananciaTotal">$0</h3>
-            <p>Ganancia Potencial</p>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-chart-line fa-2x" style="color: #17a2b8;"></i>
-            <h3 id="valorInventario">$0</h3>
-            <p>Valor Inventario</p>
-        </div>
-    </div>
-    
-    <div id="alertasContainer"></div>
-    
-    <div class="card">
-        <div class="card-header"><i class="fas fa-exchange-alt"></i> Registrar Movimiento</div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6><i class="fas fa-tag"></i> Datos del Producto</h6>
-                    <input type="text" id="codigo" class="form-control mb-2" placeholder="Código * (ej: MART-001)">
-                    <input type="text" id="nombre" class="form-control mb-2" placeholder="Nombre * (ej: Martillo)">
-                    <select id="categoria" class="form-select mb-2">
-                        <option>🔧 Herramientas</option>
-                        <option>🎨 Pinturas</option>
-                        <option>⚡ Eléctrico</option>
-                        <option>🔩 Ferretería</option>
-                    </select>
-                    <div class="row">
-                        <div class="col-6"><input type="number" id="costo" class="form-control" placeholder="Costo $"></div>
-                        <div class="col-6"><input type="number" id="precioVenta" class="form-control" placeholder="Precio Venta $"></div>
-                    </div>
+<div class="dashboard">
+    <!-- Pantalla de Login -->
+    <div id="loginContainer">
+        <div style="max-width: 450px; margin: 80px auto;">
+            <div class="card-modern">
+                <div class="card-header-modern text-center">
+                    <i class="fas fa-store fa-2x"></i>
+                    <h3 class="mt-2">Dprofer</h3>
+                    <p class="mb-0" style="opacity: 0.9;">Sistema de Inventario Profesional</p>
                 </div>
-                <div class="col-md-6">
-                    <h6><i class="fas fa-arrows-spin"></i> Movimiento</h6>
-                    <select id="tipoMovimiento" class="form-select mb-2">
-                        <option value="entrada">📥 ENTRADA (Compra)</option>
-                        <option value="salida">📤 SALIDA (Venta)</option>
-                    </select>
-                    <input type="number" id="cantidad" class="form-control mb-2" placeholder="Cantidad" value="1">
-                    <input type="text" id="observacion" class="form-control mb-2" placeholder="Observación">
-                    <hr>
-                    <div class="row">
-                        <div class="col-6">
-                            <label>Rentabilidad x unidad</label>
-                            <input type="text" id="rentabilidadUnidad" class="form-control" readonly style="background:#e9ecef;">
-                        </div>
-                        <div class="col-6">
-                            <label>Total movimiento</label>
-                            <input type="text" id="totalMovimiento" class="form-control" readonly style="background:#e9ecef;">
-                        </div>
+                <div class="card-body-modern">
+                    <div id="loginError" class="alert-modern alert alert-danger" style="display: none;"></div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Usuario</label>
+                        <input type="text" id="loginUser" class="form-control-modern" placeholder="Ingresa tu usuario">
                     </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Contraseña</label>
+                        <input type="password" id="loginPass" class="form-control-modern" placeholder="Ingresa tu contraseña">
+                    </div>
+                    
+                    <button class="btn-modern btn-primary-modern w-100 mb-2" onclick="iniciarSesion()">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                    <button class="btn-modern btn-success-modern w-100" onclick="registrarUsuario()">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </button>
                 </div>
             </div>
-            <div class="text-center mt-3">
-                <button class="btn btn-primary" onclick="registrarMovimiento()">
-                    <i class="fas fa-cloud-upload-alt"></i> Guardar en Nube
-                </button>
-                <button class="btn btn-secondary" onclick="limpiarFormulario()">
-                    <i class="fas fa-eraser"></i> Limpiar
+        </div>
+    </div>
+    
+    <!-- App Principal -->
+    <div id="appContainer" style="display: none;">
+        <!-- Header de Usuario -->
+        <div class="user-header">
+            <div>
+                <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Inventario</h2>
+                <p class="mb-0" style="opacity: 0.9;">Gestión completa de tu ferretería</p>
+            </div>
+            <div class="user-info">
+                <span><i class="fas fa-user-circle"></i> <strong id="userDisplay"></strong></span>
+                <button class="btn-modern btn-danger-modern" onclick="cerrarSesion()" style="padding: 8px 20px;">
+                    <i class="fas fa-sign-out-alt"></i> Salir
                 </button>
             </div>
         </div>
-    </div>
-    
-    <div class="card">
-        <div class="card-header"><i class="fas fa-box"></i> Inventario Actual</div>
-        <div class="card-body table-container">
-            <table class="table table-hover">
-                <thead>运转<th>Código</th><th>Producto</th><th>Stock</th><th>Precio</th><th>Rentabilidad</th><th>Estado</th><th>Acciones</th></thead>
-                <tbody id="tablaInventario"></tbody>
-            </table>
+        
+        <!-- Tarjetas de Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card" onclick="mostrarTodos()">
+                <i class="fas fa-boxes" style="color: #1e3c72;"></i>
+                <h3 id="totalProductos">0</h3>
+                <p>Total Productos</p>
+            </div>
+            <div class="stat-card" onclick="mostrarStockBajo()">
+                <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                <h3 id="stockBajo">0</h3>
+                <p>Productos con Stock Bajo</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-dollar-sign" style="color: #28a745;"></i>
+                <h3 id="gananciaTotal">$0</h3>
+                <p>Ganancia Potencial</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-line" style="color: #17a2b8;"></i>
+                <h3 id="valorInventario">$0</h3>
+                <p>Valor del Inventario</p>
+            </div>
+        </div>
+        
+        <!-- Alertas Automáticas -->
+        <div id="alertasContainer"></div>
+        
+        <!-- Formulario Principal -->
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="fas fa-exchange-alt"></i> Registrar Movimiento de Mercadería
+            </div>
+            <div class="card-body-modern">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h5 class="mb-3"><i class="fas fa-tag"></i> Datos del Producto</h5>
+                        
+                        <div class="form-group">
+                            <label>Código del Producto *</label>
+                            <div style="position: relative;">
+                                <input type="text" id="codigo" class="form-control-modern" placeholder="Ej: MART-001, CLAV-100" autocomplete="off">
+                                <div id="autocompleteList" class="autocomplete-list" style="display: none;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nombre del Producto *</label>
+                            <input type="text" id="nombre" class="form-control-modern" placeholder="Ej: Martillo de acero, Clavos 2 pulgadas">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Categoría</label>
+                                    <select id="categoria" class="form-select-modern">
+                                        <option value="Herramientas">🔧 Herramientas</option>
+                                        <option value="Pinturas">🎨 Pinturas</option>
+                                        <option value="Eléctrico">⚡ Eléctrico</option>
+                                        <option value="Ferretería">🔩 Ferretería</option>
+                                        <option value="Plomería">💧 Plomería</option>
+                                        <option value="Jardinería">🌱 Jardinería</option>
+                                        <option value="Seguridad">🔒 Seguridad</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Stock Mínimo (Alerta)</label>
+                                    <input type="number" id="stockMinimo" class="form-control-modern" value="5" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Costo Unitario ($)</label>
+                                    <input type="number" id="costo" class="form-control-modern" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Precio de Venta ($)</label>
+                                    <input type="number" id="precioVenta" class="form-control-modern" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <h5 class="mb-3"><i class="fas fa-arrows-spin"></i> Movimiento</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tipo de Movimiento</label>
+                                    <select id="tipoMovimiento" class="form-select-modern">
+                                        <option value="entrada">📥 ENTRADA (Compra a proveedor)</option>
+                                        <option value="salida">📤 SALIDA (Venta al cliente)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Cantidad</label>
+                                    <input type="number" id="cantidad" class="form-control-modern" value="1" min="1">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Observación / Nota</label>
+                            <input type="text" id="observacion" class="form-control-modern" placeholder="Ej: Compra mensual, Venta al contado">
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><i class="fas fa-chart-line"></i> Rentabilidad x Unidad</label>
+                                    <input type="text" id="rentabilidadUnidad" class="form-control-modern" readonly style="background: #e9ecef; font-weight: bold; color: #28a745;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><i class="fas fa-calculator"></i> Total del Movimiento</label>
+                                    <input type="text" id="totalMovimiento" class="form-control-modern" readonly style="background: #e9ecef; font-weight: bold; color: #1e3c72;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>IVA (15%)</label>
+                                    <input type="text" id="ivaCalculado" class="form-control-modern" readonly style="background: #e9ecef;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Total con IVA</label>
+                                    <input type="text" id="totalConIVA" class="form-control-modern" readonly style="background: #e9ecef; font-weight: bold; color: #ffc107;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn-modern btn-primary-modern me-2" onclick="registrarMovimiento()">
+                        <i class="fas fa-save"></i> Guardar Movimiento
+                    </button>
+                    <button class="btn-modern btn-warning-modern me-2" onclick="limpiarFormulario()">
+                        <i class="fas fa-eraser"></i> Limpiar Formulario
+                    </button>
+                    <button class="btn-modern btn-success-modern" onclick="exportarReporte()">
+                        <i class="fas fa-file-excel"></i> Exportar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Buscador y Tabla de Inventario -->
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="fas fa-box"></i> Inventario Actual
+            </div>
+            <div class="card-body-modern">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscador" class="form-control-modern" placeholder="Buscar por código, nombre o categoría..." onkeyup="filtrarProductos()">
+                </div>
+                
+                <div class="table-container">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Stock</th>
+                                <th>Costo</th>
+                                <th>Precio Venta</th>
+                                <th>Rentabilidad</th>
+                                <th>Valor Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaInventario"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historial de Movimientos -->
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <i class="fas fa-history"></i> Historial de Movimientos (Últimos 20)
+            </div>
+            <div class="card-body-modern">
+                <div class="table-container" style="max-height: 300px;">
+                    <table class="table-modern">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Código</th>
+                                <th>Cantidad</th>
+                                <th>Valor Unitario</th>
+                                <th>Total</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaMovimientos"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script type="module">
-    // ==================== TU CONFIGURACIÓN DE FIREBASE (CORREGIDA) ====================
-    const firebaseConfig = {
-        apiKey: "AIzaSyBJo0z_yuermDV-dn05msGkzM01Tr3feGo",
-        authDomain: "dprofer-7bea9.firebaseapp.com",
-        projectId: "dprofer-7bea9",
-        storageBucket: "dprofer-7bea9.firebasestorage.app",
-        messagingSenderId: "788368470526",
-        appId: "1:788368470526:web:e0b7f6e648f04f2ef150af",
-        measurementId: "G-VJ0HGKW9NM"
-    };
-    // =================================================================================
-    
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
+<script>
+    // ==================== DATOS ====================
+    let usuarios = JSON.parse(localStorage.getItem('dprofer_usuarios')) || [];
     let productos = [];
+    let movimientos = [];
     let usuarioActual = null;
+    let productosFiltrados = [];
     
-    window.iniciarSesion = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pwd = document.getElementById('loginPassword').value;
-        if (!email || !pwd) return mostrarError('Complete todos los campos');
-        mostrarLoading(true);
-        try {
-            await signInWithEmailAndPassword(auth, email, pwd);
-        } catch (e) { mostrarError(e.message); }
-        mostrarLoading(false);
-    };
-    
-    window.registrarUsuario = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pwd = document.getElementById('loginPassword').value;
-        if (!email || !pwd) return mostrarError('Complete todos los campos');
-        if (pwd.length < 6) return mostrarError('La contraseña debe tener al menos 6 caracteres');
-        mostrarLoading(true);
-        try {
-            await createUserWithEmailAndPassword(auth, email, pwd);
-            mostrarNotificacion('✅ Usuario registrado');
-        } catch (e) { mostrarError(e.message); }
-        mostrarLoading(false);
-    };
-    
-    window.cerrarSesion = async () => {
-        await signOut(auth);
-        document.getElementById('loginContainer').style.display = 'block';
-        document.getElementById('appContainer').style.display = 'none';
-    };
-    
-    async function cargarDatos() {
-        if (!usuarioActual) return;
-        mostrarLoading(true);
-        try {
-            const productosRef = collection(db, 'usuarios', usuarioActual.uid, 'productos');
-            const snap = await getDocs(productosRef);
-            productos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            
-            const total = productos.length;
-            const stockBajo = productos.filter(p => p.stock <= (p.stockMinimo || 5)).length;
-            const ganancia = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * p.stock), 0);
-            const valor = productos.reduce((s, p) => s + (p.costo * p.stock), 0);
-            
-            document.getElementById('totalProductos').textContent = total;
-            document.getElementById('stockBajo').textContent = stockBajo;
-            document.getElementById('gananciaTotal').textContent = `$${ganancia.toFixed(2)}`;
-            document.getElementById('valorInventario').textContent = `$${valor.toFixed(2)}`;
-            
-            const tbody = document.getElementById('tablaInventario');
-            if (productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay productos registrados</td></tr>';
-            } else {
-                tbody.innerHTML = productos.map(p => {
-                    const rentabilidad = p.precioVenta - p.costo;
-                    return `
-                        <tr>
-                            <td><strong>${p.codigo}</strong></td>
-                            <td>${p.nombre}</td>
-                            <td>${p.stock}</td>
-                            <td>$${p.precioVenta?.toFixed(2) || 0}</td>
-                            <td class="${rentabilidad > 0 ? 'text-success' : 'text-danger'}">$${rentabilidad.toFixed(2)}</td>
-                            <td>${p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">⚠️ Stock Bajo</span>' : '<span class="badge-stock-normal">✓ Normal</span>'}</td>
-                            <td><button class="btn btn-sm btn-danger" onclick="eliminarProducto(\'${p.codigo}\')"><i class="fas fa-trash"></i></button></td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-            
-            const alertas = productos.filter(p => p.stock <= (p.stockMinimo || 5));
-            document.getElementById('alertasContainer').innerHTML = alertas.length ? `
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i> <strong>¡Atención!</strong> Productos con stock bajo: 
-                    ${alertas.map(p => `<span class="badge bg-warning text-dark">${p.nombre} (${p.stock})</span>`).join(' ')}
-                </div>
-            ` : '';
-        } catch(e) { console.error(e); }
-        mostrarLoading(false);
+    // ==================== FUNCIONES DE AUTENTICACIÓN ====================
+    function registrarUsuario() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        
+        if (!user || !pass) {
+            mostrarErrorLogin('❌ Complete usuario y contraseña');
+            return;
+        }
+        if (pass.length < 4) {
+            mostrarErrorLogin('❌ La contraseña debe tener al menos 4 caracteres');
+            return;
+        }
+        if (usuarios.find(u => u.usuario === user)) {
+            mostrarErrorLogin('❌ El usuario ya existe, elige otro');
+            return;
+        }
+        
+        usuarios.push({ 
+            usuario: user, 
+            password: pass, 
+            productos: [], 
+            movimientos: [] 
+        });
+        localStorage.setItem('dprofer_usuarios', JSON.stringify(usuarios));
+        mostrarErrorLogin('✅ Usuario registrado exitosamente. Ahora inicia sesión.', 'success');
     }
     
-    window.registrarMovimiento = async () => {
+    function iniciarSesion() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        
+        const usuario = usuarios.find(u => u.usuario === user && u.password === pass);
+        if (!usuario) {
+            mostrarErrorLogin('❌ Usuario o contraseña incorrectos');
+            return;
+        }
+        
+        usuarioActual = user;
+        cargarDatosUsuario();
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('userDisplay').innerHTML = user;
+        actualizarTodo();
+    }
+    
+    function cerrarSesion() {
+        guardarDatosUsuario();
+        usuarioActual = null;
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPass').value = '';
+    }
+    
+    function cargarDatosUsuario() {
+        const usuario = usuarios.find(u => u.usuario === usuarioActual);
+        productos = usuario?.productos || [];
+        movimientos = usuario?.movimientos || [];
+    }
+    
+    function guardarDatosUsuario() {
+        const index = usuarios.findIndex(u => u.usuario === usuarioActual);
+        if (index !== -1) {
+            usuarios[index].productos = productos;
+            usuarios[index].movimientos = movimientos;
+            localStorage.setItem('dprofer_usuarios', JSON.stringify(usuarios));
+        }
+    }
+    
+    // ==================== REGISTRO DE MOVIMIENTOS ====================
+    function registrarMovimiento() {
         const codigo = document.getElementById('codigo').value.trim();
         const nombre = document.getElementById('nombre').value.trim();
-        if (!codigo || !nombre) return alert('❌ Complete código y nombre');
-        
+        const categoria = document.getElementById('categoria').value;
         const costo = parseFloat(document.getElementById('costo').value) || 0;
         const precio = parseFloat(document.getElementById('precioVenta').value) || 0;
         const tipo = document.getElementById('tipoMovimiento').value;
         const cantidad = parseInt(document.getElementById('cantidad').value) || 0;
-        const observacion = document.getElementById('observacion').value || (tipo === 'entrada' ? 'Compra' : 'Venta');
-        const categoria = document.getElementById('categoria').value;
+        const observacion = document.getElementById('observacion').value || (tipo === 'entrada' ? 'Compra a proveedor' : 'Venta al cliente');
+        const stockMinimo = parseInt(document.getElementById('stockMinimo').value) || 5;
         
-        if (cantidad <= 0) return alert('❌ La cantidad debe ser mayor a 0');
+        if (!codigo || !nombre) {
+            alert('❌ Complete código y nombre del producto');
+            return;
+        }
+        if (cantidad <= 0) {
+            alert('❌ La cantidad debe ser mayor a 0');
+            return;
+        }
+        if (precio <= 0) {
+            alert('❌ El precio de venta debe ser mayor a 0');
+            return;
+        }
         
-        mostrarLoading(true);
-        try {
-            const prodRef = doc(db, 'usuarios', usuarioActual.uid, 'productos', codigo);
-            const existente = productos.find(p => p.codigo === codigo);
-            let nuevoStock = cantidad;
-            
-            if (existente) {
-                nuevoStock = tipo === 'entrada' ? existente.stock + cantidad : existente.stock - cantidad;
-                if (nuevoStock < 0) throw new Error('Stock insuficiente');
-                await updateDoc(prodRef, { 
-                    stock: nuevoStock, 
-                    nombre, 
-                    costo, 
-                    precioVenta: precio,
-                    categoria
-                });
+        const existente = productos.find(p => p.codigo === codigo);
+        let nuevoStock = cantidad;
+        
+        if (existente) {
+            if (tipo === 'entrada') {
+                nuevoStock = existente.stock + cantidad;
             } else {
-                if (tipo === 'salida') throw new Error('Producto no existe en inventario');
-                await setDoc(prodRef, { 
-                    codigo, nombre, categoria, 
-                    costo, precioVenta: precio, 
-                    stock: cantidad, 
-                    stockMinimo: 5
-                });
+                if (existente.stock < cantidad) {
+                    alert(`❌ Stock insuficiente. Stock actual: ${existente.stock}`);
+                    return;
+                }
+                nuevoStock = existente.stock - cantidad;
             }
             
-            await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), {
-                fecha: Timestamp.now(),
-                tipo,
-                producto: nombre,
-                codigo,
-                cantidad,
-                valorUnitario: precio,
-                total: precio * cantidad,
-                observacion
+            existente.stock = nuevoStock;
+            existente.nombre = nombre;
+            existente.costo = costo;
+            existente.precioVenta = precio;
+            existente.categoria = categoria;
+            existente.stockMinimo = stockMinimo;
+        } else {
+            if (tipo === 'salida') {
+                alert('❌ No se puede registrar una salida de un producto que no existe');
+                return;
+            }
+            productos.push({
+                codigo, nombre, categoria, costo, precioVenta: precio,
+                stock: cantidad, stockMinimo, fechaCreacion: new Date().toLocaleString()
             });
-            
-            await cargarDatos();
-            limpiarFormulario();
-            mostrarNotificacion('✅ Movimiento registrado');
-        } catch(e) { alert('❌ Error: ' + e.message); }
-        mostrarLoading(false);
-    };
+        }
+        
+        // Registrar movimiento
+        movimientos.unshift({
+            fecha: new Date().toLocaleString(),
+            tipo, producto: nombre, codigo, cantidad,
+            valorUnitario: precio,
+            total: precio * cantidad,
+            observacion
+        });
+        
+        // Limitar historial a 100 movimientos
+        if (movimientos.length > 100) movimientos.pop();
+        
+        guardarDatosUsuario();
+        actualizarTodo();
+        limpiarFormulario();
+        mostrarNotificacion(`✅ ${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada correctamente`);
+    }
     
-    window.eliminarProducto = async (codigo) => {
-        if (!confirm('⚠️ ¿Eliminar este producto?')) return;
-        mostrarLoading(true);
-        try {
-            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', codigo));
-            await cargarDatos();
+    function eliminarProducto(codigo) {
+        if (confirm('⚠️ ¿Estás seguro de eliminar este producto permanentemente?')) {
+            productos = productos.filter(p => p.codigo !== codigo);
+            guardarDatosUsuario();
+            actualizarTodo();
             mostrarNotificacion('✅ Producto eliminado');
-        } catch(e) { alert('Error: ' + e.message); }
-        mostrarLoading(false);
-    };
+        }
+    }
     
-    window.limpiarFormulario = () => {
-        ['codigo','nombre','costo','precioVenta','cantidad','observacion'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('rentabilidadUnidad').value = '';
-        document.getElementById('totalMovimiento').value = '';
-        document.getElementById('codigo').focus();
-    };
+    // ==================== ACTUALIZACIÓN DE VISTAS ====================
+    function actualizarTodo() {
+        actualizarEstadisticas();
+        actualizarAlertas();
+        actualizarTabla(productos);
+        actualizarMovimientos();
+        actualizarAutocomplete();
+    }
     
-    function calcularTodo() {
+    function actualizarEstadisticas() {
+        const total = productos.length;
+        const stockBajo = productos.filter(p => p.stock <= (p.stockMinimo || 5)).length;
+        const gananciaTotal = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * p.stock), 0);
+        const valorInventario = productos.reduce((s, p) => s + (p.costo * p.stock), 0);
+        
+        document.getElementById('totalProductos').textContent = total;
+        document.getElementById('stockBajo').textContent = stockBajo;
+        document.getElementById('gananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+        document.getElementById('valorInventario').textContent = `$${valorInventario.toFixed(2)}`;
+    }
+    
+    function actualizarAlertas() {
+        const productosBajos = productos.filter(p => p.stock <= (p.stockMinimo || 5));
+        const container = document.getElementById('alertasContainer');
+        
+        if (productosBajos.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="alert alert-warning alert-modern animated">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>¡Atención!</strong> Los siguientes productos tienen stock bajo:
+                ${productosBajos.map(p => `<span class="badge bg-warning text-dark ms-1">${p.nombre} (${p.stock})</span>`).join('')}
+                <button class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+            </div>
+        `;
+    }
+    
+    function actualizarTabla(lista) {
+        const tbody = document.getElementById('tablaInventario');
+        
+        if (lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center">📦 No hay productos registrados</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = lista.map(p => {
+            const rentabilidad = p.precioVenta - p.costo;
+            const valorTotal = p.costo * p.stock;
+            const estado = p.stock <= (p.stockMinimo || 5) ? 
+                '<span class="badge-stock-bajo"><i class="fas fa-exclamation-triangle"></i> Stock Bajo</span>' : 
+                '<span class="badge-stock-normal"><i class="fas fa-check"></i> Normal</span>';
+            const rentabilidadClass = rentabilidad > 0 ? 'text-success' : rentabilidad < 0 ? 'text-danger' : 'text-warning';
+            
+            return `
+                <tr class="animated">
+                    <td><strong>${p.codigo}</strong></td>
+                    <td>${p.nombre}</td>
+                    <td><span class="badge bg-secondary">${p.categoria || 'General'}</span></td>
+                    <td><strong>${p.stock}</strong> uds</td>
+                    <td>$${p.costo.toFixed(2)}</td>
+                    <td>$${p.precioVenta.toFixed(2)}</td>
+                    <td class="${rentabilidadClass}"><strong>$${rentabilidad.toFixed(2)}</strong></td>
+                    <td>$${valorTotal.toFixed(2)}</td>
+                    <td>${estado}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    function actualizarMovimientos() {
+        const tbody = document.getElementById('tablaMovimientos');
+        
+        if (movimientos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">📋 No hay movimientos registrados</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = movimientos.slice(0, 20).map(m => `
+            <tr>
+                <td><small>${m.fecha}</small></td>
+                <td><span class="${m.tipo === 'entrada' ? 'badge-entrada' : 'badge-salida'}">${m.tipo === 'entrada' ? '📥 Entrada' : '📤 Salida'}</span></td>
+                <td>${m.producto}</td>
+                <td><small>${m.codigo}</small></td>
+                <td><strong>${m.cantidad}</strong></td>
+                <td>$${m.valorUnitario.toFixed(2)}</td>
+                <td><strong>$${m.total.toFixed(2)}</strong></td>
+                <td><small>${m.observacion}</small></td>
+            </tr>
+        `).join('');
+    }
+    
+    // ==================== AUTCOMPLETADO ====================
+    function actualizarAutocomplete() {
+        const input = document.getElementById('codigo');
+        const list = document.getElementById('autocompleteList');
+        
+        input.addEventListener('input', function() {
+            const valor = this.value.toLowerCase();
+            if (!valor) {
+                list.style.display = 'none';
+                return;
+            }
+            
+            const coincidencias = productos.filter(p => 
+                p.codigo.toLowerCase().includes(valor) || 
+                p.nombre.toLowerCase().includes(valor)
+            ).slice(0, 8);
+            
+            if (coincidencias.length === 0) {
+                list.style.display = 'none';
+                return;
+            }
+            
+            list.innerHTML = coincidencias.map(p => `
+                <div class="autocomplete-item" onclick="seleccionarProducto('${p.codigo}')">
+                    <strong>${p.codigo}</strong> - ${p.nombre} <span class="text-muted">(Stock: ${p.stock})</span>
+                </div>
+            `).join('');
+            list.style.display = 'block';
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (e.target !== input) {
+                list.style.display = 'none';
+            }
+        });
+    }
+    
+    function seleccionarProducto(codigo) {
+        const producto = productos.find(p => p.codigo === codigo);
+        if (producto) {
+            document.getElementById('codigo').value = producto.codigo;
+            document.getElementById('nombre').value = producto.nombre;
+            document.getElementById('categoria').value = producto.categoria || 'Herramientas';
+            document.getElementById('costo').value = producto.costo;
+            document.getElementById('precioVenta').value = producto.precioVenta;
+            document.getElementById('stockMinimo').value = producto.stockMinimo || 5;
+            document.getElementById('autocompleteList').style.display = 'none';
+            calcularAutomatico();
+        }
+    }
+    
+    // ==================== FILTROS Y BÚSQUEDA ====================
+    function filtrarProductos() {
+        const termino = document.getElementById('buscador').value.toLowerCase();
+        const filtrados = productos.filter(p => 
+            p.codigo.toLowerCase().includes(termino) || 
+            p.nombre.toLowerCase().includes(termino) ||
+            (p.categoria && p.categoria.toLowerCase().includes(termino))
+        );
+        actualizarTabla(filtrados);
+    }
+    
+    function mostrarTodos() {
+        document.getElementById('buscador').value = '';
+        actualizarTabla(productos);
+    }
+    
+    function mostrarStockBajo() {
+        const stockBajo = productos.filter(p => p.stock <= (p.stockMinimo || 5));
+        actualizarTabla(stockBajo);
+        document.getElementById('buscador').value = 'Stock bajo';
+    }
+    
+    // ==================== CÁLCULOS AUTOMÁTICOS ====================
+    function calcularAutomatico() {
         const costo = parseFloat(document.getElementById('costo').value) || 0;
         const precio = parseFloat(document.getElementById('precioVenta').value) || 0;
-        const cant = parseInt(document.getElementById('cantidad').value) || 0;
-        document.getElementById('rentabilidadUnidad').value = `$${(precio - costo).toFixed(2)}`;
-        document.getElementById('totalMovimiento').value = `$${(precio * cant).toFixed(2)}`;
+        const cantidad = parseInt(document.getElementById('cantidad').value) || 0;
+        const iva = 0.15;
+        
+        const rentabilidad = precio - costo;
+        const total = precio * cantidad;
+        const ivaCalculado = total * iva;
+        const totalConIva = total + ivaCalculado;
+        
+        document.getElementById('rentabilidadUnidad').value = `$${rentabilidad.toFixed(2)}`;
+        document.getElementById('totalMovimiento').value = `$${total.toFixed(2)}`;
+        document.getElementById('ivaCalculado').value = `$${ivaCalculado.toFixed(2)}`;
+        document.getElementById('totalConIVA').value = `$${totalConIva.toFixed(2)}`;
+        
+        // Cambiar color según rentabilidad
+        const rentInput = document.getElementById('rentabilidadUnidad');
+        if (rentabilidad > 0) rentInput.style.color = '#28a745';
+        else if (rentabilidad < 0) rentInput.style.color = '#dc3545';
+        else rentInput.style.color = '#666';
     }
     
-    document.getElementById('costo').addEventListener('input', calcularTodo);
-    document.getElementById('precioVenta').addEventListener('input', calcularTodo);
-    document.getElementById('cantidad').addEventListener('input', calcularTodo);
-    
-    function mostrarLoading(show) {
-        document.getElementById('loading').style.display = show ? 'flex' : 'none';
+    // ==================== UTILIDADES ====================
+    function limpiarFormulario() {
+        document.getElementById('codigo').value = '';
+        document.getElementById('nombre').value = '';
+        document.getElementById('costo').value = '';
+        document.getElementById('precioVenta').value = '';
+        document.getElementById('cantidad').value = '1';
+        document.getElementById('observacion').value = '';
+        document.getElementById('stockMinimo').value = '5';
+        document.getElementById('categoria').value = 'Herramientas';
+        calcularAutomatico();
+        document.getElementById('codigo').focus();
     }
     
-    function mostrarError(msg) {
-        const errorDiv = document.getElementById('loginError');
-        errorDiv.textContent = msg;
-        errorDiv.style.display = 'block';
-        setTimeout(() => errorDiv.style.display = 'none', 3000);
+    function exportarReporte() {
+        if (productos.length === 0) {
+            alert('No hay productos para exportar');
+            return;
+        }
+        
+        let texto = "=== REPORTE DE INVENTARIO DPROFER ===\n";
+        texto += `Fecha: ${new Date().toLocaleString()}\n`;
+        texto += `Usuario: ${usuarioActual}\n`;
+        texto += "=".repeat(60) + "\n\n";
+        texto += "CÓDIGO\tPRODUCTO\tCATEGORÍA\tSTOCK\tCOSTO\tPRECIO\tRENTABILIDAD\n";
+        texto += "-".repeat(80) + "\n";
+        
+        productos.forEach(p => {
+            const rentabilidad = p.precioVenta - p.costo;
+            texto += `${p.codigo}\t${p.nombre}\t${p.categoria || 'General'}\t${p.stock}\t$${p.costo.toFixed(2)}\t$${p.precioVenta.toFixed(2)}\t$${rentabilidad.toFixed(2)}\n`;
+        });
+        
+        texto += "\n" + "=".repeat(60) + "\n";
+        const gananciaTotal = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * p.stock), 0);
+        texto += `💰 GANANCIA TOTAL: $${gananciaTotal.toFixed(2)}\n`;
+        texto += "=".repeat(60);
+        
+        const blob = new Blob([texto], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_dprofer_${new Date().toISOString().slice(0,19)}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarNotificacion('📄 Reporte exportado correctamente');
     }
     
     function mostrarNotificacion(msg) {
         const toast = document.createElement('div');
+        toast.className = 'alert alert-success alert-modern';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;animation:fadeIn 0.3s;';
         toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#28a745;color:white;padding:12px 20px;border-radius:10px;z-index:1000;animation:fadeIn 0.3s';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            usuarioActual = user;
-            document.getElementById('userEmail').textContent = user.email;
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'block';
-            await cargarDatos();
-        } else {
-            document.getElementById('loginContainer').style.display = 'block';
-            document.getElementById('appContainer').style.display = 'none';
-        }
-    });
+    function mostrarErrorLogin(msg, tipo = 'danger') {
+        const errorDiv = document.getElementById('loginError');
+        errorDiv.className = `alert alert-${tipo} alert-modern`;
+        errorDiv.innerHTML = msg;
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+    }
+    
+    // Eventos para cálculos automáticos
+    document.getElementById('costo')?.addEventListener('input', calcularAutomatico);
+    document.getElementById('precioVenta')?.addEventListener('input', calcularAutomatico);
+    document.getElementById('cantidad')?.addEventListener('input', calcularAutomatico);
+    
+    // Inicializar cálculos
+    calcularAutomatico();
 </script>
 </body>
 </html>
