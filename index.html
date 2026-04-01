@@ -10,7 +10,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Colores corporativos */
         :root {
             --azul-naval: #1e3c72;
             --azul-naval-claro: #2a5298;
@@ -30,7 +29,6 @@
         
         .container { max-width: 1400px; margin: 0 auto; }
         
-        /* Tarjetas de estadísticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -49,30 +47,11 @@
             border: 1px solid var(--gris-claro);
         }
         
-        .stat-card:hover { 
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+        .stat-card i { font-size: 40px; margin-bottom: 10px; color: var(--azul-naval); }
+        .stat-card h3 { font-size: 28px; font-weight: bold; margin: 10px 0; color: var(--azul-naval); }
+        .stat-card p { color: var(--gris-oscuro); margin: 0; }
         
-        .stat-card i { 
-            font-size: 40px; 
-            margin-bottom: 10px;
-            color: var(--azul-naval);
-        }
-        
-        .stat-card h3 { 
-            font-size: 28px; 
-            font-weight: bold; 
-            margin: 10px 0;
-            color: var(--azul-naval);
-        }
-        
-        .stat-card p {
-            color: var(--gris-oscuro);
-            margin: 0;
-        }
-        
-        /* Tarjetas principales */
         .card {
             background: var(--blanco);
             border-radius: 20px;
@@ -90,23 +69,11 @@
             border: none;
         }
         
-        .card-header i {
-            margin-right: 8px;
-        }
+        .card-header i { margin-right: 8px; }
+        .card-body { padding: 25px; background: var(--blanco); }
         
-        .card-body { 
-            padding: 25px;
-            background: var(--blanco);
-        }
-        
-        /* Formulario */
         .form-group { margin-bottom: 15px; }
-        .form-group label { 
-            display: block; 
-            font-weight: 600; 
-            margin-bottom: 5px;
-            color: var(--gris-oscuro);
-        }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: var(--gris-oscuro); }
         
         input, select {
             width: 100%;
@@ -117,13 +84,8 @@
             background: var(--blanco);
         }
         
-        input:focus, select:focus { 
-            outline: none; 
-            border-color: var(--azul-naval);
-            box-shadow: 0 0 0 3px rgba(30,60,114,0.1);
-        }
+        input:focus, select:focus { outline: none; border-color: var(--azul-naval); box-shadow: 0 0 0 3px rgba(30,60,114,0.1); }
         
-        /* Botones */
         .btn {
             padding: 10px 25px;
             border: none;
@@ -133,89 +95,22 @@
             transition: all 0.3s;
         }
         
-        .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%); color: var(--blanco); }
+        .btn-success { background: #28a745; color: var(--blanco); }
+        .btn-danger { background: #dc3545; color: var(--blanco); }
+        .btn-warning { background: #ffc107; color: var(--gris-oscuro); }
+        .btn-secondary { background: var(--gris-medio); color: var(--blanco); }
         
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%);
-            color: var(--blanco);
-        }
+        .table-container { overflow-x: auto; max-height: 450px; overflow-y: auto; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; background: var(--blanco); }
+        th { background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%); color: var(--blanco); padding: 12px; position: sticky; top: 0; font-weight: 600; }
+        td { padding: 10px; border-bottom: 1px solid var(--gris-claro); color: var(--gris-oscuro); }
+        tr:hover { background: var(--blanco-humo); }
         
-        .btn-success { 
-            background: #28a745;
-            color: var(--blanco);
-        }
+        .badge-stock-bajo { background: #dc3545; color: var(--blanco); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+        .badge-stock-normal { background: #28a745; color: var(--blanco); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         
-        .btn-danger { 
-            background: #dc3545;
-            color: var(--blanco);
-        }
-        
-        .btn-warning { 
-            background: #ffc107;
-            color: var(--gris-oscuro);
-        }
-        
-        .btn-secondary {
-            background: var(--gris-medio);
-            color: var(--blanco);
-        }
-        
-        /* Tabla */
-        .table-container {
-            overflow-x: auto;
-            max-height: 450px;
-            overflow-y: auto;
-            border-radius: 12px;
-        }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse;
-            background: var(--blanco);
-        }
-        
-        th {
-            background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%);
-            color: var(--blanco);
-            padding: 12px;
-            position: sticky;
-            top: 0;
-            font-weight: 600;
-        }
-        
-        td {
-            padding: 10px;
-            border-bottom: 1px solid var(--gris-claro);
-            color: var(--gris-oscuro);
-        }
-        
-        tr:hover { 
-            background: var(--blanco-humo);
-        }
-        
-        /* Badges */
-        .badge-stock-bajo { 
-            background: #dc3545; 
-            color: var(--blanco); 
-            padding: 4px 10px; 
-            border-radius: 20px; 
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        .badge-stock-normal { 
-            background: #28a745; 
-            color: var(--blanco); 
-            padding: 4px 10px; 
-            border-radius: 20px; 
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        /* Header de usuario */
         .user-header {
             background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%);
             color: var(--blanco);
@@ -229,44 +124,15 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
-        .user-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
+        .user-header h2 { margin: 0; font-size: 24px; }
+        .user-header p { margin: 5px 0 0; opacity: 0.9; }
         
-        .user-header p {
-            margin: 5px 0 0;
-            opacity: 0.9;
-        }
-        
-        /* Login */
         .login-box { max-width: 450px; margin: 80px auto; }
         
-        /* Alertas */
-        .alert { 
-            padding: 12px 20px; 
-            border-radius: 15px; 
-            margin-bottom: 20px;
-            border: none;
-        }
-        
-        .alert-warning { 
-            background: #fff3cd; 
-            border-left: 4px solid #ffc107; 
-            color: #856404;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            color: #155724;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-            color: #721c24;
-        }
+        .alert { padding: 12px 20px; border-radius: 15px; margin-bottom: 20px; border: none; }
+        .alert-warning { background: #fff3cd; border-left: 4px solid #ffc107; color: #856404; }
+        .alert-success { background: #d4edda; border-left: 4px solid #28a745; color: #155724; }
+        .alert-danger { background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; }
         
         .hidden { display: none; }
         .text-center { text-align: center; }
@@ -281,6 +147,44 @@
             font-family: monospace;
             font-weight: bold;
             color: var(--azul-naval);
+        }
+        
+        /* Estilos para el autocompletado */
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--blanco);
+            border: 1px solid var(--gris-claro);
+            border-radius: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--gris-claro);
+            transition: background 0.2s;
+        }
+        
+        .autocomplete-item:hover {
+            background: var(--blanco-humo);
+        }
+        
+        .autocomplete-item strong {
+            color: var(--azul-naval);
+        }
+        
+        .autocomplete-item small {
+            color: var(--gris-medio);
         }
         
         @media (max-width: 768px) {
@@ -313,25 +217,9 @@
         
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--gris-claro);
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--azul-naval);
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--azul-naval-claro);
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--gris-claro); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--azul-naval); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -339,7 +227,6 @@
 <div id="loading" class="loading"><div class="spinner"></div></div>
 
 <div class="container">
-    <!-- Pantalla de Login -->
     <div id="loginContainer">
         <div class="login-box">
             <div class="card">
@@ -368,12 +255,11 @@
         </div>
     </div>
 
-    <!-- App Principal -->
     <div id="appContainer" class="hidden">
         <div class="user-header">
             <div>
                 <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
-                <p>Código automático | Orden alfabético | Datos en la nube</p>
+                <p>Código automático | Busca productos existentes | Datos en la nube</p>
             </div>
             <div>
                 <span><i class="fas fa-user-circle"></i> <strong id="userDisplay"></strong></span>
@@ -416,13 +302,14 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group">
-                            <label><i class="fas fa-barcode"></i> Código (Automático)</label>
+                            <label><i class="fas fa-barcode"></i> Código (Automático o existente)</label>
                             <input type="text" id="codigo" class="codigo-auto" readonly placeholder="Se genera automáticamente">
-                            <small class="text-muted">Se genera con las 3 primeras letras + número secuencial (ej: MAR-001)</small>
+                            <small class="text-muted">Se genera con las 3 primeras letras + número secuencial único</small>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group autocomplete-container">
                             <label><i class="fas fa-tag"></i> Nombre del Producto *</label>
-                            <input type="text" id="nombre" placeholder="Ej: Martillo de acero" onkeyup="generarCodigoAutomatico()">
+                            <input type="text" id="nombre" placeholder="Escribe para buscar productos existentes..." onkeyup="buscarProductosParaAutocompletar()">
+                            <div id="autocompleteList" class="autocomplete-list hidden"></div>
                         </div>
                         <div class="form-group">
                             <label><i class="fas fa-layer-group"></i> Categoría</label>
@@ -451,8 +338,8 @@
                         <div class="form-group">
                             <label><i class="fas fa-exchange-alt"></i> Tipo de Movimiento</label>
                             <select id="tipoMovimiento">
-                                <option value="entrada">Entrada (Compra o nuevo producto)</option>
-                                <option value="salida">Salida (Venta o retiro)</option>
+                                <option value="entrada">📥 Entrada (Comprar más stock)</option>
+                                <option value="salida">📤 Salida (Vender o retirar)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -502,19 +389,9 @@
                     <input type="text" id="buscador" placeholder="Buscar por código o nombre..." onkeyup="filtrarProductos()">
                 </div>
                 <div class="table-container">
-                    <table>
+                    <table class="table">
                         <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Código</th>
-                                <th>Producto</th>
-                                <th>Categoría</th>
-                                <th>Stock</th>
-                                <th>Precio</th>
-                                <th>Rentabilidad</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </thead>
+                            <tr><th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Rentabilidad</th><th>Estado</th><th>Acciones</th></thead>
                         <tbody id="tablaInventario"></tbody>
                     </table>
                 </div>
@@ -527,17 +404,9 @@
             </div>
             <div class="card-body">
                 <div class="table-container" style="max-height: 300px;">
-                    <table>
+                    <table class="table">
                         <thead>
-                            发展
-                                <th>Fecha</th>
-                                <th>Tipo</th>
-                                <th>Código</th>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Total</th>
-                                <th>Observación</th>
-                            </thead>
+                            发展<th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
                         <tbody id="tablaMovimientos"></tbody>
                     </table>
                 </div>
@@ -571,24 +440,85 @@
     let movimientos = [];
     let usuarioActual = null;
     
+    // ==================== AUTOCOMPLETADO ====================
+    window.buscarProductosParaAutocompletar = function() {
+        const termino = document.getElementById('nombre').value.trim().toLowerCase();
+        const listContainer = document.getElementById('autocompleteList');
+        
+        if (!termino || termino.length < 2) {
+            listContainer.classList.add('hidden');
+            return;
+        }
+        
+        const productosFiltrados = productos.filter(p => 
+            p.nombre.toLowerCase().includes(termino) || 
+            (p.codigo && p.codigo.toLowerCase().includes(termino))
+        ).slice(0, 8);
+        
+        if (productosFiltrados.length === 0) {
+            listContainer.classList.add('hidden');
+            return;
+        }
+        
+        listContainer.innerHTML = productosFiltrados.map(p => `
+            <div class="autocomplete-item" onclick="seleccionarProductoExistente('${p.codigo}')">
+                <strong>${p.codigo}</strong> - ${p.nombre}<br>
+                <small>Stock: ${p.stock} | Precio: $${p.precioVenta.toFixed(2)} | Costo: $${p.costo.toFixed(2)}</small>
+            </div>
+        `).join('');
+        listContainer.classList.remove('hidden');
+    };
+    
+    window.seleccionarProductoExistente = function(codigo) {
+        const producto = productos.find(p => p.codigo === codigo);
+        if (producto) {
+            document.getElementById('codigo').value = producto.codigo;
+            document.getElementById('nombre').value = producto.nombre;
+            document.getElementById('categoria').value = producto.categoria || 'Herramientas';
+            document.getElementById('costo').value = producto.costo;
+            document.getElementById('precioVenta').value = producto.precioVenta;
+            document.getElementById('stockMinimo').value = producto.stockMinimo || 5;
+            document.getElementById('autocompleteList').classList.add('hidden');
+            calcularAutomatico();
+            
+            // Mostrar mensaje de éxito
+            mostrarNotificacion(`Producto "${producto.nombre}" cargado. Stock actual: ${producto.stock}`);
+        }
+    };
+    
+    // Cerrar autocompletado al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('autocompleteList');
+        const input = document.getElementById('nombre');
+        if (container && input && e.target !== input && !container.contains(e.target)) {
+            container.classList.add('hidden');
+        }
+    });
+    
     // ==================== GENERAR CÓDIGO AUTOMÁTICO ====================
-    function generarCodigoAutomatico() {
+    window.generarCodigoAutomatico = function() {
         const nombre = document.getElementById('nombre').value.trim();
+        const codigoActual = document.getElementById('codigo').value.trim();
+        
         if (!nombre) {
             document.getElementById('codigo').value = '';
             return;
         }
         
-        // Tomar primeras 3 letras en mayúsculas (solo letras, sin acentos)
+        // Si ya hay un código (producto seleccionado), no generar nuevo
+        if (codigoActual && productos.find(p => p.codigo === codigoActual)) {
+            return;
+        }
+        
         let prefijo = nombre.substring(0, 3).toUpperCase();
         prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         
-        // Filtrar productos que empiecen con el mismo prefijo
-        const mismosPrefijo = productos.filter(p => p.codigo && p.codigo.startsWith(prefijo + '-'));
+        const productosConPrefijo = productos.filter(p => 
+            p.codigo && p.codigo.startsWith(prefijo + '-')
+        );
         
-        // Encontrar el número más alto
         let maxNumero = 0;
-        mismosPrefijo.forEach(p => {
+        productosConPrefijo.forEach(p => {
             const partes = p.codigo.split('-');
             if (partes.length === 2) {
                 const num = parseInt(partes[1]);
@@ -599,9 +529,8 @@
         const nuevoNumero = maxNumero + 1;
         const codigoGenerado = `${prefijo}-${nuevoNumero.toString().padStart(3, '0')}`;
         document.getElementById('codigo').value = codigoGenerado;
-    }
+    };
     
-    // ==================== ORDENAR PRODUCTOS ALFABÉTICAMENTE ====================
     function ordenarProductosAlfabeticamente(lista) {
         return [...lista].sort((a, b) => {
             const nombreA = (a.nombre || '').toLowerCase();
@@ -691,7 +620,6 @@
         mostrarLoading(false);
     };
     
-    // ==================== CARGAR DATOS DESDE FIREBASE ====================
     async function cargarDatosDesdeFirebase() {
         if (!usuarioActual) return;
         
@@ -736,7 +664,10 @@
         mostrarLoading(true);
         try {
             let codigoFinal = codigo;
-            if (!codigoFinal || codigoFinal === '') {
+            const existente = productos.find(p => p.codigo === codigoFinal);
+            
+            // Si no hay código o el producto no existe, generar nuevo código
+            if (!codigoFinal || !existente) {
                 let prefijo = nombre.substring(0, 3).toUpperCase();
                 prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                 const mismosPrefijo = productos.filter(p => p.codigo && p.codigo.startsWith(prefijo + '-'));
@@ -754,14 +685,17 @@
             }
             
             const productoRef = doc(db, 'usuarios', usuarioActual.uid, 'productos', codigoFinal);
-            const existente = productos.find(p => p.codigo === codigoFinal);
+            const productoExistente = productos.find(p => p.codigo === codigoFinal);
             
-            if (existente) {
-                let nuevoStock = existente.stock;
+            if (productoExistente) {
+                // Actualizar producto existente
+                let nuevoStock = productoExistente.stock;
                 if (tipo === 'entrada') {
                     nuevoStock += cantidad;
                 } else {
-                    if (existente.stock < cantidad) throw new Error(`Stock insuficiente. Stock actual: ${existente.stock}`);
+                    if (productoExistente.stock < cantidad) {
+                        throw new Error(`Stock insuficiente. Stock actual: ${productoExistente.stock}`);
+                    }
                     nuevoStock -= cantidad;
                 }
                 await updateDoc(productoRef, {
@@ -769,15 +703,21 @@
                     stock: nuevoStock, stockMinimo,
                     actualizado: Timestamp.now()
                 });
+                mostrarNotificacion(`Stock actualizado: ${productoExistente.nombre} - Nuevo stock: ${nuevoStock}`);
             } else {
-                if (tipo === 'salida') throw new Error('No se puede registrar salida de producto inexistente');
+                // Crear nuevo producto
+                if (tipo === 'salida') {
+                    throw new Error('No se puede registrar salida de producto inexistente');
+                }
                 await setDoc(productoRef, {
                     codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
                     stock: cantidad, stockMinimo,
                     creado: Timestamp.now()
                 });
+                mostrarNotificacion(`Nuevo producto creado: ${nombre} - Código: ${codigoFinal}`);
             }
             
+            // Registrar movimiento
             await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), {
                 fecha: Timestamp.now(),
                 tipo, producto: nombre, codigo: codigoFinal, cantidad,
@@ -786,7 +726,6 @@
             
             await cargarDatosDesdeFirebase();
             limpiarFormulario();
-            mostrarNotificacion('Movimiento guardado en la nube');
         } catch (error) {
             alert(`Error: ${error.message}`);
         }
@@ -838,7 +777,7 @@
     function actualizarTabla(lista) {
         const tbody = document.getElementById('tablaInventario');
         if (!tbody) return;
-        if (!lista || lista.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay productos registrados</td></tr>'; return; }
+        if (!lista || lista.length === 0) { tbody.innerHTML = ' credencial<td colspan="9" class="text-center">No hay productos registrados</td> </tr>'; return; }
         
         tbody.innerHTML = lista.map((p, index) => {
             const rentabilidad = (p.precioVenta || 0) - (p.costo || 0);
@@ -854,7 +793,7 @@
                     <td style="color: ${rentabilidad >= 0 ? '#28a745' : '#dc3545'}">$${rentabilidad.toFixed(2)}</td>
                     <td>${estado}</td>
                     <td><button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${p.codigo}')"><i class="fas fa-trash"></i></button></td>
-                 </tr>
+                </tr>
             `;
         }).join('');
     }
@@ -862,9 +801,9 @@
     function actualizarMovimientos() {
         const tbody = document.getElementById('tablaMovimientos');
         if (!tbody) return;
-        if (!movimientos || movimientos.length === 0) { tbody.innerHTML = ' credencial<td colspan="7" class="text-center">No hay movimientos registrados</td> </tr>'; return; }
+        if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay movimientos registrados</td></tr>'; return; }
         tbody.innerHTML = movimientos.slice(0, 30).map(m => `
-             <tr>
+            <tr>
                 <td><small>${m.fecha ? new Date(m.fecha.seconds * 1000).toLocaleString() : ''}</small></td>
                 <td><span style="background:${m.tipo === 'entrada' ? '#28a745' : '#dc3545'}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo === 'entrada' ? 'Entrada' : 'Salida'}</span></td>
                 <td><code>${m.codigo || ''}</code></td>
@@ -872,7 +811,7 @@
                 <td>${m.cantidad || 0}</td>
                 <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
                 <td><small>${m.observacion || ''}</small></td>
-             </tr>
+            </tr>
         `).join('');
     }
     
@@ -913,8 +852,6 @@
         }
     }
     
-    window.generarCodigoAutomatico = generarCodigoAutomatico;
-    
     window.limpiarFormulario = function() {
         const campos = ['nombre', 'costo', 'precioVenta', 'cantidad', 'observacion'];
         campos.forEach(id => {
@@ -951,7 +888,6 @@
         alert('Reporte exportado correctamente');
     };
     
-    // Eventos
     const costoInput = document.getElementById('costo');
     const precioInput = document.getElementById('precioVenta');
     const cantidadInput = document.getElementById('cantidad');
