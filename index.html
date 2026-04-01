@@ -226,7 +226,7 @@
         <div class="card-header"><i class="fas fa-box"></i> Inventario Actual</div>
         <div class="card-body table-container">
             <table class="table table-hover">
-                <thead>运河<th>Código</th><th>Producto</th><th>Stock</th><th>Precio</th><th>Rentabilidad</th><th>Estado</th><th>Acciones</th></thead>
+                <thead>运转<th>Código</th><th>Producto</th><th>Stock</th><th>Precio</th><th>Rentabilidad</th><th>Estado</th><th>Acciones</th></thead>
                 <tbody id="tablaInventario"></tbody>
             </table>
         </div>
@@ -234,16 +234,17 @@
 </div>
 
 <script type="module">
-    // ==================== TU CONFIGURACIÓN DE FIREBASE ====================
+    // ==================== TU CONFIGURACIÓN DE FIREBASE (CORREGIDA) ====================
     const firebaseConfig = {
-        apiKey: "zaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",",
+        apiKey: "AIzaSyBJo0z_yuermDV-dn05msGkzM01Tr3feGo",
         authDomain: "dprofer-7bea9.firebaseapp.com",
         projectId: "dprofer-7bea9",
         storageBucket: "dprofer-7bea9.firebasestorage.app",
         messagingSenderId: "788368470526",
-        appId: "1:788368470526:web:e0b7f6e648f04f2ef150af"
+        appId: "1:788368470526:web:e0b7f6e648f04f2ef150af",
+        measurementId: "G-VJ0HGKW9NM"
     };
-    // =====================================================================
+    // =================================================================================
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -275,6 +276,7 @@
         mostrarLoading(true);
         try {
             await createUserWithEmailAndPassword(auth, email, pwd);
+            mostrarNotificacion('✅ Usuario registrado');
         } catch (e) { mostrarError(e.message); }
         mostrarLoading(false);
     };
@@ -304,24 +306,31 @@
             document.getElementById('valorInventario').textContent = `$${valor.toFixed(2)}`;
             
             const tbody = document.getElementById('tablaInventario');
-            tbody.innerHTML = productos.map(p => {
-                const rentabilidad = p.precioVenta - p.costo;
-                return `
-                    <tr>
-                        <td><strong>${p.codigo}</strong></td>
-                        <td>${p.nombre}</td>
-                        <td>${p.stock}</td>
-                        <td>$${p.precioVenta?.toFixed(2) || 0}</td>
-                        <td class="${rentabilidad > 0 ? 'text-success' : 'text-danger'}">$${rentabilidad.toFixed(2)}</td>
-                        <td>${p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">⚠️ Stock Bajo</span>' : '<span class="badge-stock-normal">✓ Normal</span>'}</td>
-                        <td><button class="btn btn-sm btn-danger" onclick="eliminarProducto(\'${p.codigo}\')"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `;
-            }).join('');
+            if (productos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay productos registrados</td></tr>';
+            } else {
+                tbody.innerHTML = productos.map(p => {
+                    const rentabilidad = p.precioVenta - p.costo;
+                    return `
+                        <tr>
+                            <td><strong>${p.codigo}</strong></td>
+                            <td>${p.nombre}</td>
+                            <td>${p.stock}</td>
+                            <td>$${p.precioVenta?.toFixed(2) || 0}</td>
+                            <td class="${rentabilidad > 0 ? 'text-success' : 'text-danger'}">$${rentabilidad.toFixed(2)}</td>
+                            <td>${p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">⚠️ Stock Bajo</span>' : '<span class="badge-stock-normal">✓ Normal</span>'}</td>
+                            <td><button class="btn btn-sm btn-danger" onclick="eliminarProducto(\'${p.codigo}\')"><i class="fas fa-trash"></i></button></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
             
             const alertas = productos.filter(p => p.stock <= (p.stockMinimo || 5));
             document.getElementById('alertasContainer').innerHTML = alertas.length ? `
-                <div class="alert alert-warning">⚠️ Productos con stock bajo: ${alertas.map(p => p.nombre).join(', ')}</div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>¡Atención!</strong> Productos con stock bajo: 
+                    ${alertas.map(p => `<span class="badge bg-warning text-dark">${p.nombre} (${p.stock})</span>`).join(' ')}
+                </div>
             ` : '';
         } catch(e) { console.error(e); }
         mostrarLoading(false);
@@ -337,6 +346,9 @@
         const tipo = document.getElementById('tipoMovimiento').value;
         const cantidad = parseInt(document.getElementById('cantidad').value) || 0;
         const observacion = document.getElementById('observacion').value || (tipo === 'entrada' ? 'Compra' : 'Venta');
+        const categoria = document.getElementById('categoria').value;
+        
+        if (cantidad <= 0) return alert('❌ La cantidad debe ser mayor a 0');
         
         mostrarLoading(true);
         try {
@@ -347,29 +359,48 @@
             if (existente) {
                 nuevoStock = tipo === 'entrada' ? existente.stock + cantidad : existente.stock - cantidad;
                 if (nuevoStock < 0) throw new Error('Stock insuficiente');
-                await updateDoc(prodRef, { stock: nuevoStock, nombre, costo, precioVenta: precio });
+                await updateDoc(prodRef, { 
+                    stock: nuevoStock, 
+                    nombre, 
+                    costo, 
+                    precioVenta: precio,
+                    categoria
+                });
             } else {
-                if (tipo === 'salida') throw new Error('Producto no existe');
-                await setDoc(prodRef, { codigo, nombre, categoria: document.getElementById('categoria').value, costo, precioVenta: precio, stock: cantidad, stockMinimo: 5 });
+                if (tipo === 'salida') throw new Error('Producto no existe en inventario');
+                await setDoc(prodRef, { 
+                    codigo, nombre, categoria, 
+                    costo, precioVenta: precio, 
+                    stock: cantidad, 
+                    stockMinimo: 5
+                });
             }
             
             await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), {
-                fecha: Timestamp.now(), tipo, producto: nombre, codigo, cantidad,
-                valorUnitario: precio, total: precio * cantidad, observacion
+                fecha: Timestamp.now(),
+                tipo,
+                producto: nombre,
+                codigo,
+                cantidad,
+                valorUnitario: precio,
+                total: precio * cantidad,
+                observacion
             });
             
             await cargarDatos();
             limpiarFormulario();
+            mostrarNotificacion('✅ Movimiento registrado');
         } catch(e) { alert('❌ Error: ' + e.message); }
         mostrarLoading(false);
     };
     
     window.eliminarProducto = async (codigo) => {
-        if (!confirm('¿Eliminar producto?')) return;
+        if (!confirm('⚠️ ¿Eliminar este producto?')) return;
         mostrarLoading(true);
         try {
             await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', codigo));
             await cargarDatos();
+            mostrarNotificacion('✅ Producto eliminado');
         } catch(e) { alert('Error: ' + e.message); }
         mostrarLoading(false);
     };
@@ -378,6 +409,7 @@
         ['codigo','nombre','costo','precioVenta','cantidad','observacion'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('rentabilidadUnidad').value = '';
         document.getElementById('totalMovimiento').value = '';
+        document.getElementById('codigo').focus();
     };
     
     function calcularTodo() {
@@ -401,6 +433,14 @@
         errorDiv.textContent = msg;
         errorDiv.style.display = 'block';
         setTimeout(() => errorDiv.style.display = 'none', 3000);
+    }
+    
+    function mostrarNotificacion(msg) {
+        const toast = document.createElement('div');
+        toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#28a745;color:white;padding:12px 20px;border-radius:10px;z-index:1000;animation:fadeIn 0.3s';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
     
     onAuthStateChanged(auth, async (user) => {
