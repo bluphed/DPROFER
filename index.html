@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1e3c72">
-    <title>Dprofer Cloud - Inventario</title>
+    <title>Dprofer - Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -361,33 +361,6 @@
     </div>
 </div>
 
-<!-- Modal para registrar empleado -->
-<div id="registrarEmpleadoModal" class="modal">
-    <div class="modal-content">
-        <i class="fas fa-user-plus" style="font-size: 50px; color: var(--azul-naval);"></i>
-        <h3>Registrar Empleado</h3>
-        <div class="form-group">
-            <label>Correo electrónico</label>
-            <input type="email" id="nuevoEmail" placeholder="empleado@empresa.com">
-        </div>
-        <div class="form-group">
-            <label>Contraseña</label>
-            <input type="password" id="nuevoPassword" placeholder="Mínimo 6 caracteres">
-        </div>
-        <div class="form-group">
-            <label>Rol</label>
-            <select id="nuevoRol">
-                <option value="empleado">Empleado</option>
-                <option value="administrador">Administrador</option>
-            </select>
-        </div>
-        <div class="modal-buttons">
-            <button class="btn btn-success" onclick="registrarEmpleado()">Registrar</button>
-            <button class="btn btn-secondary" onclick="cerrarRegistrarEmpleado()">Cancelar</button>
-        </div>
-    </div>
-</div>
-
 <!-- Modal para respaldo -->
 <div id="backupModal" class="modal">
     <div class="modal-content">
@@ -406,91 +379,29 @@
 <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importarRespaldo(this)">
 
 <div class="container">
-    <!-- Pantalla de Login de Empresa -->
-    <div id="empresaLoginContainer">
+    <!-- Pantalla de Login -->
+    <div id="loginContainer">
         <div class="login-box">
             <div class="card">
                 <div class="card-header text-center">
-                    <i class="fas fa-building"></i> Dprofer Cloud
-                    <p style="font-size: 14px; margin-top: 5px;">Acceso a la empresa</p>
+                    <i class="fas fa-store"></i> Dprofer Cloud
+                    <p style="font-size: 14px; margin-top: 5px;">Sistema de Inventario</p>
                 </div>
                 <div class="card-body">
                     <div class="logo-login text-center mb-3">
                         <img src="imagenes/logo-login.png" alt="Dprofer Logo" style="width: 100px; border-radius: 25px;" onerror="this.style.display='none'">
                     </div>
-                    <div id="empresaError" class="alert" style="display: none;"></div>
-                    <div class="form-group">
-                        <label><i class="fas fa-envelope"></i> Correo de la empresa</label>
-                        <input type="email" id="empresaEmail" placeholder="dproferventas@gmail.com">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-lock"></i> Contraseña de empresa</label>
-                        <input type="password" id="empresaPassword" placeholder="Contraseña">
-                    </div>
-                    <button class="btn btn-primary" onclick="iniciarSesionEmpresa()" style="width: 100%;">
-                        <i class="fas fa-sign-in-alt"></i> Ingresar a la empresa
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pantalla de Login de Empleado (se omitirá para el administrador) -->
-    <div id="empleadoLoginContainer" class="hidden">
-        <div class="login-box">
-            <div class="card">
-                <div class="card-header text-center">
-                    <i class="fas fa-users"></i> Dprofer Cloud
-                    <p style="font-size: 14px; margin-top: 5px;">Iniciar sesión como empleado</p>
-                </div>
-                <div class="card-body">
-                    <div id="empleadoError" class="alert" style="display: none;"></div>
+                    <div id="loginError" class="alert" style="display: none;"></div>
                     <div class="form-group">
                         <label><i class="fas fa-envelope"></i> Correo electrónico</label>
-                        <input type="email" id="empleadoEmail" placeholder="empleado@empresa.com">
+                        <input type="email" id="loginEmail" placeholder="dproferventas@gmail.com">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="empleadoPassword" placeholder="Contraseña">
+                        <input type="password" id="loginPassword" placeholder="Contraseña">
                     </div>
-                    <button class="btn btn-primary" onclick="iniciarSesionEmpleado()" style="width: 100%; margin-bottom: 10px;">
+                    <button class="btn btn-primary" onclick="iniciarSesion()" style="width: 100%;">
                         <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </button>
-                    <button class="btn btn-success" onclick="mostrarRegistroEmpleado()" style="width: 100%;">
-                        <i class="fas fa-user-plus"></i> Registrarme
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pantalla de Registro de Empleado -->
-    <div id="registroEmpleadoContainer" class="hidden">
-        <div class="login-box">
-            <div class="card">
-                <div class="card-header text-center">
-                    <i class="fas fa-user-plus"></i> Dprofer Cloud
-                    <p style="font-size: 14px; margin-top: 5px;">Registro de nuevo empleado</p>
-                </div>
-                <div class="card-body">
-                    <div id="registroError" class="alert" style="display: none;"></div>
-                    <div class="form-group">
-                        <label><i class="fas fa-envelope"></i> Correo electrónico</label>
-                        <input type="email" id="regEmail" placeholder="empleado@empresa.com">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-lock"></i> Confirmar contraseña</label>
-                        <input type="password" id="regPasswordConfirm" placeholder="Repite la contraseña">
-                    </div>
-                    <button class="btn btn-success" onclick="registrarNuevoEmpleado()" style="width: 100%; margin-bottom: 10px;">
-                        <i class="fas fa-check"></i> Registrarme
-                    </button>
-                    <button class="btn btn-secondary" onclick="volverALoginEmpleado()" style="width: 100%;">
-                        <i class="fas fa-arrow-left"></i> Volver al inicio de sesión
                     </button>
                 </div>
             </div>
@@ -504,24 +415,21 @@
                 <img src="imagenes/logo-header.png" alt="Dprofer Logo" style="width: 50px; border-radius: 12px;" onerror="this.style.display='none'">
                 <div>
                     <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
-                    <p>Código único global | Datos en la nube</p>
+                    <p>Código único global | Datos guardados localmente</p>
                 </div>
             </div>
             <div>
                 <span><i class="fas fa-user-circle"></i> <strong id="userDisplay"></strong></span>
-                <button class="btn btn-danger" onclick="cerrarSesionCompleta()" style="margin-left: 15px;">
+                <button class="btn btn-danger" onclick="cerrarSesion()" style="margin-left: 15px;">
                     <i class="fas fa-sign-out-alt"></i> Salir
                 </button>
             </div>
         </div>
 
-        <!-- Panel de Administrador (solo para admins) -->
-        <div id="adminPanel" class="alert alert-info admin-only">
+        <!-- Panel de Administrador -->
+        <div id="adminPanel" class="alert alert-info">
             <i class="fas fa-crown"></i> <strong>Panel de Administración</strong>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                <button class="btn btn-success" onclick="abrirRegistrarEmpleadoModal()">
-                    <i class="fas fa-user-plus"></i> Registrar Empleado
-                </button>
                 <button class="btn btn-dark" onclick="abrirModalBackup()">
                     <i class="fas fa-database"></i> Respaldo de Datos
                 </button>
@@ -628,7 +536,7 @@
                 </div>
                 <div class="text-center mt-3">
                     <button class="btn btn-primary" onclick="registrarMovimiento()">
-                        <i class="fas fa-cloud-upload-alt"></i> Guardar en la Nube
+                        <i class="fas fa-save"></i> Guardar
                     </button>
                     <button class="btn btn-secondary" onclick="limpiarFormulario()">
                         <i class="fas fa-eraser"></i> Limpiar
@@ -640,8 +548,7 @@
         <!-- Pestañas -->
         <div class="tabs">
             <div class="tab active" onclick="cambiarTab('inventario')">📋 Inventario</div>
-            <div id="adminTab" class="tab admin-only" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
-            <div id="adminTabEmpleados" class="tab admin-only" onclick="cambiarTab('empleados')">👥 Empleados</div>
+            <div id="adminTab" class="tab" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
         </div>
 
         <!-- Contenido Inventario -->
@@ -706,29 +613,6 @@
             </div>
         </div>
 
-        <!-- Contenido Empleados -->
-        <div id="tabEmpleados" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-users"></i> Empleados de la Empresa
-                </div>
-                <div class="card-body">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr><th>Correo</th><th>Rol</th><th>Fecha de registro</th><th>Acciones</th></thead>
-                            <tbody id="tablaEmpleados"></tbody>
-                        </table>
-                    </div>
-                    <div class="text-center mt-3">
-                        <button class="btn btn-success" onclick="abrirRegistrarEmpleadoModal()">
-                            <i class="fas fa-user-plus"></i> Registrar Nuevo Empleado
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Historial de Movimientos -->
         <div class="card">
             <div class="card-header">
@@ -738,7 +622,7 @@
                 <div class="table-container" style="max-height: 300px;">
                     <table class="table">
                         <thead>
-                            <tr><th>Fecha</th><th>Empleado</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
+                            <tr><th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
                         <tbody id="tablaMovimientos"></tbody>
                     </table>
                 </div>
@@ -747,394 +631,69 @@
     </div>
 </div>
 
-<script type="module">
-    // ==================== CONFIGURACIÓN DE FIREBASE ====================
-    const firebaseConfig = {
-        apiKey: "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",
-        authDomain: "dprofer-7bea9.firebaseapp.com",
-        projectId: "dprofer-7bea9",
-        storageBucket: "dprofer-7bea9.firebasestorage.app",
-        messagingSenderId: "788368470526",
-        appId: "1:788368470526:web:8644b343b056b9e6f150af",
-        measurementId: "G-TFD1EGQ829"
-    };
-    
-    // Credenciales de la empresa
-    const EMPRESA = {
+<script>
+    // ==================== CREDENCIALES ====================
+    const CREDENCIALES = {
         email: "dproferventas@gmail.com",
         password: "//Dprofer*"
     };
     
     const ADMIN_PASSWORD = "dprofer2024";
-    let empresaActual = null;
-    let empleadoActual = null;
     let esAdmin = false;
-    let productos = [];
-    let movimientos = [];
-    let empleados = [];
+    let productos = JSON.parse(localStorage.getItem('dprofer_productos')) || [];
+    let movimientos = JSON.parse(localStorage.getItem('dprofer_movimientos')) || [];
     let productoAEditar = null;
     let productoAEliminar = null;
-    
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
     
     window.addEventListener('load', () => {
         setTimeout(() => {
             const splash = document.getElementById('splash');
             if (splash) splash.style.display = 'none';
         }, 1500);
+        actualizarTodo();
     });
     
-    // ==================== LOGIN DE EMPRESA ====================
-    window.iniciarSesionEmpresa = async function() {
-        const email = document.getElementById('empresaEmail').value.trim();
-        const password = document.getElementById('empresaPassword').value;
+    // ==================== LOGIN ====================
+    window.iniciarSesion = function() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
         
-        if (email === EMPRESA.email && password === EMPRESA.password) {
-            empresaActual = email;
-            mostrarLoading(true);
-            
-            try {
-                // Intentar iniciar sesión automáticamente como administrador
-                await signInWithEmailAndPassword(auth, EMPRESA.email, EMPRESA.password);
-                
-                // Verificar si el admin existe en Firestore
-                const user = auth.currentUser;
-                const empleadoRef = doc(db, 'empresas', empresaActual, 'empleados', user.uid);
-                const empleadoDoc = await getDocs(collection(db, 'empresas', empresaActual, 'empleados'));
-                let existe = false;
-                empleadoDoc.forEach(doc => {
-                    if (doc.data().uid === user.uid) existe = true;
-                });
-                
-                if (!existe) {
-                    await setDoc(empleadoRef, {
-                        email: EMPRESA.email,
-                        rol: 'administrador',
-                        fechaRegistro: Timestamp.now(),
-                        uid: user.uid
-                    });
-                }
-                
-                empleadoActual = {
-                    uid: user.uid,
-                    email: EMPRESA.email,
-                    rol: 'administrador'
-                };
-                esAdmin = true;
-                
-                await cargarDatosEmpresa();
-                
-                document.getElementById('empresaLoginContainer').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                document.getElementById('userDisplay').innerHTML = `${EMPRESA.email} (Administrador)`;
-                
-                document.getElementById('adminPanel').classList.remove('admin-only');
-                document.getElementById('adminTab').classList.remove('admin-only');
-                document.getElementById('adminTabEmpleados').classList.remove('admin-only');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('admin-only'));
-                cargarListaEmpleados();
-                
-            } catch (error) {
-                // Si no existe la cuenta, crearla automáticamente
-                try {
-                    const userCredential = await createUserWithEmailAndPassword(auth, EMPRESA.email, EMPRESA.password);
-                    const empleadoRef = doc(db, 'empresas', empresaActual, 'empleados', userCredential.user.uid);
-                    await setDoc(empleadoRef, {
-                        email: EMPRESA.email,
-                        rol: 'administrador',
-                        fechaRegistro: Timestamp.now(),
-                        uid: userCredential.user.uid
-                    });
-                    
-                    empleadoActual = {
-                        uid: userCredential.user.uid,
-                        email: EMPRESA.email,
-                        rol: 'administrador'
-                    };
-                    esAdmin = true;
-                    
-                    await cargarDatosEmpresa();
-                    
-                    document.getElementById('empresaLoginContainer').classList.add('hidden');
-                    document.getElementById('appContainer').classList.remove('hidden');
-                    document.getElementById('userDisplay').innerHTML = `${EMPRESA.email} (Administrador)`;
-                    
-                    document.getElementById('adminPanel').classList.remove('admin-only');
-                    document.getElementById('adminTab').classList.remove('admin-only');
-                    document.getElementById('adminTabEmpleados').classList.remove('admin-only');
-                    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('admin-only'));
-                    cargarListaEmpleados();
-                    
-                } catch (createError) {
-                    mostrarErrorEmpresa('Error al crear cuenta de administrador: ' + createError.message);
-                }
-            }
-            mostrarLoading(false);
-        } else {
-            mostrarErrorEmpresa('Correo o contraseña de empresa incorrectos');
-        }
-    };
-    
-    function mostrarErrorEmpresa(msg, tipo = 'danger') {
-        const errorDiv = document.getElementById('empresaError');
-        errorDiv.className = `alert alert-${tipo}`;
-        errorDiv.innerHTML = msg;
-        errorDiv.style.display = 'block';
-        setTimeout(() => errorDiv.style.display = 'none', 3000);
-    }
-    
-    // ==================== REGISTRO DE EMPLEADO ====================
-    window.mostrarRegistroEmpleado = function() {
-        document.getElementById('empleadoLoginContainer').classList.add('hidden');
-        document.getElementById('registroEmpleadoContainer').classList.remove('hidden');
-    };
-    
-    window.volverALoginEmpleado = function() {
-        document.getElementById('registroEmpleadoContainer').classList.add('hidden');
-        document.getElementById('empleadoLoginContainer').classList.remove('hidden');
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regPasswordConfirm').value = '';
-    };
-    
-    window.registrarNuevoEmpleado = async function() {
-        const email = document.getElementById('regEmail').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regPasswordConfirm').value;
-        
-        if (!email || !password) {
-            mostrarErrorRegistro('Complete todos los campos');
-            return;
-        }
-        if (password.length < 6) {
-            mostrarErrorRegistro('La contraseña debe tener al menos 6 caracteres');
-            return;
-        }
-        if (password !== confirm) {
-            mostrarErrorRegistro('Las contraseñas no coinciden');
-            return;
-        }
-        
-        mostrarLoading(true);
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const uid = userCredential.user.uid;
-            
-            let rol = 'empleado';
-            if (email === EMPRESA.email) {
-                rol = 'administrador';
-            }
-            
-            await setDoc(doc(db, 'empresas', empresaActual, 'empleados', uid), {
-                email: email,
-                rol: rol,
-                fechaRegistro: Timestamp.now(),
-                uid: uid
-            });
-            
-            mostrarErrorRegistro('✅ Empleado registrado exitosamente. Ahora inicia sesión.', 'success');
-            setTimeout(() => {
-                volverALoginEmpleado();
-            }, 2000);
-        } catch (error) {
-            let mensaje = error.message;
-            if (mensaje.includes('email-already-in-use')) mensaje = 'Este correo ya está registrado';
-            if (mensaje.includes('invalid-email')) mensaje = 'Correo electrónico no válido';
-            mostrarErrorRegistro(`Error: ${mensaje}`);
-        }
-        mostrarLoading(false);
-    };
-    
-    function mostrarErrorRegistro(msg, tipo = 'danger') {
-        const errorDiv = document.getElementById('registroError');
-        errorDiv.className = `alert alert-${tipo}`;
-        errorDiv.innerHTML = msg;
-        errorDiv.style.display = 'block';
-        setTimeout(() => errorDiv.style.display = 'none', 3000);
-    }
-    
-    function mostrarErrorEmpleado(msg, tipo = 'danger') {
-        const errorDiv = document.getElementById('empleadoError');
-        errorDiv.className = `alert alert-${tipo}`;
-        errorDiv.innerHTML = msg;
-        errorDiv.style.display = 'block';
-        setTimeout(() => errorDiv.style.display = 'none', 3000);
-    }
-    
-    // ==================== LOGIN DE EMPLEADO ====================
-    window.iniciarSesionEmpleado = async function() {
-        const email = document.getElementById('empleadoEmail').value.trim();
-        const password = document.getElementById('empleadoPassword').value;
-        
-        if (!email || !password) {
-            mostrarErrorEmpleado('Complete correo y contraseña');
-            return;
-        }
-        
-        mostrarLoading(true);
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const uid = userCredential.user.uid;
-            
-            const empleadosRef = collection(db, 'empresas', empresaActual, 'empleados');
-            const empleadosSnap = await getDocs(empleadosRef);
-            let empleadoData = null;
-            empleadosSnap.forEach(doc => {
-                if (doc.data().uid === uid) {
-                    empleadoData = doc.data();
-                }
-            });
-            
-            if (!empleadoData) {
-                throw new Error('No tienes acceso a esta empresa');
-            }
-            
-            empleadoActual = {
-                uid: uid,
-                email: email,
-                rol: empleadoData.rol
-            };
-            esAdmin = empleadoData.rol === 'administrador';
-            
-            await cargarDatosEmpresa();
-            
-            document.getElementById('empleadoLoginContainer').classList.add('hidden');
+        if (email === CREDENCIALES.email && password === CREDENCIALES.password) {
+            esAdmin = true;
+            document.getElementById('loginContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
-            document.getElementById('userDisplay').innerHTML = `${email} ${esAdmin ? '(Administrador)' : '(Empleado)'}`;
-            
-            if (esAdmin) {
-                document.getElementById('adminPanel').classList.remove('admin-only');
-                document.getElementById('adminTab').classList.remove('admin-only');
-                document.getElementById('adminTabEmpleados').classList.remove('admin-only');
-                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('admin-only'));
-                cargarListaEmpleados();
-            } else {
-                document.getElementById('adminPanel').classList.add('admin-only');
-                document.getElementById('adminTab').classList.add('admin-only');
-                document.getElementById('adminTabEmpleados').classList.add('admin-only');
-            }
-        } catch (error) {
-            let mensaje = error.message;
-            if (mensaje.includes('invalid-credential')) mensaje = 'Correo o contraseña incorrectos';
-            if (mensaje.includes('user-not-found')) mensaje = 'Usuario no encontrado';
-            if (mensaje.includes('wrong-password')) mensaje = 'Contraseña incorrecta';
-            mostrarErrorEmpleado(`Error: ${mensaje}`);
-        }
-        mostrarLoading(false);
-    };
-    
-    // ==================== CARGAR DATOS DE LA EMPRESA ====================
-    async function cargarDatosEmpresa() {
-        mostrarLoading(true);
-        try {
-            const productosRef = collection(db, 'empresas', empresaActual, 'productos');
-            const productosSnap = await getDocs(productosRef);
-            productos = productosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            const movimientosRef = collection(db, 'empresas', empresaActual, 'movimientos');
-            const movimientosSnap = await getDocs(query(movimientosRef, orderBy('fecha', 'desc'), limit(100)));
-            movimientos = movimientosSnap.docs.map(doc => doc.data());
-            
+            document.getElementById('userDisplay').innerHTML = `${email} (Administrador)`;
             actualizarTodo();
-        } catch (error) {
-            console.error('Error:', error);
+            mostrarNotificacion('Bienvenido Administrador');
+        } else {
+            mostrarErrorLogin('Correo o contraseña incorrectos');
         }
-        mostrarLoading(false);
+    };
+    
+    window.cerrarSesion = function() {
+        esAdmin = false;
+        document.getElementById('loginContainer').classList.remove('hidden');
+        document.getElementById('appContainer').classList.add('hidden');
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    };
+    
+    function mostrarErrorLogin(msg) {
+        const errorDiv = document.getElementById('loginError');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.innerHTML = msg;
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
     }
     
-    // ==================== CARGAR LISTA DE EMPLEADOS ====================
-    async function cargarListaEmpleados() {
-        try {
-            const empleadosRef = collection(db, 'empresas', empresaActual, 'empleados');
-            const empleadosSnap = await getDocs(empleadosRef);
-            empleados = empleadosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            actualizarTablaEmpleados();
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    function mostrarNotificacion(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;background:#28a745;color:white;border-radius:10px;padding:12px 20px;';
+        toast.innerHTML = `✅ ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
-    
-    function actualizarTablaEmpleados() {
-        const tbody = document.getElementById('tablaEmpleados');
-        if (!tbody) return;
-        if (empleados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No hay empleados registrados</td></tr>';
-            return;
-        }
-        tbody.innerHTML = empleados.map(e => `
-            <tr>
-                <td><strong>${e.email}</strong></td>
-                <td><span class="badge ${e.rol === 'administrador' ? 'bg-warning' : 'bg-secondary'}">${e.rol === 'administrador' ? 'Administrador' : 'Empleado'}</span></td>
-                <td><small>${e.fechaRegistro ? new Date(e.fechaRegistro.seconds * 1000).toLocaleString() : ''}</small></td>
-                <td>${e.email !== empleadoActual?.email ? `<button class="btn btn-sm btn-danger" onclick="eliminarEmpleado('${e.id}')"><i class="fas fa-trash"></i></button>` : ''}</td>
-            </tr>
-        `).join('');
-    }
-    
-    window.eliminarEmpleado = async function(id) {
-        if (!confirm('¿Eliminar este empleado?')) return;
-        try {
-            await deleteDoc(doc(db, 'empresas', empresaActual, 'empleados', id));
-            await cargarListaEmpleados();
-            mostrarNotificacion('Empleado eliminado');
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    };
-    
-    // ==================== REGISTRAR EMPLEADO (ADMIN) ====================
-    window.abrirRegistrarEmpleadoModal = function() {
-        if (!esAdmin) return;
-        document.getElementById('nuevoEmail').value = '';
-        document.getElementById('nuevoPassword').value = '';
-        document.getElementById('nuevoRol').value = 'empleado';
-        document.getElementById('registrarEmpleadoModal').style.display = 'block';
-    };
-    
-    window.cerrarRegistrarEmpleado = function() {
-        document.getElementById('registrarEmpleadoModal').style.display = 'none';
-    };
-    
-    window.registrarEmpleado = async function() {
-        const email = document.getElementById('nuevoEmail').value.trim();
-        const password = document.getElementById('nuevoPassword').value;
-        const rol = document.getElementById('nuevoRol').value;
-        
-        if (!email || !password) {
-            alert('Complete todos los campos');
-            return;
-        }
-        if (password.length < 6) {
-            alert('La contraseña debe tener al menos 6 caracteres');
-            return;
-        }
-        
-        mostrarLoading(true);
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const uid = userCredential.user.uid;
-            
-            await setDoc(doc(db, 'empresas', empresaActual, 'empleados', uid), {
-                email: email,
-                rol: rol,
-                fechaRegistro: Timestamp.now(),
-                uid: uid
-            });
-            
-            cerrarRegistrarEmpleado();
-            await cargarListaEmpleados();
-            mostrarNotificacion(`Empleado ${email} registrado como ${rol}`);
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-        mostrarLoading(false);
-    };
     
     // ==================== AUTOCOMPLETADO ====================
     window.buscarProductosParaAutocompletar = function() {
@@ -1213,7 +772,7 @@
     }
     
     // ==================== REGISTRAR MOVIMIENTO ====================
-    window.registrarMovimiento = async function() {
+    window.registrarMovimiento = function() {
         const codigo = document.getElementById('codigo').value.trim();
         const nombre = document.getElementById('nombre').value.trim();
         const categoria = document.getElementById('categoria').value;
@@ -1233,75 +792,66 @@
             return;
         }
         
-        mostrarLoading(true);
-        try {
-            let codigoFinal = codigo;
-            const productoExistente = productos.find(p => p.codigo === codigoFinal);
-            
-            if (!codigoFinal || !productoExistente) {
-                const totalProductos = productos.length;
-                const siguienteNumero = totalProductos + 1;
-                let prefijo = nombre.substring(0, 3).toUpperCase();
-                prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                codigoFinal = `${prefijo}-${siguienteNumero.toString().padStart(3, '0')}`;
-                document.getElementById('codigo').value = codigoFinal;
-            }
-            
-            const productoRef = doc(db, 'empresas', empresaActual, 'productos', codigoFinal);
-            const existente = productos.find(p => p.codigo === codigoFinal);
-            
-            if (existente) {
-                let nuevoStock = existente.stock;
-                if (tipo === 'entrada') {
-                    nuevoStock += cantidad;
-                } else {
-                    if (existente.stock < cantidad) {
-                        throw new Error(`Stock insuficiente. Stock actual: ${existente.stock}`);
-                    }
-                    nuevoStock -= cantidad;
-                }
-                await updateDoc(productoRef, {
-                    nombre, costo, precioVenta: precio, categoria,
-                    stock: nuevoStock, stockMinimo,
-                    actualizado: Timestamp.now()
-                });
-            } else {
-                if (tipo === 'salida') {
-                    throw new Error('No se puede registrar salida de producto inexistente');
-                }
-                await setDoc(productoRef, {
-                    codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
-                    stock: cantidad, stockMinimo,
-                    creado: Timestamp.now()
-                });
-            }
-            
-            await setDoc(doc(collection(db, 'empresas', empresaActual, 'movimientos')), {
-                fecha: Timestamp.now(),
-                empleado: empleadoActual.email,
-                tipo: tipo === 'entrada' ? 'Entrada' : 'Salida',
-                producto: nombre,
-                codigo: codigoFinal,
-                cantidad: cantidad,
-                total: precio * cantidad,
-                observacion: observacion
-            });
-            
-            await cargarDatosEmpresa();
-            limpiarFormulario();
-            mostrarNotificacion(`Movimiento registrado por ${empleadoActual.email}`);
-        } catch (error) {
-            alert(`Error: ${error.message}`);
+        let codigoFinal = codigo;
+        const existente = productos.find(p => p.codigo === codigoFinal);
+        
+        if (!codigoFinal || !existente) {
+            const totalProductos = productos.length;
+            const siguienteNumero = totalProductos + 1;
+            let prefijo = nombre.substring(0, 3).toUpperCase();
+            prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            codigoFinal = `${prefijo}-${siguienteNumero.toString().padStart(3, '0')}`;
+            document.getElementById('codigo').value = codigoFinal;
         }
-        mostrarLoading(false);
+        
+        if (existente) {
+            let nuevoStock = existente.stock;
+            if (tipo === 'entrada') {
+                nuevoStock += cantidad;
+            } else {
+                if (existente.stock < cantidad) {
+                    alert(`Stock insuficiente. Stock actual: ${existente.stock}`);
+                    return;
+                }
+                nuevoStock -= cantidad;
+            }
+            existente.stock = nuevoStock;
+            existente.nombre = nombre;
+            existente.costo = costo;
+            existente.precioVenta = precio;
+            existente.categoria = categoria;
+            existente.stockMinimo = stockMinimo;
+        } else {
+            if (tipo === 'salida') {
+                alert('No se puede registrar salida de producto inexistente');
+                return;
+            }
+            productos.push({
+                codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
+                stock: cantidad, stockMinimo, creado: new Date().toLocaleString()
+            });
+        }
+        
+        movimientos.unshift({
+            fecha: new Date().toLocaleString(),
+            tipo: tipo === 'entrada' ? 'Entrada' : 'Salida',
+            producto: nombre,
+            codigo: codigoFinal,
+            cantidad: cantidad,
+            total: precio * cantidad,
+            observacion: observacion
+        });
+        
+        localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+        localStorage.setItem('dprofer_movimientos', JSON.stringify(movimientos));
+        
+        actualizarTodo();
+        limpiarFormulario();
+        mostrarNotificacion('Movimiento registrado');
     };
     
-    // ==================== MODALES DE EDICIÓN Y ELIMINACIÓN ====================
+    // ==================== MODALES ====================
     window.mostrarModalEditar = function(codigo) {
-        if (!esAdmin) {
-            alert('No tienes permisos para editar productos');
-            return;
-        }
         productoAEditar = codigo;
         document.getElementById('editModal').style.display = 'block';
         document.getElementById('editPassword').value = '';
@@ -1337,7 +887,7 @@
         productoAEditar = null;
     };
     
-    window.guardarEdicionProducto = async function() {
+    window.guardarEdicionProducto = function() {
         if (!productoAEditar) return;
         
         const nuevoNombre = document.getElementById('editNombre').value.trim();
@@ -1352,32 +902,22 @@
             return;
         }
         
-        mostrarLoading(true);
-        try {
-            const productoRef = doc(db, 'empresas', empresaActual, 'productos', productoAEditar);
-            await updateDoc(productoRef, {
-                nombre: nuevoNombre,
-                categoria: nuevaCategoria,
-                costo: nuevoCosto,
-                precioVenta: nuevoPrecio,
-                stock: nuevoStock,
-                stockMinimo: nuevoStockMinimo,
-                actualizado: Timestamp.now()
-            });
-            await cargarDatosEmpresa();
+        const index = productos.findIndex(p => p.codigo === productoAEditar);
+        if (index !== -1) {
+            productos[index].nombre = nuevoNombre;
+            productos[index].categoria = nuevaCategoria;
+            productos[index].costo = nuevoCosto;
+            productos[index].precioVenta = nuevoPrecio;
+            productos[index].stock = nuevoStock;
+            productos[index].stockMinimo = nuevoStockMinimo;
+            localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+            actualizarTodo();
             cerrarEditarProductoModal();
             mostrarNotificacion('Producto actualizado');
-        } catch (error) {
-            alert('Error: ' + error.message);
         }
-        mostrarLoading(false);
     };
     
     window.mostrarModalEliminar = function(codigo) {
-        if (!esAdmin) {
-            alert('No tienes permisos para eliminar productos');
-            return;
-        }
         productoAEliminar = codigo;
         document.getElementById('deleteModal').style.display = 'block';
         document.getElementById('deletePassword').value = '';
@@ -1388,19 +928,14 @@
         productoAEliminar = null;
     };
     
-    window.confirmarEliminacion = async function() {
+    window.confirmarEliminacion = function() {
         const password = document.getElementById('deletePassword').value;
         if (password === ADMIN_PASSWORD) {
             if (productoAEliminar) {
-                mostrarLoading(true);
-                try {
-                    await deleteDoc(doc(db, 'empresas', empresaActual, 'productos', productoAEliminar));
-                    await cargarDatosEmpresa();
-                    mostrarNotificacion('Producto eliminado');
-                } catch (error) {
-                    alert('Error: ' + error.message);
-                }
-                mostrarLoading(false);
+                productos = productos.filter(p => p.codigo !== productoAEliminar);
+                localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+                actualizarTodo();
+                mostrarNotificacion('Producto eliminado');
             }
             cerrarModalEliminar();
         } else {
@@ -1411,7 +946,6 @@
     
     // ==================== RESPALDO ====================
     window.abrirModalBackup = function() {
-        if (!esAdmin) return;
         document.getElementById('backupModal').style.display = 'block';
         document.getElementById('backupPassword').value = '';
     };
@@ -1452,22 +986,21 @@
         cerrarModalBackup();
     };
     
-    window.importarRespaldo = async function(input) {
+    window.importarRespaldo = function(input) {
         const file = input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = function(e) {
             try {
                 const respaldo = JSON.parse(e.target.result);
                 if (respaldo.productos) {
                     if (confirm('¿Importar respaldo? Esto reemplazará los datos actuales.')) {
-                        mostrarLoading(true);
-                        for (const p of respaldo.productos) {
-                            await setDoc(doc(db, 'empresas', empresaActual, 'productos', p.codigo), p);
-                        }
-                        await cargarDatosEmpresa();
+                        productos = respaldo.productos;
+                        movimientos = respaldo.movimientos || [];
+                        localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+                        localStorage.setItem('dprofer_movimientos', JSON.stringify(movimientos));
+                        actualizarTodo();
                         mostrarNotificacion('Respaldo importado');
-                        mostrarLoading(false);
                     }
                 } else {
                     alert('Archivo no válido');
@@ -1480,9 +1013,8 @@
         input.value = '';
     };
     
-    // ==================== DASHBOARD ADMIN ====================
+    // ==================== DASHBOARD ====================
     window.mostrarDashboardAdmin = function() {
-        if (!esAdmin) return;
         cambiarTab('dashboard');
         actualizarDashboardAdmin();
     };
@@ -1542,10 +1074,6 @@
             document.getElementById('adminTab').classList.add('active');
             document.getElementById('tabDashboard').classList.add('active');
             actualizarDashboardAdmin();
-        } else if (tab === 'empleados') {
-            document.getElementById('adminTabEmpleados').classList.add('active');
-            document.getElementById('tabEmpleados').classList.add('active');
-            cargarListaEmpleados();
         }
     };
     
@@ -1558,20 +1086,6 @@
             if (nombreA > nombreB) return 1;
             return 0;
         });
-    }
-    
-    function mostrarLoading(show) {
-        const loading = document.getElementById('loading');
-        if (loading) loading.style.display = show ? 'flex' : 'none';
-    }
-    
-    function mostrarNotificacion(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'alert alert-success';
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;background:#28a745;color:white;border-radius:10px;padding:12px 20px;';
-        toast.innerHTML = `✅ ${msg}`;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
     }
     
     function actualizarTodo() {
@@ -1621,8 +1135,8 @@
                     <td style="color: ${rentabilidad >= 0 ? '#28a745' : '#dc3545'}">$${rentabilidad.toFixed(2)}</td>
                     <td>${estado}</td>
                     <td>
-                        ${esAdmin ? `<button class="btn btn-sm btn-warning" onclick="mostrarModalEditar('${p.codigo}')" style="margin-right: 5px;"><i class="fas fa-edit"></i></button>` : ''}
-                        ${esAdmin ? `<button class="btn btn-sm btn-danger" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button>` : ''}
+                        <button class="btn btn-sm btn-warning" onclick="mostrarModalEditar('${p.codigo}')" style="margin-right: 5px;"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `;
@@ -1632,23 +1146,18 @@
     function actualizarMovimientos() {
         const tbody = document.getElementById('tablaMovimientos');
         if (!tbody) return;
-        if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay movimientos registrados</td>'; return; }
-        tbody.innerHTML = movimientos.slice(0, 50).map(m => {
-            const fecha = m.fecha ? new Date(m.fecha.seconds * 1000).toLocaleString() : '';
-            const tipoColor = m.tipo === 'Entrada' ? '#28a745' : '#dc3545';
-            return `
-                <tr>
-                    <td><small>${fecha}</small></td>
-                    <td><strong>${m.empleado || 'Sistema'}</strong></td>
-                    <td><span style="background:${tipoColor}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo || ''}</span></td>
-                    <td><code>${m.codigo || ''}</code></td>
-                    <td>${m.producto || ''}</td>
-                    <td>${m.cantidad || 0}</td>
-                    <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
-                    <td><small>${m.observacion || ''}</small></td>
-                </tr>
-            `;
-        }).join('');
+        if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay movimientos registrados</td>'; return; }
+        tbody.innerHTML = movimientos.slice(0, 50).map(m => `
+            <tr>
+                <td><small>${m.fecha || ''}</small></td>
+                <td><span style="background:${m.tipo === 'Entrada' ? '#28a745' : '#dc3545'}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo || ''}</span></td>
+                <td><code>${m.codigo || ''}</code></td>
+                <td>${m.producto || ''}</td>
+                <td>${m.cantidad || 0}</td>
+                <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
+                <td><small>${m.observacion || ''}</small></td>
+            </tr>
+        `).join('');
     }
     
     // ==================== EXPORTAR A EXCEL ====================
@@ -1662,8 +1171,6 @@
         const datos = [];
         datos.push(['INFORME DE INVENTARIO DPROFER']);
         datos.push(['Fecha de exportación:', new Date().toLocaleString()]);
-        datos.push(['Empresa:', empresaActual]);
-        datos.push(['Empleado:', empleadoActual?.email]);
         datos.push([]);
         datos.push(['#', 'Código', 'Producto', 'Categoría', 'Stock', 'Precio Venta', 'Costo', 'Rentabilidad Unidad', 'Valor Total']);
         
@@ -1754,23 +1261,6 @@
         calcularAutomatico();
         const nombreInput = document.getElementById('nombre');
         if (nombreInput) nombreInput.focus();
-    };
-    
-    window.cerrarSesionCompleta = async function() {
-        mostrarLoading(true);
-        await signOut(auth);
-        empresaActual = null;
-        empleadoActual = null;
-        esAdmin = false;
-        productos = [];
-        movimientos = [];
-        document.getElementById('appContainer').classList.add('hidden');
-        document.getElementById('empleadoLoginContainer').classList.add('hidden');
-        document.getElementById('registroEmpleadoContainer').classList.add('hidden');
-        document.getElementById('empresaLoginContainer').classList.remove('hidden');
-        document.getElementById('empresaEmail').value = '';
-        document.getElementById('empresaPassword').value = '';
-        mostrarLoading(false);
     };
     
     const costoInput = document.getElementById('costo');
