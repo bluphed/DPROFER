@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1e3c72">
-    <title>Dprofer - Inventario</title>
+    <title>Dprofer Cloud - Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -245,7 +245,6 @@
         }
         
         canvas { max-height: 300px; margin: 20px 0; }
-        .admin-only { display: none; }
         .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--gris-claro); }
         .tab { padding: 10px 20px; cursor: pointer; border-radius: 10px 10px 0 0; transition: all 0.3s; }
         .tab:hover { background: var(--gris-claro); }
@@ -385,7 +384,7 @@
             <div class="card">
                 <div class="card-header text-center">
                     <i class="fas fa-store"></i> Dprofer Cloud
-                    <p style="font-size: 14px; margin-top: 5px;">Sistema de Inventario</p>
+                    <p style="font-size: 14px; margin-top: 5px;">Sistema de Inventario en la Nube</p>
                 </div>
                 <div class="card-body">
                     <div class="logo-login text-center mb-3">
@@ -415,7 +414,7 @@
                 <img src="imagenes/logo-header.png" alt="Dprofer Logo" style="width: 50px; border-radius: 12px;" onerror="this.style.display='none'">
                 <div>
                     <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
-                    <p>Código único global | Datos guardados localmente</p>
+                    <p>Datos en la nube | Accede desde cualquier dispositivo</p>
                 </div>
             </div>
             <div>
@@ -427,7 +426,7 @@
         </div>
 
         <!-- Panel de Administrador -->
-        <div id="adminPanel" class="alert alert-info">
+        <div class="alert alert-info">
             <i class="fas fa-crown"></i> <strong>Panel de Administración</strong>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                 <button class="btn btn-dark" onclick="abrirModalBackup()">
@@ -536,7 +535,7 @@
                 </div>
                 <div class="text-center mt-3">
                     <button class="btn btn-primary" onclick="registrarMovimiento()">
-                        <i class="fas fa-save"></i> Guardar
+                        <i class="fas fa-cloud-upload-alt"></i> Guardar en la Nube
                     </button>
                     <button class="btn btn-secondary" onclick="limpiarFormulario()">
                         <i class="fas fa-eraser"></i> Limpiar
@@ -548,7 +547,7 @@
         <!-- Pestañas -->
         <div class="tabs">
             <div class="tab active" onclick="cambiarTab('inventario')">📋 Inventario</div>
-            <div id="adminTab" class="tab" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
+            <div class="tab" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
         </div>
 
         <!-- Contenido Inventario -->
@@ -631,51 +630,79 @@
     </div>
 </div>
 
-<script>
-    // ==================== CREDENCIALES ====================
-    const CREDENCIALES = {
-        email: "dproferventas@gmail.com",
-        password: "//Dprofer*"
+<script type="module">
+    // ==================== CONFIGURACIÓN DE FIREBASE ====================
+    const firebaseConfig = {
+        apiKey: "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",
+        authDomain: "dprofer-7bea9.firebaseapp.com",
+        projectId: "dprofer-7bea9",
+        storageBucket: "dprofer-7bea9.firebasestorage.app",
+        messagingSenderId: "788368470526",
+        appId: "1:788368470526:web:8644b343b056b9e6f150af",
+        measurementId: "G-TFD1EGQ829"
     };
     
     const ADMIN_PASSWORD = "dprofer2024";
-    let esAdmin = false;
-    let productos = JSON.parse(localStorage.getItem('dprofer_productos')) || [];
-    let movimientos = JSON.parse(localStorage.getItem('dprofer_movimientos')) || [];
+    let usuarioActual = null;
+    let productos = [];
+    let movimientos = [];
     let productoAEditar = null;
     let productoAEliminar = null;
+    
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
     
     window.addEventListener('load', () => {
         setTimeout(() => {
             const splash = document.getElementById('splash');
             if (splash) splash.style.display = 'none';
         }, 1500);
-        actualizarTodo();
     });
     
     // ==================== LOGIN ====================
-    window.iniciarSesion = function() {
+    window.iniciarSesion = async function() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         
-        if (email === CREDENCIALES.email && password === CREDENCIALES.password) {
-            esAdmin = true;
+        if (!email || !password) {
+            mostrarErrorLogin('Complete correo y contraseña');
+            return;
+        }
+        
+        mostrarLoading(true);
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            usuarioActual = userCredential.user;
             document.getElementById('loginContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
-            document.getElementById('userDisplay').innerHTML = `${email} (Administrador)`;
-            actualizarTodo();
-            mostrarNotificacion('Bienvenido Administrador');
-        } else {
-            mostrarErrorLogin('Correo o contraseña incorrectos');
+            document.getElementById('userDisplay').innerHTML = usuarioActual.email;
+            await cargarDatos();
+        } catch (error) {
+            let mensaje = error.message;
+            if (mensaje.includes('invalid-credential')) mensaje = 'Correo o contraseña incorrectos';
+            if (mensaje.includes('user-not-found')) mensaje = 'Usuario no encontrado';
+            if (mensaje.includes('wrong-password')) mensaje = 'Contraseña incorrecta';
+            mostrarErrorLogin(`Error: ${mensaje}`);
         }
+        mostrarLoading(false);
     };
     
-    window.cerrarSesion = function() {
-        esAdmin = false;
+    window.cerrarSesion = async function() {
+        mostrarLoading(true);
+        await signOut(auth);
+        usuarioActual = null;
+        productos = [];
+        movimientos = [];
         document.getElementById('loginContainer').classList.remove('hidden');
         document.getElementById('appContainer').classList.add('hidden');
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
+        mostrarLoading(false);
     };
     
     function mostrarErrorLogin(msg) {
@@ -693,6 +720,32 @@
         toast.innerHTML = `✅ ${msg}`;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+    
+    function mostrarLoading(show) {
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = show ? 'flex' : 'none';
+    }
+    
+    // ==================== CARGAR DATOS ====================
+    async function cargarDatos() {
+        if (!usuarioActual) return;
+        
+        mostrarLoading(true);
+        try {
+            const productosRef = collection(db, 'empresa', 'dprofer', 'productos');
+            const productosSnap = await getDocs(productosRef);
+            productos = productosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            const movimientosRef = collection(db, 'empresa', 'dprofer', 'movimientos');
+            const movimientosSnap = await getDocs(query(movimientosRef, orderBy('fecha', 'desc'), limit(100)));
+            movimientos = movimientosSnap.docs.map(doc => doc.data());
+            
+            actualizarTodo();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        mostrarLoading(false);
     }
     
     // ==================== AUTOCOMPLETADO ====================
@@ -772,7 +825,7 @@
     }
     
     // ==================== REGISTRAR MOVIMIENTO ====================
-    window.registrarMovimiento = function() {
+    window.registrarMovimiento = async function() {
         const codigo = document.getElementById('codigo').value.trim();
         const nombre = document.getElementById('nombre').value.trim();
         const categoria = document.getElementById('categoria').value;
@@ -792,62 +845,66 @@
             return;
         }
         
-        let codigoFinal = codigo;
-        const existente = productos.find(p => p.codigo === codigoFinal);
-        
-        if (!codigoFinal || !existente) {
-            const totalProductos = productos.length;
-            const siguienteNumero = totalProductos + 1;
-            let prefijo = nombre.substring(0, 3).toUpperCase();
-            prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            codigoFinal = `${prefijo}-${siguienteNumero.toString().padStart(3, '0')}`;
-            document.getElementById('codigo').value = codigoFinal;
-        }
-        
-        if (existente) {
-            let nuevoStock = existente.stock;
-            if (tipo === 'entrada') {
-                nuevoStock += cantidad;
-            } else {
-                if (existente.stock < cantidad) {
-                    alert(`Stock insuficiente. Stock actual: ${existente.stock}`);
-                    return;
+        mostrarLoading(true);
+        try {
+            let codigoFinal = codigo;
+            const existente = productos.find(p => p.codigo === codigoFinal);
+            
+            if (!codigoFinal || !existente) {
+                const totalProductos = productos.length;
+                const siguienteNumero = totalProductos + 1;
+                let prefijo = nombre.substring(0, 3).toUpperCase();
+                prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                codigoFinal = `${prefijo}-${siguienteNumero.toString().padStart(3, '0')}`;
+                document.getElementById('codigo').value = codigoFinal;
+            }
+            
+            const productoRef = doc(db, 'empresa', 'dprofer', 'productos', codigoFinal);
+            const productoExistente = productos.find(p => p.codigo === codigoFinal);
+            
+            if (productoExistente) {
+                let nuevoStock = productoExistente.stock;
+                if (tipo === 'entrada') {
+                    nuevoStock += cantidad;
+                } else {
+                    if (productoExistente.stock < cantidad) {
+                        throw new Error(`Stock insuficiente. Stock actual: ${productoExistente.stock}`);
+                    }
+                    nuevoStock -= cantidad;
                 }
-                nuevoStock -= cantidad;
+                await updateDoc(productoRef, {
+                    nombre, costo, precioVenta: precio, categoria,
+                    stock: nuevoStock, stockMinimo,
+                    actualizado: Timestamp.now()
+                });
+            } else {
+                if (tipo === 'salida') {
+                    throw new Error('No se puede registrar salida de producto inexistente');
+                }
+                await setDoc(productoRef, {
+                    codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
+                    stock: cantidad, stockMinimo,
+                    creado: Timestamp.now()
+                });
             }
-            existente.stock = nuevoStock;
-            existente.nombre = nombre;
-            existente.costo = costo;
-            existente.precioVenta = precio;
-            existente.categoria = categoria;
-            existente.stockMinimo = stockMinimo;
-        } else {
-            if (tipo === 'salida') {
-                alert('No se puede registrar salida de producto inexistente');
-                return;
-            }
-            productos.push({
-                codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
-                stock: cantidad, stockMinimo, creado: new Date().toLocaleString()
+            
+            await setDoc(doc(collection(db, 'empresa', 'dprofer', 'movimientos')), {
+                fecha: Timestamp.now(),
+                tipo: tipo === 'entrada' ? 'Entrada' : 'Salida',
+                producto: nombre,
+                codigo: codigoFinal,
+                cantidad: cantidad,
+                total: precio * cantidad,
+                observacion: observacion
             });
+            
+            await cargarDatos();
+            limpiarFormulario();
+            mostrarNotificacion('Movimiento guardado en la nube');
+        } catch (error) {
+            alert(`Error: ${error.message}`);
         }
-        
-        movimientos.unshift({
-            fecha: new Date().toLocaleString(),
-            tipo: tipo === 'entrada' ? 'Entrada' : 'Salida',
-            producto: nombre,
-            codigo: codigoFinal,
-            cantidad: cantidad,
-            total: precio * cantidad,
-            observacion: observacion
-        });
-        
-        localStorage.setItem('dprofer_productos', JSON.stringify(productos));
-        localStorage.setItem('dprofer_movimientos', JSON.stringify(movimientos));
-        
-        actualizarTodo();
-        limpiarFormulario();
-        mostrarNotificacion('Movimiento registrado');
+        mostrarLoading(false);
     };
     
     // ==================== MODALES ====================
@@ -887,7 +944,7 @@
         productoAEditar = null;
     };
     
-    window.guardarEdicionProducto = function() {
+    window.guardarEdicionProducto = async function() {
         if (!productoAEditar) return;
         
         const nuevoNombre = document.getElementById('editNombre').value.trim();
@@ -902,19 +959,25 @@
             return;
         }
         
-        const index = productos.findIndex(p => p.codigo === productoAEditar);
-        if (index !== -1) {
-            productos[index].nombre = nuevoNombre;
-            productos[index].categoria = nuevaCategoria;
-            productos[index].costo = nuevoCosto;
-            productos[index].precioVenta = nuevoPrecio;
-            productos[index].stock = nuevoStock;
-            productos[index].stockMinimo = nuevoStockMinimo;
-            localStorage.setItem('dprofer_productos', JSON.stringify(productos));
-            actualizarTodo();
+        mostrarLoading(true);
+        try {
+            const productoRef = doc(db, 'empresa', 'dprofer', 'productos', productoAEditar);
+            await updateDoc(productoRef, {
+                nombre: nuevoNombre,
+                categoria: nuevaCategoria,
+                costo: nuevoCosto,
+                precioVenta: nuevoPrecio,
+                stock: nuevoStock,
+                stockMinimo: nuevoStockMinimo,
+                actualizado: Timestamp.now()
+            });
+            await cargarDatos();
             cerrarEditarProductoModal();
             mostrarNotificacion('Producto actualizado');
+        } catch (error) {
+            alert('Error: ' + error.message);
         }
+        mostrarLoading(false);
     };
     
     window.mostrarModalEliminar = function(codigo) {
@@ -928,14 +991,19 @@
         productoAEliminar = null;
     };
     
-    window.confirmarEliminacion = function() {
+    window.confirmarEliminacion = async function() {
         const password = document.getElementById('deletePassword').value;
         if (password === ADMIN_PASSWORD) {
             if (productoAEliminar) {
-                productos = productos.filter(p => p.codigo !== productoAEliminar);
-                localStorage.setItem('dprofer_productos', JSON.stringify(productos));
-                actualizarTodo();
-                mostrarNotificacion('Producto eliminado');
+                mostrarLoading(true);
+                try {
+                    await deleteDoc(doc(db, 'empresa', 'dprofer', 'productos', productoAEliminar));
+                    await cargarDatos();
+                    mostrarNotificacion('Producto eliminado');
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+                mostrarLoading(false);
             }
             cerrarModalEliminar();
         } else {
@@ -986,21 +1054,22 @@
         cerrarModalBackup();
     };
     
-    window.importarRespaldo = function(input) {
+    window.importarRespaldo = async function(input) {
         const file = input.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             try {
                 const respaldo = JSON.parse(e.target.result);
                 if (respaldo.productos) {
                     if (confirm('¿Importar respaldo? Esto reemplazará los datos actuales.')) {
-                        productos = respaldo.productos;
-                        movimientos = respaldo.movimientos || [];
-                        localStorage.setItem('dprofer_productos', JSON.stringify(productos));
-                        localStorage.setItem('dprofer_movimientos', JSON.stringify(movimientos));
-                        actualizarTodo();
+                        mostrarLoading(true);
+                        for (const p of respaldo.productos) {
+                            await setDoc(doc(db, 'empresa', 'dprofer', 'productos', p.codigo), p);
+                        }
+                        await cargarDatos();
                         mostrarNotificacion('Respaldo importado');
+                        mostrarLoading(false);
                     }
                 } else {
                     alert('Archivo no válido');
@@ -1147,17 +1216,21 @@
         const tbody = document.getElementById('tablaMovimientos');
         if (!tbody) return;
         if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay movimientos registrados</td>'; return; }
-        tbody.innerHTML = movimientos.slice(0, 50).map(m => `
-            <tr>
-                <td><small>${m.fecha || ''}</small></td>
-                <td><span style="background:${m.tipo === 'Entrada' ? '#28a745' : '#dc3545'}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo || ''}</span></td>
-                <td><code>${m.codigo || ''}</code></td>
-                <td>${m.producto || ''}</td>
-                <td>${m.cantidad || 0}</td>
-                <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
-                <td><small>${m.observacion || ''}</small></td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = movimientos.slice(0, 50).map(m => {
+            const fecha = m.fecha ? new Date(m.fecha.seconds * 1000).toLocaleString() : '';
+            const tipoColor = m.tipo === 'Entrada' ? '#28a745' : '#dc3545';
+            return `
+                <tr>
+                    <td><small>${fecha}</small></td>
+                    <td><span style="background:${tipoColor}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo || ''}</span></td>
+                    <td><code>${m.codigo || ''}</code></td>
+                    <td>${m.producto || ''}</td>
+                    <td>${m.cantidad || 0}</td>
+                    <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
+                    <td><small>${m.observacion || ''}</small></td>
+                </tr>
+            `;
+        }).join('');
     }
     
     // ==================== EXPORTAR A EXCEL ====================
@@ -1272,6 +1345,16 @@
     calcularAutomatico();
     
     document.getElementById('nombre').addEventListener('input', generarCodigoAutomatico);
+    
+    onAuthStateChanged(auth, (user) => {
+        if (user && !usuarioActual) {
+            usuarioActual = user;
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('userDisplay').innerHTML = user.email;
+            cargarDatos();
+        }
+    });
 </script>
 </body>
 </html>
