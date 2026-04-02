@@ -117,7 +117,6 @@
         
         .badge-stock-bajo { background: #dc3545; color: var(--blanco); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .badge-stock-normal { background: #28a745; color: var(--blanco); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-        .badge-admin { background: #ffc107; color: #1e3c72; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
         
         .user-header {
             background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%);
@@ -183,27 +182,6 @@
         .autocomplete-item strong { color: var(--azul-naval); }
         .autocomplete-item small { color: var(--gris-medio); }
         
-        /* Pestañas */
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--gris-claro);
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 10px 10px 0 0;
-            transition: all 0.3s;
-        }
-        .tab:hover { background: var(--gris-claro); }
-        .tab.active {
-            background: var(--azul-naval);
-            color: var(--blanco);
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .user-header { flex-direction: column; gap: 15px; text-align: center; }
@@ -236,7 +214,6 @@
         ::-webkit-scrollbar-track { background: var(--gris-claro); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: var(--azul-naval); border-radius: 10px; }
         
-        /* Modales */
         .modal {
             display: none;
             position: fixed;
@@ -267,11 +244,14 @@
             margin-top: 15px;
         }
         
-        /* Gráfico */
-        canvas {
-            max-height: 300px;
-            margin: 20px 0;
-        }
+        canvas { max-height: 300px; margin: 20px 0; }
+        .admin-only { display: none; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--gris-claro); }
+        .tab { padding: 10px 20px; cursor: pointer; border-radius: 10px 10px 0 0; transition: all 0.3s; }
+        .tab:hover { background: var(--gris-claro); }
+        .tab.active { background: var(--azul-naval); color: var(--blanco); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -283,8 +263,8 @@
     <div class="modal-content">
         <i class="fas fa-shield-alt" style="font-size: 50px; color: var(--azul-naval);"></i>
         <h3>Verificación de seguridad</h3>
-        <p>Ingresa la contraseña de desarrollador para eliminar este producto</p>
-        <input type="password" id="deletePassword" placeholder="Contraseña de desarrollador">
+        <p>Ingresa la contraseña de administrador para eliminar este producto</p>
+        <input type="password" id="deletePassword" placeholder="Contraseña de administrador">
         <div class="modal-buttons">
             <button class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
             <button class="btn btn-secondary" onclick="cerrarModalEliminar()">Cancelar</button>
@@ -297,8 +277,8 @@
     <div class="modal-content">
         <i class="fas fa-edit" style="font-size: 50px; color: var(--azul-naval);"></i>
         <h3>Editar Producto</h3>
-        <p>Ingresa la contraseña de desarrollador para editar</p>
-        <input type="password" id="editPassword" placeholder="Contraseña de desarrollador">
+        <p>Ingresa la contraseña de administrador para editar</p>
+        <input type="password" id="editPassword" placeholder="Contraseña de administrador">
         <div class="modal-buttons">
             <button class="btn btn-primary" onclick="verificarYMostrarEdicion()">Verificar</button>
             <button class="btn btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
@@ -349,13 +329,52 @@
     </div>
 </div>
 
-<!-- Modal de respaldo -->
+<!-- Modal para seleccionar trabajador -->
+<div id="seleccionarTrabajadorModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-users" style="font-size: 50px; color: var(--azul-naval);"></i>
+        <h3>Seleccionar Trabajador</h3>
+        <p>¿Quién está realizando esta acción?</p>
+        <select id="selectTrabajador" class="form-select">
+            <option value="">Seleccione un trabajador...</option>
+        </select>
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="confirmarTrabajador()">Continuar</button>
+            <button class="btn btn-secondary" onclick="cerrarSeleccionTrabajador()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para registrar nuevo trabajador -->
+<div id="registrarTrabajadorModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-user-plus" style="font-size: 50px; color: var(--azul-naval);"></i>
+        <h3>Registrar Nuevo Trabajador</h3>
+        <div class="form-group">
+            <label>Nombre del trabajador</label>
+            <input type="text" id="nuevoTrabajador" placeholder="Ej: Juan Pérez">
+        </div>
+        <div class="form-group">
+            <label>Rol</label>
+            <select id="nuevoRol">
+                <option value="trabajador">Trabajador</option>
+                <option value="administrador">Administrador</option>
+            </select>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-success" onclick="guardarNuevoTrabajador()">Registrar</button>
+            <button class="btn btn-secondary" onclick="cerrarRegistrarTrabajador()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para respaldo -->
 <div id="backupModal" class="modal">
     <div class="modal-content">
         <i class="fas fa-database" style="font-size: 50px; color: var(--azul-naval);"></i>
         <h3>Respaldo de Datos</h3>
-        <p>Ingresa la contraseña de desarrollador para exportar/importar datos</p>
-        <input type="password" id="backupPassword" placeholder="Contraseña de desarrollador">
+        <p>Ingresa la contraseña de administrador</p>
+        <input type="password" id="backupPassword" placeholder="Contraseña de administrador">
         <div class="modal-buttons">
             <button class="btn btn-primary" onclick="exportarRespaldoCompleto()">Exportar Respaldo</button>
             <button class="btn btn-warning" onclick="abrirImportarRespaldo()">Importar Respaldo</button>
@@ -364,16 +383,16 @@
     </div>
 </div>
 
-<!-- Input oculto para importar archivo -->
 <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importarRespaldoCompleto(this)">
 
 <div class="container">
+    <!-- Pantalla de Login Único -->
     <div id="loginContainer">
         <div class="login-box">
             <div class="card">
                 <div class="card-header text-center">
                     <i class="fas fa-store"></i> Dprofer Cloud
-                    <p style="font-size: 14px; margin-top: 5px;">Códigos únicos globales</p>
+                    <p style="font-size: 14px; margin-top: 5px;">Sistema de Inventario</p>
                 </div>
                 <div class="card-body">
                     <div class="logo-login text-center mb-3">
@@ -386,45 +405,46 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-lock"></i> Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="Mínimo 6 caracteres">
+                        <input type="password" id="loginPassword" placeholder="Contraseña">
                     </div>
-                    <button class="btn btn-primary" onclick="iniciarSesion()" style="width: 100%; margin-bottom: 10px;">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </button>
-                    <button class="btn btn-success" onclick="registrarUsuario()" style="width: 100%;">
-                        <i class="fas fa-user-plus"></i> Registrarse
+                    <button class="btn btn-primary" onclick="iniciarSesionUnico()" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i> Ingresar al Sistema
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- App Principal -->
     <div id="appContainer" class="hidden">
         <div class="user-header">
             <div class="logo-header" style="display: flex; align-items: center; gap: 15px;">
                 <img src="imagenes/logo-header.png" alt="Dprofer Logo" style="width: 50px; border-radius: 12px;" onerror="this.style.display='none'">
                 <div>
                     <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
-                    <p>Código único global | Busca productos existentes | Datos en la nube</p>
+                    <p>Código único global | Datos en la nube</p>
                 </div>
             </div>
             <div>
                 <span><i class="fas fa-user-circle"></i> <strong id="userDisplay"></strong></span>
-                <button class="btn btn-danger" onclick="cerrarSesion()" style="margin-left: 15px;">
+                <button class="btn btn-danger" onclick="cerrarSesionUnico()" style="margin-left: 15px;">
                     <i class="fas fa-sign-out-alt"></i> Salir
                 </button>
             </div>
         </div>
 
-        <!-- Botones de administración (solo visibles para desarrollador) -->
-        <div id="adminButtons" class="alert alert-info" style="display: none;">
+        <!-- Panel de Administrador (solo visible para admins) -->
+        <div id="adminPanel" class="alert alert-info admin-only">
             <i class="fas fa-crown"></i> <strong>Panel de Administración</strong>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                <button class="btn btn-success" onclick="abrirRegistrarTrabajador()">
+                    <i class="fas fa-user-plus"></i> Registrar Trabajador
+                </button>
                 <button class="btn btn-dark" onclick="abrirModalBackup()">
                     <i class="fas fa-database"></i> Respaldo de Datos
                 </button>
                 <button class="btn btn-warning" onclick="mostrarDashboardAdmin()">
-                    <i class="fas fa-chart-line"></i> Dashboard Ejecutivo
+                    <i class="fas fa-chart-line"></i> Dashboard
                 </button>
                 <button class="btn btn-secondary" onclick="exportarExcelProfesional()">
                     <i class="fas fa-file-excel"></i> Exportar Excel
@@ -477,13 +497,8 @@
                         <div class="form-group">
                             <label><i class="fas fa-layer-group"></i> Categoría</label>
                             <select id="categoria">
-                                <option>Herramientas</option>
-                                <option>Pinturas</option>
-                                <option>Eléctrico</option>
-                                <option>Ferretería</option>
-                                <option>Plomería</option>
-                                <option>Jardinería</option>
-                                <option>Seguridad</option>
+                                <option>Herramientas</option><option>Pinturas</option><option>Eléctrico</option>
+                                <option>Ferretería</option><option>Plomería</option><option>Jardinería</option>
                             </select>
                         </div>
                         <div class="row">
@@ -530,7 +545,7 @@
                     </div>
                 </div>
                 <div class="text-center mt-3">
-                    <button class="btn btn-primary" onclick="registrarMovimiento()">
+                    <button class="btn btn-primary" onclick="abrirSeleccionTrabajador()">
                         <i class="fas fa-cloud-upload-alt"></i> Guardar en la Nube
                     </button>
                     <button class="btn btn-secondary" onclick="limpiarFormulario()">
@@ -540,10 +555,11 @@
             </div>
         </div>
 
-        <!-- Pestañas para Inventario y Dashboard Admin -->
+        <!-- Pestañas -->
         <div class="tabs">
             <div class="tab active" onclick="cambiarTab('inventario')">📋 Inventario</div>
-            <div id="adminTab" class="tab" style="display: none;" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
+            <div id="adminTab" class="tab admin-only" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
+            <div id="adminTabTrabajadores" class="tab admin-only" onclick="cambiarTab('trabajadores')">👥 Trabajadores</div>
         </div>
 
         <!-- Contenido Inventario -->
@@ -603,8 +619,28 @@
                         <button class="btn btn-primary" onclick="exportarExcelProfesional()">
                             <i class="fas fa-file-excel"></i> Exportar a Excel
                         </button>
-                        <button class="btn btn-dark" onclick="abrirModalBackup()">
-                            <i class="fas fa-database"></i> Respaldo de Datos
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido Trabajadores -->
+        <div id="tabTrabajadores" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i> Lista de Trabajadores
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr><th>Nombre</th><th>Rol</th><th>Fecha de Registro</th><th>Acciones</th></thead>
+                            <tbody id="tablaTrabajadores"></tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-success" onclick="abrirRegistrarTrabajador()">
+                            <i class="fas fa-user-plus"></i> Registrar Nuevo Trabajador
                         </button>
                     </div>
                 </div>
@@ -620,7 +656,7 @@
                 <div class="table-container" style="max-height: 300px;">
                     <table class="table">
                         <thead>
-                            <tr><th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
+                            <tr><th>Fecha</th><th>Trabajador</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
                         <tbody id="tablaMovimientos"></tbody>
                     </table>
                 </div>
@@ -629,36 +665,63 @@
     </div>
 </div>
 
-<script type="module">
+<script>
     // ==================== CONFIGURACIÓN ====================
-    const firebaseConfig = {
-        apiKey: "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",
-        authDomain: "dprofer-7bea9.firebaseapp.com",
-        projectId: "dprofer-7bea9",
-        storageBucket: "dprofer-7bea9.firebasestorage.app",
-        messagingSenderId: "788368470526",
-        appId: "1:788368470526:web:8644b343b056b9e6f150af",
-        measurementId: "G-TFD1EGQ829"
+    // Credenciales únicas para entrar al sistema
+    const CREDENCIALES_UNICAS = {
+        email: "dprofer@empresa.com",
+        password: "admin123"
     };
     
-    const DESARROLLADOR_PASSWORD = "dprofer2024";
+    const ADMIN_PASSWORD = "dprofer2024";
+    let trabajadores = JSON.parse(localStorage.getItem('dprofer_trabajadores')) || [];
+    let productos = JSON.parse(localStorage.getItem('dprofer_productos')) || [];
+    let movimientos = JSON.parse(localStorage.getItem('dprofer_movimientos')) || [];
+    let usuarioActual = null;
+    let trabajadorActual = null;
+    let esAdministradorActual = false;
     let productoAEliminar = null;
     let productoAEditar = null;
-    let usuarioEsDesarrollador = false;
+    let pendingMovimiento = null;
     let categoriasChart = null;
     let topProductosChart = null;
     
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    // Inicializar trabajador por defecto si no hay ninguno
+    if (trabajadores.length === 0) {
+        trabajadores.push({
+            id: 1,
+            nombre: "Administrador",
+            rol: "administrador",
+            fecha: new Date().toLocaleString()
+        });
+        localStorage.setItem('dprofer_trabajadores', JSON.stringify(trabajadores));
+    }
     
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // ==================== FUNCIONES DE LOGIN ÚNICO ====================
+    window.iniciarSesionUnico = function() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (email === CREDENCIALES_UNICAS.email && password === CREDENCIALES_UNICAS.password) {
+            usuarioActual = email;
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('userDisplay').innerHTML = email;
+            actualizarTodo();
+        } else {
+            mostrarErrorLogin('Credenciales incorrectas. Contacte al administrador.');
+        }
+    };
     
-    let productos = [];
-    let movimientos = [];
-    let usuarioActual = null;
+    window.cerrarSesionUnico = function() {
+        usuarioActual = null;
+        trabajadorActual = null;
+        esAdministradorActual = false;
+        document.getElementById('loginContainer').classList.remove('hidden');
+        document.getElementById('appContainer').classList.add('hidden');
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    };
     
     // ==================== AUTOCOMPLETADO ====================
     window.buscarProductosParaAutocompletar = function() {
@@ -712,7 +775,7 @@
         }
     });
     
-    // ==================== GENERAR CÓDIGO AUTOMÁTICO ====================
+    // ==================== GENERAR CÓDIGO ====================
     window.generarCodigoAutomatico = function() {
         const nombre = document.getElementById('nombre').value.trim();
         const codigoActual = document.getElementById('codigo').value.trim();
@@ -736,385 +799,52 @@
         document.getElementById('codigo').value = codigoGenerado;
     };
     
-    // ==================== MODALES DE ELIMINACIÓN Y EDICIÓN ====================
-    window.mostrarModalEliminar = function(codigo) {
-        productoAEliminar = codigo;
-        document.getElementById('deleteModal').style.display = 'block';
-        document.getElementById('deletePassword').value = '';
+    // ==================== SELECCIÓN DE TRABAJADOR ====================
+    window.abrirSeleccionTrabajador = function() {
+        const select = document.getElementById('selectTrabajador');
+        select.innerHTML = '<option value="">Seleccione un trabajador...</option>';
+        trabajadores.forEach(t => {
+            select.innerHTML += `<option value="${t.id}">${t.nombre} (${t.rol === 'administrador' ? 'Admin' : 'Trabajador'})</option>`;
+        });
+        document.getElementById('seleccionarTrabajadorModal').style.display = 'block';
     };
     
-    window.cerrarModalEliminar = function() {
-        document.getElementById('deleteModal').style.display = 'none';
-        productoAEliminar = null;
+    window.cerrarSeleccionTrabajador = function() {
+        document.getElementById('seleccionarTrabajadorModal').style.display = 'none';
+        pendingMovimiento = null;
     };
     
-    window.confirmarEliminacion = function() {
-        const password = document.getElementById('deletePassword').value;
-        if (password === DESARROLLADOR_PASSWORD) {
-            ejecutarEliminacion(productoAEliminar);
-            cerrarModalEliminar();
-        } else {
-            alert('Contraseña incorrecta. No tienes permisos para eliminar productos.');
-            cerrarModalEliminar();
+    window.confirmarTrabajador = function() {
+        const trabajadorId = document.getElementById('selectTrabajador').value;
+        if (!trabajadorId) {
+            alert('Seleccione un trabajador');
+            return;
         }
-    };
-    
-    window.mostrarModalEditar = function(codigo) {
-        productoAEditar = codigo;
-        document.getElementById('editModal').style.display = 'block';
-        document.getElementById('editPassword').value = '';
-    };
-    
-    window.cerrarModalEdicion = function() {
-        document.getElementById('editModal').style.display = 'none';
-        productoAEditar = null;
-    };
-    
-    window.verificarYMostrarEdicion = function() {
-        const password = document.getElementById('editPassword').value;
-        if (password === DESARROLLADOR_PASSWORD) {
-            cerrarModalEdicion();
-            const producto = productos.find(p => p.codigo === productoAEditar);
-            if (producto) {
-                document.getElementById('editNombre').value = producto.nombre;
-                document.getElementById('editCategoria').value = producto.categoria || 'Herramientas';
-                document.getElementById('editCosto').value = producto.costo;
-                document.getElementById('editPrecio').value = producto.precioVenta;
-                document.getElementById('editStock').value = producto.stock;
-                document.getElementById('editStockMinimo').value = producto.stockMinimo || 5;
-                document.getElementById('editarProductoModal').style.display = 'block';
+        const trabajador = trabajadores.find(t => t.id == trabajadorId);
+        if (trabajador) {
+            trabajadorActual = trabajador;
+            esAdministradorActual = trabajador.rol === 'administrador';
+            document.getElementById('seleccionarTrabajadorModal').style.display = 'none';
+            
+            // Mostrar/ocultar elementos de admin según el rol
+            if (esAdministradorActual) {
+                document.getElementById('adminPanel').classList.remove('admin-only');
+                document.getElementById('adminTab').classList.remove('admin-only');
+                document.getElementById('adminTabTrabajadores').classList.remove('admin-only');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('admin-only'));
+            } else {
+                document.getElementById('adminPanel').classList.add('admin-only');
+                document.getElementById('adminTab').classlist.add('admin-only');
+                document.getElementById('adminTabTrabajadores').classList.add('admin-only');
             }
-        } else {
-            alert('Contraseña incorrecta. No tienes permisos para editar productos.');
-            cerrarModalEdicion();
-        }
-    };
-    
-    window.cerrarEditarProductoModal = function() {
-        document.getElementById('editarProductoModal').style.display = 'none';
-        productoAEditar = null;
-    };
-    
-    window.guardarEdicionProducto = async function() {
-        if (!productoAEditar) return;
-        
-        const nuevoNombre = document.getElementById('editNombre').value.trim();
-        const nuevaCategoria = document.getElementById('editCategoria').value;
-        const nuevoCosto = parseFloat(document.getElementById('editCosto').value) || 0;
-        const nuevoPrecio = parseFloat(document.getElementById('editPrecio').value) || 0;
-        const nuevoStock = parseInt(document.getElementById('editStock').value) || 0;
-        const nuevoStockMinimo = parseInt(document.getElementById('editStockMinimo').value) || 5;
-        
-        if (!nuevoNombre) {
-            alert('El nombre del producto es obligatorio');
-            return;
-        }
-        
-        mostrarLoading(true);
-        try {
-            const productoRef = doc(db, 'usuarios', usuarioActual.uid, 'productos', productoAEditar);
-            await updateDoc(productoRef, {
-                nombre: nuevoNombre,
-                categoria: nuevaCategoria,
-                costo: nuevoCosto,
-                precioVenta: nuevoPrecio,
-                stock: nuevoStock,
-                stockMinimo: nuevoStockMinimo,
-                actualizado: Timestamp.now()
-            });
             
-            await cargarDatosDesdeFirebase();
-            cerrarEditarProductoModal();
-            mostrarNotificacion('Producto actualizado correctamente');
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        }
-        mostrarLoading(false);
-    };
-    
-    async function ejecutarEliminacion(codigo) {
-        if (!codigo) return;
-        mostrarLoading(true);
-        try {
-            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', codigo));
-            await cargarDatosDesdeFirebase();
-            mostrarNotificacion('Producto eliminado correctamente');
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        }
-        mostrarLoading(false);
-    }
-    
-    // ==================== RESPALDO DE DATOS ====================
-    window.abrirModalBackup = function() {
-        document.getElementById('backupModal').style.display = 'block';
-        document.getElementById('backupPassword').value = '';
-    };
-    
-    window.cerrarModalBackup = function() {
-        document.getElementById('backupModal').style.display = 'none';
-    };
-    
-    window.exportarRespaldoCompleto = function() {
-        const password = document.getElementById('backupPassword').value;
-        if (password !== DESARROLLADOR_PASSWORD) {
-            alert('Contraseña incorrecta. Solo el desarrollador puede exportar respaldos.');
-            return;
-        }
-        
-        const respaldo = {
-            fecha: new Date().toLocaleString(),
-            usuario: usuarioActual?.email,
-            productos: productos,
-            movimientos: movimientos
-        };
-        
-        const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `respaldo_dprofer_${new Date().toISOString().slice(0,19)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        mostrarNotificacion('Respaldo exportado correctamente');
-        cerrarModalBackup();
-    };
-    
-    window.abrirImportarRespaldo = function() {
-        const password = document.getElementById('backupPassword').value;
-        if (password !== DESARROLLADOR_PASSWORD) {
-            alert('Contraseña incorrecta. Solo el desarrollador puede importar respaldos.');
-            return;
-        }
-        document.getElementById('importFile').click();
-        cerrarModalBackup();
-    };
-    
-    window.importarRespaldoCompleto = async function(input) {
-        const file = input.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            try {
-                const respaldo = JSON.parse(e.target.result);
-                if (respaldo.productos && respaldo.movimientos) {
-                    if (confirm('¿Importar respaldo? Esto reemplazará todos los datos actuales.')) {
-                        mostrarLoading(true);
-                        // Eliminar datos actuales
-                        const productosRef = collection(db, 'usuarios', usuarioActual.uid, 'productos');
-                        const productosSnap = await getDocs(productosRef);
-                        for (const docSnap of productosSnap.docs) {
-                            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', docSnap.id));
-                        }
-                        
-                        const movimientosRef = collection(db, 'usuarios', usuarioActual.uid, 'movimientos');
-                        const movimientosSnap = await getDocs(movimientosRef);
-                        for (const docSnap of movimientosSnap.docs) {
-                            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'movimientos', docSnap.id));
-                        }
-                        
-                        // Importar nuevos datos
-                        for (const p of respaldo.productos) {
-                            await setDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', p.codigo), p);
-                        }
-                        for (const m of respaldo.movimientos) {
-                            await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), m);
-                        }
-                        
-                        await cargarDatosDesdeFirebase();
-                        mostrarNotificacion('Respaldo importado correctamente');
-                        mostrarLoading(false);
-                    }
-                } else {
-                    alert('Archivo de respaldo no válido');
-                }
-            } catch (error) {
-                alert('Error al leer el archivo: ' + error.message);
-            }
-        };
-        reader.readAsText(file);
-        input.value = '';
-    };
-    
-    // ==================== DASHBOARD ADMIN ====================
-    window.mostrarDashboardAdmin = function() {
-        cambiarTab('dashboard');
-        actualizarDashboardAdmin();
-    };
-    
-    function actualizarDashboardAdmin() {
-        document.getElementById('adminTotalProductos').textContent = productos.length;
-        const valorInventario = productos.reduce((s, p) => s + (p.costo * p.stock), 0);
-        const gananciaTotal = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * p.stock), 0);
-        document.getElementById('adminValorInventario').textContent = `$${valorInventario.toFixed(2)}`;
-        document.getElementById('adminGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
-        
-        // Gráfico por categorías
-        const categorias = [...new Set(productos.map(p => p.categoria || 'General'))];
-        const stockPorCategoria = categorias.map(cat => 
-            productos.filter(p => (p.categoria || 'General') === cat).reduce((sum, p) => sum + p.stock, 0)
-        );
-        
-        if (categoriasChart) categoriasChart.destroy();
-        const ctxCat = document.getElementById('categoriasChart').getContext('2d');
-        categoriasChart = new Chart(ctxCat, {
-            type: 'pie',
-            data: {
-                labels: categorias,
-                datasets: [{
-                    data: stockPorCategoria,
-                    backgroundColor: ['#1e3c72', '#2a5298', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d']
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-        });
-        
-        // Top 5 productos más valiosos
-        const topProductos = [...productos].sort((a, b) => (b.precioVenta * b.stock) - (a.precioVenta * a.stock)).slice(0, 5);
-        if (topProductosChart) topProductosChart.destroy();
-        const ctxTop = document.getElementById('topProductosChart').getContext('2d');
-        topProductosChart = new Chart(ctxTop, {
-            type: 'bar',
-            data: {
-                labels: topProductos.map(p => p.nombre),
-                datasets: [{
-                    label: 'Valor en inventario ($)',
-                    data: topProductos.map(p => p.precioVenta * p.stock),
-                    backgroundColor: '#2a5298'
-                }]
-            },
-            options: { responsive: true }
-        });
-    }
-    
-    // ==================== PESTAÑAS ====================
-    window.cambiarTab = function(tab) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-        
-        if (tab === 'inventario') {
-            document.querySelector('.tab').classList.add('active');
-            document.getElementById('tabInventario').classList.add('active');
-        } else if (tab === 'dashboard') {
-            document.getElementById('adminTab').classList.add('active');
-            document.getElementById('tabDashboard').classList.add('active');
-            actualizarDashboardAdmin();
+            mostrarNotificacion(`Trabajador actual: ${trabajador.nombre} (${trabajador.rol === 'administrador' ? 'Administrador' : 'Trabajador'})`);
+            registrarMovimiento();
         }
     };
-    
-    // ==================== FUNCIONES COMUNES ====================
-    function ordenarProductosAlfabeticamente(lista) {
-        return [...lista].sort((a, b) => {
-            const nombreA = (a.nombre || '').toLowerCase();
-            const nombreB = (b.nombre || '').toLowerCase();
-            if (nombreA < nombreB) return -1;
-            if (nombreA > nombreB) return 1;
-            return 0;
-        });
-    }
-    
-    function mostrarLoading(show) {
-        const loading = document.getElementById('loading');
-        if (loading) loading.style.display = show ? 'flex' : 'none';
-    }
-    
-    function mostrarErrorLogin(msg, tipo = 'danger') {
-        const errorDiv = document.getElementById('loginError');
-        if (errorDiv) {
-            errorDiv.className = `alert alert-${tipo}`;
-            errorDiv.innerHTML = msg;
-            errorDiv.style.display = 'block';
-            setTimeout(() => errorDiv.style.display = 'none', 3000);
-        }
-    }
-    
-    function mostrarNotificacion(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'alert alert-success';
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;background:#28a745;color:white;border-radius:10px;padding:12px 20px;';
-        toast.innerHTML = `✅ ${msg}`;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-    
-    // ==================== AUTENTICACIÓN ====================
-    window.registrarUsuario = async () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        
-        if (!email || !password) {
-            mostrarErrorLogin('Complete correo y contraseña');
-            return;
-        }
-        if (password.length < 6) {
-            mostrarErrorLogin('La contraseña debe tener al menos 6 caracteres');
-            return;
-        }
-        
-        mostrarLoading(true);
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            mostrarErrorLogin('Usuario registrado exitosamente. Ahora inicia sesión', 'success');
-        } catch (error) {
-            let mensaje = error.message;
-            if (mensaje.includes('email-already-in-use')) mensaje = 'Este correo ya está registrado';
-            if (mensaje.includes('invalid-email')) mensaje = 'Correo electrónico no válido';
-            mostrarErrorLogin(`Error: ${mensaje}`);
-        }
-        mostrarLoading(false);
-    };
-    
-    window.iniciarSesion = async () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        
-        if (!email || !password) {
-            mostrarErrorLogin('Complete correo y contraseña');
-            return;
-        }
-        
-        mostrarLoading(true);
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            let mensaje = error.message;
-            if (mensaje.includes('invalid-credential')) mensaje = 'Correo o contraseña incorrectos';
-            if (mensaje.includes('user-not-found')) mensaje = 'Usuario no encontrado';
-            if (mensaje.includes('wrong-password')) mensaje = 'Contraseña incorrecta';
-            mostrarErrorLogin(`Error: ${mensaje}`);
-        }
-        mostrarLoading(false);
-    };
-    
-    window.cerrarSesion = async () => {
-        mostrarLoading(true);
-        await signOut(auth);
-        mostrarLoading(false);
-    };
-    
-    async function cargarDatosDesdeFirebase() {
-        if (!usuarioActual) return;
-        
-        mostrarLoading(true);
-        try {
-            const productosRef = collection(db, 'usuarios', usuarioActual.uid, 'productos');
-            const productosSnap = await getDocs(productosRef);
-            productos = productosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
-            const movimientosRef = collection(db, 'usuarios', usuarioActual.uid, 'movimientos');
-            const movimientosSnap = await getDocs(query(movimientosRef, orderBy('fecha', 'desc'), limit(100)));
-            movimientos = movimientosSnap.docs.map(doc => doc.data());
-            
-            actualizarTodo();
-        } catch (error) {
-            console.error('Error:', error);
-        }
-        mostrarLoading(false);
-    }
     
     // ==================== REGISTRAR MOVIMIENTO ====================
-    window.registrarMovimiento = async () => {
+    async function registrarMovimiento() {
         const codigo = document.getElementById('codigo').value.trim();
         const nombre = document.getElementById('nombre').value.trim();
         const categoria = document.getElementById('categoria').value;
@@ -1148,60 +878,423 @@
                 document.getElementById('codigo').value = codigoFinal;
             }
             
-            const productoRef = doc(db, 'usuarios', usuarioActual.uid, 'productos', codigoFinal);
             const existente = productos.find(p => p.codigo === codigoFinal);
             
             if (existente) {
                 let nuevoStock = existente.stock;
                 if (tipo === 'entrada') {
                     nuevoStock += cantidad;
-                    mostrarNotificacion(`Stock aumentado: ${existente.nombre} | +${cantidad} = ${nuevoStock}`);
                 } else {
                     if (existente.stock < cantidad) {
                         throw new Error(`Stock insuficiente. Stock actual: ${existente.stock}`);
                     }
                     nuevoStock -= cantidad;
-                    mostrarNotificacion(`Stock reducido: ${existente.nombre} | -${cantidad} = ${nuevoStock}`);
                 }
-                await updateDoc(productoRef, {
-                    nombre, costo, precioVenta: precio, categoria,
-                    stock: nuevoStock, stockMinimo,
-                    actualizado: Timestamp.now()
-                });
+                existente.stock = nuevoStock;
+                existente.nombre = nombre;
+                existente.costo = costo;
+                existente.precioVenta = precio;
+                existente.categoria = categoria;
+                existente.stockMinimo = stockMinimo;
             } else {
                 if (tipo === 'salida') {
                     throw new Error('No se puede registrar salida de producto inexistente');
                 }
-                await setDoc(productoRef, {
+                productos.push({
                     codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
-                    stock: cantidad, stockMinimo,
-                    creado: Timestamp.now()
+                    stock: cantidad, stockMinimo, creado: new Date().toLocaleString()
                 });
-                mostrarNotificacion(`Nuevo producto creado: ${nombre} | Código: ${codigoFinal}`);
             }
             
-            await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), {
-                fecha: Timestamp.now(),
-                tipo, producto: nombre, codigo: codigoFinal, cantidad,
-                valorUnitario: precio, total: precio * cantidad, observacion
+            // Registrar movimiento con nombre del trabajador
+            movimientos.unshift({
+                fecha: new Date().toLocaleString(),
+                trabajador: trabajadorActual.nombre,
+                tipo: tipo === 'entrada' ? 'Entrada' : 'Salida',
+                producto: nombre,
+                codigo: codigoFinal,
+                cantidad: cantidad,
+                total: precio * cantidad,
+                observacion: observacion
             });
             
-            await cargarDatosDesdeFirebase();
+            // Guardar en localStorage
+            localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+            localStorage.setItem('dprofer_movimientos', JSON.stringify(movimientos));
+            
+            actualizarTodo();
             limpiarFormulario();
+            mostrarNotificacion(`Movimiento registrado por ${trabajadorActual.nombre}`);
         } catch (error) {
             alert(`Error: ${error.message}`);
         }
         mostrarLoading(false);
+    }
+    
+    // ==================== MODALES DE ELIMINACIÓN Y EDICIÓN ====================
+    window.mostrarModalEliminar = function(codigo) {
+        if (!esAdministradorActual) {
+            alert('No tienes permisos para eliminar productos. Solo el administrador puede hacerlo.');
+            return;
+        }
+        productoAEliminar = codigo;
+        document.getElementById('deleteModal').style.display = 'block';
+        document.getElementById('deletePassword').value = '';
     };
     
-    // ==================== ACTUALIZAR VISTAS ====================
+    window.cerrarModalEliminar = function() {
+        document.getElementById('deleteModal').style.display = 'none';
+        productoAEliminar = null;
+    };
+    
+    window.confirmarEliminacion = function() {
+        const password = document.getElementById('deletePassword').value;
+        if (password === ADMIN_PASSWORD) {
+            ejecutarEliminacion(productoAEliminar);
+            cerrarModalEliminar();
+        } else {
+            alert('Contraseña incorrecta. No tienes permisos para eliminar productos.');
+            cerrarModalEliminar();
+        }
+    };
+    
+    window.mostrarModalEditar = function(codigo) {
+        if (!esAdministradorActual) {
+            alert('No tienes permisos para editar productos. Solo el administrador puede hacerlo.');
+            return;
+        }
+        productoAEditar = codigo;
+        document.getElementById('editModal').style.display = 'block';
+        document.getElementById('editPassword').value = '';
+    };
+    
+    window.cerrarModalEdicion = function() {
+        document.getElementById('editModal').style.display = 'none';
+        productoAEditar = null;
+    };
+    
+    window.verificarYMostrarEdicion = function() {
+        const password = document.getElementById('editPassword').value;
+        if (password === ADMIN_PASSWORD) {
+            cerrarModalEdicion();
+            const producto = productos.find(p => p.codigo === productoAEditar);
+            if (producto) {
+                document.getElementById('editNombre').value = producto.nombre;
+                document.getElementById('editCategoria').value = producto.categoria || 'Herramientas';
+                document.getElementById('editCosto').value = producto.costo;
+                document.getElementById('editPrecio').value = producto.precioVenta;
+                document.getElementById('editStock').value = producto.stock;
+                document.getElementById('editStockMinimo').value = producto.stockMinimo || 5;
+                document.getElementById('editarProductoModal').style.display = 'block';
+            }
+        } else {
+            alert('Contraseña incorrecta. No tienes permisos para editar productos.');
+            cerrarModalEdicion();
+        }
+    };
+    
+    window.cerrarEditarProductoModal = function() {
+        document.getElementById('editarProductoModal').style.display = 'none';
+        productoAEditar = null;
+    };
+    
+    window.guardarEdicionProducto = function() {
+        if (!productoAEditar) return;
+        
+        const nuevoNombre = document.getElementById('editNombre').value.trim();
+        const nuevaCategoria = document.getElementById('editCategoria').value;
+        const nuevoCosto = parseFloat(document.getElementById('editCosto').value) || 0;
+        const nuevoPrecio = parseFloat(document.getElementById('editPrecio').value) || 0;
+        const nuevoStock = parseInt(document.getElementById('editStock').value) || 0;
+        const nuevoStockMinimo = parseInt(document.getElementById('editStockMinimo').value) || 5;
+        
+        if (!nuevoNombre) {
+            alert('El nombre del producto es obligatorio');
+            return;
+        }
+        
+        const index = productos.findIndex(p => p.codigo === productoAEditar);
+        if (index !== -1) {
+            productos[index].nombre = nuevoNombre;
+            productos[index].categoria = nuevaCategoria;
+            productos[index].costo = nuevoCosto;
+            productos[index].precioVenta = nuevoPrecio;
+            productos[index].stock = nuevoStock;
+            productos[index].stockMinimo = nuevoStockMinimo;
+            localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+            actualizarTodo();
+            cerrarEditarProductoModal();
+            mostrarNotificacion('Producto actualizado correctamente');
+        }
+    };
+    
+    function ejecutarEliminacion(codigo) {
+        if (!codigo) return;
+        productos = productos.filter(p => p.codigo !== codigo);
+        localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+        actualizarTodo();
+        mostrarNotificacion('Producto eliminado correctamente');
+    }
+    
+    // ==================== GESTIÓN DE TRABAJADORES ====================
+    window.abrirRegistrarTrabajador = function() {
+        if (!esAdministradorActual) {
+            alert('No tienes permisos para registrar trabajadores');
+            return;
+        }
+        document.getElementById('nuevoTrabajador').value = '';
+        document.getElementById('nuevoRol').value = 'trabajador';
+        document.getElementById('registrarTrabajadorModal').style.display = 'block';
+    };
+    
+    window.cerrarRegistrarTrabajador = function() {
+        document.getElementById('registrarTrabajadorModal').style.display = 'none';
+    };
+    
+    window.guardarNuevoTrabajador = function() {
+        const nombre = document.getElementById('nuevoTrabajador').value.trim();
+        const rol = document.getElementById('nuevoRol').value;
+        
+        if (!nombre) {
+            alert('Ingrese el nombre del trabajador');
+            return;
+        }
+        
+        const nuevoId = trabajadores.length > 0 ? Math.max(...trabajadores.map(t => t.id)) + 1 : 2;
+        trabajadores.push({
+            id: nuevoId,
+            nombre: nombre,
+            rol: rol,
+            fecha: new Date().toLocaleString()
+        });
+        localStorage.setItem('dprofer_trabajadores', JSON.stringify(trabajadores));
+        actualizarTablaTrabajadores();
+        cerrarRegistrarTrabajador();
+        mostrarNotificacion(`Trabajador ${nombre} registrado como ${rol === 'administrador' ? 'Administrador' : 'Trabajador'}`);
+    };
+    
+    window.eliminarTrabajador = function(id) {
+        if (!esAdministradorActual) {
+            alert('No tienes permisos para eliminar trabajadores');
+            return;
+        }
+        const trabajador = trabajadores.find(t => t.id === id);
+        if (trabajador && trabajador.nombre === 'Administrador') {
+            alert('No se puede eliminar al administrador principal');
+            return;
+        }
+        if (confirm(`¿Eliminar a ${trabajador?.nombre}?`)) {
+            trabajadores = trabajadores.filter(t => t.id !== id);
+            localStorage.setItem('dprofer_trabajadores', JSON.stringify(trabajadores));
+            actualizarTablaTrabajadores();
+            mostrarNotificacion('Trabajador eliminado');
+        }
+    };
+    
+    function actualizarTablaTrabajadores() {
+        const tbody = document.getElementById('tablaTrabajadores');
+        if (!tbody) return;
+        if (trabajadores.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No hay trabajadores registrados</tr>';
+            return;
+        }
+        tbody.innerHTML = trabajadores.map(t => `
+            <tr>
+                <td><strong>${t.nombre}</strong></td>
+                <td><span class="badge ${t.rol === 'administrador' ? 'bg-warning' : 'bg-secondary'}">${t.rol === 'administrador' ? 'Administrador' : 'Trabajador'}</span></td>
+                <td><small>${t.fecha}</small></td>
+                <td>${t.nombre !== 'Administrador' ? `<button class="btn btn-sm btn-danger" onclick="eliminarTrabajador(${t.id})"><i class="fas fa-trash"></i></button>` : ''}</td>
+            </tr>
+        `).join('');
+    }
+    
+    // ==================== RESPALDO ====================
+    window.abrirModalBackup = function() {
+        if (!esAdministradorActual) {
+            alert('No tienes permisos para acceder a respaldos.');
+            return;
+        }
+        document.getElementById('backupModal').style.display = 'block';
+        document.getElementById('backupPassword').value = '';
+    };
+    
+    window.cerrarModalBackup = function() {
+        document.getElementById('backupModal').style.display = 'none';
+    };
+    
+    window.exportarRespaldoCompleto = function() {
+        const password = document.getElementById('backupPassword').value;
+        if (password !== ADMIN_PASSWORD) {
+            alert('Contraseña incorrecta');
+            return;
+        }
+        const respaldo = {
+            fecha: new Date().toLocaleString(),
+            productos: productos,
+            movimientos: movimientos,
+            trabajadores: trabajadores
+        };
+        const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `respaldo_dprofer_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarNotificacion('Respaldo exportado correctamente');
+        cerrarModalBackup();
+    };
+    
+    window.abrirImportarRespaldo = function() {
+        const password = document.getElementById('backupPassword').value;
+        if (password !== ADMIN_PASSWORD) {
+            alert('Contraseña incorrecta');
+            return;
+        }
+        document.getElementById('importFile').click();
+        cerrarModalBackup();
+    };
+    
+    window.importarRespaldoCompleto = function(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const respaldo = JSON.parse(e.target.result);
+                if (respaldo.productos && respaldo.movimientos) {
+                    if (confirm('¿Importar respaldo? Esto reemplazará todos los datos actuales.')) {
+                        productos = respaldo.productos;
+                        movimientos = respaldo.movimientos;
+                        if (respaldo.trabajadores) trabajadores = respaldo.trabajadores;
+                        localStorage.setItem('dprofer_productos', JSON.stringify(productos));
+                        localStorage.setItem('dprofer_movimientos', JSON.stringify(movimientos));
+                        localStorage.setItem('dprofer_trabajadores', JSON.stringify(trabajadores));
+                        actualizarTodo();
+                        actualizarTablaTrabajadores();
+                        mostrarNotificacion('Respaldo importado correctamente');
+                    }
+                } else {
+                    alert('Archivo de respaldo no válido');
+                }
+            } catch (error) {
+                alert('Error al leer el archivo');
+            }
+        };
+        reader.readAsText(file);
+        input.value = '';
+    };
+    
+    // ==================== DASHBOARD ADMIN ====================
+    window.mostrarDashboardAdmin = function() {
+        if (!esAdministradorActual) return;
+        cambiarTab('dashboard');
+        actualizarDashboardAdmin();
+    };
+    
+    function actualizarDashboardAdmin() {
+        document.getElementById('adminTotalProductos').textContent = productos.length;
+        const valorInventario = productos.reduce((s, p) => s + (p.costo * p.stock), 0);
+        const gananciaTotal = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * p.stock), 0);
+        document.getElementById('adminValorInventario').textContent = `$${valorInventario.toFixed(2)}`;
+        document.getElementById('adminGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+        
+        const categorias = [...new Set(productos.map(p => p.categoria || 'General'))];
+        const stockPorCategoria = categorias.map(cat => 
+            productos.filter(p => (p.categoria || 'General') === cat).reduce((sum, p) => sum + p.stock, 0)
+        );
+        
+        if (categoriasChart) categoriasChart.destroy();
+        const ctxCat = document.getElementById('categoriasChart').getContext('2d');
+        categoriasChart = new Chart(ctxCat, {
+            type: 'pie',
+            data: {
+                labels: categorias,
+                datasets: [{
+                    data: stockPorCategoria,
+                    backgroundColor: ['#1e3c72', '#2a5298', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+        
+        const topProductos = [...productos].sort((a, b) => (b.precioVenta * b.stock) - (a.precioVenta * a.stock)).slice(0, 5);
+        if (topProductosChart) topProductosChart.destroy();
+        const ctxTop = document.getElementById('topProductosChart').getContext('2d');
+        topProductosChart = new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: topProductos.map(p => p.nombre),
+                datasets: [{
+                    label: 'Valor en inventario ($)',
+                    data: topProductos.map(p => p.precioVenta * p.stock),
+                    backgroundColor: '#2a5298'
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+    
+    // ==================== PESTAÑAS ====================
+    window.cambiarTab = function(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        if (tab === 'inventario') {
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('tabInventario').classList.add('active');
+        } else if (tab === 'dashboard') {
+            document.getElementById('adminTab').classList.add('active');
+            document.getElementById('tabDashboard').classList.add('active');
+            actualizarDashboardAdmin();
+        } else if (tab === 'trabajadores') {
+            document.getElementById('adminTabTrabajadores').classList.add('active');
+            document.getElementById('tabTrabajadores').classList.add('active');
+            actualizarTablaTrabajadores();
+        }
+    };
+    
+    // ==================== FUNCIONES COMUNES ====================
+    function ordenarProductosAlfabeticamente(lista) {
+        return [...lista].sort((a, b) => {
+            const nombreA = (a.nombre || '').toLowerCase();
+            const nombreB = (b.nombre || '').toLowerCase();
+            if (nombreA < nombreB) return -1;
+            if (nombreA > nombreB) return 1;
+            return 0;
+        });
+    }
+    
+    function mostrarLoading(show) {
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = show ? 'flex' : 'none';
+    }
+    
+    function mostrarErrorLogin(msg) {
+        const errorDiv = document.getElementById('loginError');
+        if (errorDiv) {
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.innerHTML = msg;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+    }
+    
+    function mostrarNotificacion(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success';
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:1000;background:#28a745;color:white;border-radius:10px;padding:12px 20px;';
+        toast.innerHTML = `✅ ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
     function actualizarTodo() {
         const productosOrdenados = ordenarProductosAlfabeticamente(productos);
         actualizarEstadisticas();
         actualizarAlertas();
         actualizarTabla(productosOrdenados);
         actualizarMovimientos();
-        if (usuarioEsDesarrollador) actualizarDashboardAdmin();
     }
     
     function actualizarEstadisticas() {
@@ -1227,7 +1320,7 @@
     function actualizarTabla(lista) {
         const tbody = document.getElementById('tablaInventario');
         if (!tbody) return;
-        if (!lista || lista.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay productos registrados</td></tr>'; return; }
+        if (!lista || lista.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay productos registrados</tr>'; return; }
         
         tbody.innerHTML = lista.map((p, index) => {
             const rentabilidad = (p.precioVenta || 0) - (p.costo || 0);
@@ -1243,8 +1336,8 @@
                     <td style="color: ${rentabilidad >= 0 ? '#28a745' : '#dc3545'}">$${rentabilidad.toFixed(2)}</td>
                     <td>${estado}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning" onclick="mostrarModalEditar('${p.codigo}')" style="margin-right: 5px;"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-danger" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button>
+                        ${esAdministradorActual ? `<button class="btn btn-sm btn-warning" onclick="mostrarModalEditar('${p.codigo}')" style="margin-right: 5px;"><i class="fas fa-edit"></i></button>` : ''}
+                        ${esAdministradorActual ? `<button class="btn btn-sm btn-danger" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button>` : ''}
                     </td>
                 </tr>
             `;
@@ -1254,23 +1347,19 @@
     function actualizarMovimientos() {
         const tbody = document.getElementById('tablaMovimientos');
         if (!tbody) return;
-        if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay movimientos registrados</td></tr>'; return; }
-        tbody.innerHTML = movimientos.slice(0, 30).map(m => {
-            const fecha = m.fecha ? new Date(m.fecha.seconds * 1000).toLocaleString() : '';
-            const tipoTexto = m.tipo === 'entrada' ? 'Entrada' : 'Salida';
-            const tipoColor = m.tipo === 'entrada' ? '#28a745' : '#dc3545';
-            return `
-                <tr>
-                    <td><small>${fecha}</small></td>
-                    <td><span style="background:${tipoColor}; color:white; padding:3px 8px; border-radius:15px;">${tipoTexto}</span></td>
-                    <td><code>${m.codigo || ''}</code></td>
-                    <td>${m.producto || ''}</td>
-                    <td>${m.cantidad || 0}</td>
-                    <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
-                    <td><small>${m.observacion || ''}</small></td>
-                </tr>
-            `;
-        }).join('');
+        if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center">No hay movimientos registrados</tr>'; return; }
+        tbody.innerHTML = movimientos.slice(0, 50).map(m => `
+            <tr>
+                <td><small>${m.fecha || ''}</small></td>
+                <td><strong>${m.trabajador || 'Sistema'}</strong></td>
+                <td><span style="background:${m.tipo === 'Entrada' ? '#28a745' : '#dc3545'}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo || ''}</span></td>
+                <td><code>${m.codigo || ''}</code></td>
+                <td>${m.producto || ''}</td>
+                <td>${m.cantidad || 0}</td>
+                <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
+                <td><small>${m.observacion || ''}</small></td>
+            </tr>
+        `).join('');
     }
     
     // ==================== EXPORTAR A EXCEL ====================
@@ -1284,7 +1373,7 @@
         const datos = [];
         datos.push(['INFORME DE INVENTARIO DPROFER']);
         datos.push(['Fecha de exportación:', new Date().toLocaleString()]);
-        datos.push(['Usuario:', usuarioActual?.email || '']);
+        datos.push(['Usuario:', usuarioActual || '']);
         datos.push([]);
         datos.push(['#', 'Código', 'Producto', 'Categoría', 'Stock', 'Precio Venta', 'Costo', 'Rentabilidad Unidad', 'Valor Total']);
         
@@ -1387,31 +1476,7 @@
     if (cantidadInput) cantidadInput.addEventListener('input', calcularAutomatico);
     calcularAutomatico();
     
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            usuarioActual = user;
-            document.getElementById('userDisplay').innerHTML = user.email;
-            document.getElementById('loginContainer').classList.add('hidden');
-            document.getElementById('appContainer').classList.remove('hidden');
-            
-            // Verificar si es desarrollador (puedes definir un email específico)
-            const emailsDesarrollador = ['dproferventas@gmail.com', 'tuemail@gmail.com'];
-            if (emailsDesarrollador.includes(user.email)) {
-                usuarioEsDesarrollador = true;
-                document.getElementById('adminButtons').style.display = 'block';
-                document.getElementById('adminTab').style.display = 'block';
-            } else {
-                usuarioEsDesarrollador = false;
-                document.getElementById('adminButtons').style.display = 'none';
-                document.getElementById('adminTab').style.display = 'none';
-            }
-            
-            await cargarDatosDesdeFirebase();
-        } else {
-            document.getElementById('loginContainer').classList.remove('hidden');
-            document.getElementById('appContainer').classList.add('hidden');
-        }
-    });
+    actualizarTablaTrabajadores();
 </script>
 </body>
 </html>
