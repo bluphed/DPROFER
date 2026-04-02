@@ -253,7 +253,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* Splash screen */
         .splash {
             position: fixed;
             top: 0;
@@ -436,7 +435,7 @@
         </div>
     </div>
 
-    <!-- Pantalla de Login de Empleado -->
+    <!-- Pantalla de Login de Empleado (se omitirá para el administrador) -->
     <div id="empleadoLoginContainer" class="hidden">
         <div class="login-box">
             <div class="card">
@@ -760,7 +759,7 @@
         measurementId: "G-TFD1EGQ829"
     };
     
-    // Credenciales de la empresa (usando el correo proporcionado)
+    // Credenciales de la empresa
     const EMPRESA = {
         email: "dproferventas@gmail.com",
         password: "//Dprofer*"
@@ -784,7 +783,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     
-    // Ocultar splash después de cargar
     window.addEventListener('load', () => {
         setTimeout(() => {
             const splash = document.getElementById('splash');
@@ -793,15 +791,91 @@
     });
     
     // ==================== LOGIN DE EMPRESA ====================
-    window.iniciarSesionEmpresa = function() {
+    window.iniciarSesionEmpresa = async function() {
         const email = document.getElementById('empresaEmail').value.trim();
         const password = document.getElementById('empresaPassword').value;
         
         if (email === EMPRESA.email && password === EMPRESA.password) {
             empresaActual = email;
-            document.getElementById('empresaLoginContainer').classList.add('hidden');
-            document.getElementById('empleadoLoginContainer').classList.remove('hidden');
-            mostrarErrorEmpresa('', 'success');
+            mostrarLoading(true);
+            
+            try {
+                // Intentar iniciar sesión automáticamente como administrador
+                await signInWithEmailAndPassword(auth, EMPRESA.email, EMPRESA.password);
+                
+                // Verificar si el admin existe en Firestore
+                const user = auth.currentUser;
+                const empleadoRef = doc(db, 'empresas', empresaActual, 'empleados', user.uid);
+                const empleadoDoc = await getDocs(collection(db, 'empresas', empresaActual, 'empleados'));
+                let existe = false;
+                empleadoDoc.forEach(doc => {
+                    if (doc.data().uid === user.uid) existe = true;
+                });
+                
+                if (!existe) {
+                    await setDoc(empleadoRef, {
+                        email: EMPRESA.email,
+                        rol: 'administrador',
+                        fechaRegistro: Timestamp.now(),
+                        uid: user.uid
+                    });
+                }
+                
+                empleadoActual = {
+                    uid: user.uid,
+                    email: EMPRESA.email,
+                    rol: 'administrador'
+                };
+                esAdmin = true;
+                
+                await cargarDatosEmpresa();
+                
+                document.getElementById('empresaLoginContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('userDisplay').innerHTML = `${EMPRESA.email} (Administrador)`;
+                
+                document.getElementById('adminPanel').classList.remove('admin-only');
+                document.getElementById('adminTab').classList.remove('admin-only');
+                document.getElementById('adminTabEmpleados').classList.remove('admin-only');
+                document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('admin-only'));
+                cargarListaEmpleados();
+                
+            } catch (error) {
+                // Si no existe la cuenta, crearla automáticamente
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, EMPRESA.email, EMPRESA.password);
+                    const empleadoRef = doc(db, 'empresas', empresaActual, 'empleados', userCredential.user.uid);
+                    await setDoc(empleadoRef, {
+                        email: EMPRESA.email,
+                        rol: 'administrador',
+                        fechaRegistro: Timestamp.now(),
+                        uid: userCredential.user.uid
+                    });
+                    
+                    empleadoActual = {
+                        uid: userCredential.user.uid,
+                        email: EMPRESA.email,
+                        rol: 'administrador'
+                    };
+                    esAdmin = true;
+                    
+                    await cargarDatosEmpresa();
+                    
+                    document.getElementById('empresaLoginContainer').classList.add('hidden');
+                    document.getElementById('appContainer').classList.remove('hidden');
+                    document.getElementById('userDisplay').innerHTML = `${EMPRESA.email} (Administrador)`;
+                    
+                    document.getElementById('adminPanel').classList.remove('admin-only');
+                    document.getElementById('adminTab').classList.remove('admin-only');
+                    document.getElementById('adminTabEmpleados').classList.remove('admin-only');
+                    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('admin-only'));
+                    cargarListaEmpleados();
+                    
+                } catch (createError) {
+                    mostrarErrorEmpresa('Error al crear cuenta de administrador: ' + createError.message);
+                }
+            }
+            mostrarLoading(false);
         } else {
             mostrarErrorEmpresa('Correo o contraseña de empresa incorrectos');
         }
