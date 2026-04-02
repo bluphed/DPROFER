@@ -421,8 +421,8 @@
                     </div>
                     <div id="empresaError" class="alert" style="display: none;"></div>
                     <div class="form-group">
-                        <label><i class="fas fa-building"></i> Código de empresa</label>
-                        <input type="text" id="empresaCodigo" placeholder="Código de empresa (ej: DPROFER01)">
+                        <label><i class="fas fa-envelope"></i> Correo de la empresa</label>
+                        <input type="email" id="empresaEmail" placeholder="dproferventas@gmail.com">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-lock"></i> Contraseña de empresa</label>
@@ -760,10 +760,10 @@
         measurementId: "G-TFD1EGQ829"
     };
     
-    // Credenciales de la empresa (única para todos)
+    // Credenciales de la empresa (usando el correo proporcionado)
     const EMPRESA = {
-        codigo: "DPROFER01",
-        password: "empresa123"
+        email: "dproferventas@gmail.com",
+        password: "//Dprofer*"
     };
     
     const ADMIN_PASSWORD = "dprofer2024";
@@ -774,6 +774,7 @@
     let movimientos = [];
     let empleados = [];
     let productoAEditar = null;
+    let productoAEliminar = null;
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -793,16 +794,16 @@
     
     // ==================== LOGIN DE EMPRESA ====================
     window.iniciarSesionEmpresa = function() {
-        const codigo = document.getElementById('empresaCodigo').value.trim();
+        const email = document.getElementById('empresaEmail').value.trim();
         const password = document.getElementById('empresaPassword').value;
         
-        if (codigo === EMPRESA.codigo && password === EMPRESA.password) {
-            empresaActual = codigo;
+        if (email === EMPRESA.email && password === EMPRESA.password) {
+            empresaActual = email;
             document.getElementById('empresaLoginContainer').classList.add('hidden');
             document.getElementById('empleadoLoginContainer').classList.remove('hidden');
             mostrarErrorEmpresa('', 'success');
         } else {
-            mostrarErrorEmpresa('Código o contraseña de empresa incorrectos');
+            mostrarErrorEmpresa('Correo o contraseña de empresa incorrectos');
         }
     };
     
@@ -848,14 +849,17 @@
         
         mostrarLoading(true);
         try {
-            // Crear usuario en Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const uid = userCredential.user.uid;
             
-            // Guardar en Firestore como empleado de la empresa
+            let rol = 'empleado';
+            if (email === EMPRESA.email) {
+                rol = 'administrador';
+            }
+            
             await setDoc(doc(db, 'empresas', empresaActual, 'empleados', uid), {
                 email: email,
-                rol: 'empleado',
+                rol: rol,
                 fechaRegistro: Timestamp.now(),
                 uid: uid
             });
@@ -901,14 +905,13 @@
         
         mostrarLoading(true);
         try {
-            // Iniciar sesión en Firebase Auth
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const uid = userCredential.user.uid;
             
-            // Verificar si el empleado pertenece a la empresa
-            const empleadoDoc = await getDocs(collection(db, 'empresas', empresaActual, 'empleados'));
+            const empleadosRef = collection(db, 'empresas', empresaActual, 'empleados');
+            const empleadosSnap = await getDocs(empleadosRef);
             let empleadoData = null;
-            empleadoDoc.forEach(doc => {
+            empleadosSnap.forEach(doc => {
                 if (doc.data().uid === uid) {
                     empleadoData = doc.data();
                 }
@@ -925,14 +928,12 @@
             };
             esAdmin = empleadoData.rol === 'administrador';
             
-            // Cargar datos de la empresa
             await cargarDatosEmpresa();
             
             document.getElementById('empleadoLoginContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
             document.getElementById('userDisplay').innerHTML = `${email} ${esAdmin ? '(Administrador)' : '(Empleado)'}`;
             
-            // Mostrar/ocultar elementos de admin
             if (esAdmin) {
                 document.getElementById('adminPanel').classList.remove('admin-only');
                 document.getElementById('adminTab').classList.remove('admin-only');
@@ -958,12 +959,10 @@
     async function cargarDatosEmpresa() {
         mostrarLoading(true);
         try {
-            // Cargar productos
             const productosRef = collection(db, 'empresas', empresaActual, 'productos');
             const productosSnap = await getDocs(productosRef);
             productos = productosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            // Cargar movimientos
             const movimientosRef = collection(db, 'empresas', empresaActual, 'movimientos');
             const movimientosSnap = await getDocs(query(movimientosRef, orderBy('fecha', 'desc'), limit(100)));
             movimientos = movimientosSnap.docs.map(doc => doc.data());
@@ -999,7 +998,7 @@
                 <td><strong>${e.email}</strong></td>
                 <td><span class="badge ${e.rol === 'administrador' ? 'bg-warning' : 'bg-secondary'}">${e.rol === 'administrador' ? 'Administrador' : 'Empleado'}</span></td>
                 <td><small>${e.fechaRegistro ? new Date(e.fechaRegistro.seconds * 1000).toLocaleString() : ''}</small></td>
-                <td>${e.email !== empleadoActual.email ? `<button class="btn btn-sm btn-danger" onclick="eliminarEmpleado('${e.id}')"><i class="fas fa-trash"></i></button>` : ''}</td>
+                <td>${e.email !== empleadoActual?.email ? `<button class="btn btn-sm btn-danger" onclick="eliminarEmpleado('${e.id}')"><i class="fas fa-trash"></i></button>` : ''}</td>
             </tr>
         `).join('');
     }
@@ -1309,8 +1308,6 @@
         document.getElementById('deleteModal').style.display = 'block';
         document.getElementById('deletePassword').value = '';
     };
-    
-    let productoAEliminar = null;
     
     window.cerrarModalEliminar = function() {
         document.getElementById('deleteModal').style.display = 'none';
@@ -1697,7 +1694,7 @@
         document.getElementById('empleadoLoginContainer').classList.add('hidden');
         document.getElementById('registroEmpleadoContainer').classList.add('hidden');
         document.getElementById('empresaLoginContainer').classList.remove('hidden');
-        document.getElementById('empresaCodigo').value = '';
+        document.getElementById('empresaEmail').value = '';
         document.getElementById('empresaPassword').value = '';
         mostrarLoading(false);
     };
