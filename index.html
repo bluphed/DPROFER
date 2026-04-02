@@ -4,18 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1e3c72">
-    
-    <!-- Favicon para la pestaña del navegador -->
-    <link rel="icon" type="image/png" sizes="192x192" href="imagenes/icon-192.png">
-    <link rel="apple-touch-icon" href="imagenes/icon-192.png">
-    <link rel="manifest" href="manifest.json">
-    
-    <title>Dprofer Cloud - Sistema de Inventario</title>
-    
+    <title>Dprofer Cloud - Inventario Automático</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -37,32 +30,6 @@
         }
         
         .container { max-width: 1400px; margin: 0 auto; }
-        
-        /* Logo en el login */
-        .logo-login {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .logo-login img {
-            width: 100px;
-            height: 100px;
-            border-radius: 25px;
-            object-fit: cover;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Logo en el header */
-        .logo-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logo-header img {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            object-fit: cover;
-        }
         
         .stats-grid {
             display: grid;
@@ -102,6 +69,10 @@
             padding: 15px 20px;
             font-weight: bold;
             border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
         
         .card-header i { margin-right: 8px; }
@@ -136,6 +107,7 @@
         .btn-danger { background: #dc3545; color: var(--blanco); }
         .btn-warning { background: #ffc107; color: var(--gris-oscuro); }
         .btn-secondary { background: var(--gris-medio); color: var(--blanco); }
+        .btn-dark { background: var(--azul-naval); color: var(--blanco); }
         
         .table-container { overflow-x: auto; max-height: 450px; overflow-y: auto; border-radius: 12px; }
         table { width: 100%; border-collapse: collapse; background: var(--blanco); }
@@ -145,6 +117,7 @@
         
         .badge-stock-bajo { background: #dc3545; color: var(--blanco); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
         .badge-stock-normal { background: #28a745; color: var(--blanco); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+        .badge-admin { background: #ffc107; color: #1e3c72; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
         
         .user-header {
             background: linear-gradient(135deg, var(--azul-naval) 0%, var(--azul-naval-claro) 100%);
@@ -168,6 +141,7 @@
         .alert-warning { background: #fff3cd; border-left: 4px solid #ffc107; color: #856404; }
         .alert-success { background: #d4edda; border-left: 4px solid #28a745; color: #155724; }
         .alert-danger { background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; }
+        .alert-info { background: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460; }
         
         .hidden { display: none; }
         .text-center { text-align: center; }
@@ -176,6 +150,7 @@
         
         .row { display: flex; gap: 15px; flex-wrap: wrap; }
         .col-6 { flex: 1; min-width: 45%; }
+        .col-4 { flex: 1; min-width: 30%; }
         
         .codigo-auto {
             background: var(--gris-claro);
@@ -208,11 +183,31 @@
         .autocomplete-item strong { color: var(--azul-naval); }
         .autocomplete-item small { color: var(--gris-medio); }
         
+        /* Pestañas */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--gris-claro);
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s;
+        }
+        .tab:hover { background: var(--gris-claro); }
+        .tab.active {
+            background: var(--azul-naval);
+            color: var(--blanco);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .user-header { flex-direction: column; gap: 15px; text-align: center; }
-            .col-6 { min-width: 100%; }
-            .logo-header { justify-content: center; }
+            .col-6, .col-4 { min-width: 100%; }
         }
         
         .loading {
@@ -241,7 +236,7 @@
         ::-webkit-scrollbar-track { background: var(--gris-claro); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: var(--azul-naval); border-radius: 10px; }
         
-        /* Modal de eliminación */
+        /* Modales */
         .modal {
             display: none;
             position: fixed;
@@ -254,15 +249,28 @@
         }
         .modal-content {
             background-color: var(--blanco);
-            margin: 15% auto;
-            padding: 20px;
+            margin: 10% auto;
+            padding: 25px;
             border-radius: 20px;
-            width: 350px;
+            width: 450px;
+            max-width: 90%;
             text-align: center;
         }
-        .modal input {
+        .modal input, .modal select {
             width: 100%;
             margin: 10px 0;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        /* Gráfico */
+        canvas {
+            max-height: 300px;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -277,10 +285,87 @@
         <h3>Verificación de seguridad</h3>
         <p>Ingresa la contraseña de desarrollador para eliminar este producto</p>
         <input type="password" id="deletePassword" placeholder="Contraseña de desarrollador">
-        <button class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
-        <button class="btn btn-secondary" onclick="cerrarModalEliminar()">Cancelar</button>
+        <div class="modal-buttons">
+            <button class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
+            <button class="btn btn-secondary" onclick="cerrarModalEliminar()">Cancelar</button>
+        </div>
     </div>
 </div>
+
+<!-- Modal para editar producto -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-edit" style="font-size: 50px; color: var(--azul-naval);"></i>
+        <h3>Editar Producto</h3>
+        <p>Ingresa la contraseña de desarrollador para editar</p>
+        <input type="password" id="editPassword" placeholder="Contraseña de desarrollador">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="verificarYMostrarEdicion()">Verificar</button>
+            <button class="btn btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de edición de producto -->
+<div id="editarProductoModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-pen" style="font-size: 50px; color: var(--azul-naval);"></i>
+        <h3>Editar Producto</h3>
+        <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="editNombre" placeholder="Nombre del producto">
+        </div>
+        <div class="form-group">
+            <label>Categoría</label>
+            <select id="editCategoria">
+                <option>Herramientas</option><option>Pinturas</option><option>Eléctrico</option>
+                <option>Ferretería</option><option>Plomería</option><option>Jardinería</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <label>Costo ($)</label>
+                <input type="number" id="editCosto" step="0.01">
+            </div>
+            <div class="col-6">
+                <label>Precio Venta ($)</label>
+                <input type="number" id="editPrecio" step="0.01">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <label>Stock</label>
+                <input type="number" id="editStock">
+            </div>
+            <div class="col-6">
+                <label>Stock Mínimo</label>
+                <input type="number" id="editStockMinimo">
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-success" onclick="guardarEdicionProducto()">Guardar Cambios</button>
+            <button class="btn btn-secondary" onclick="cerrarEditarProductoModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de respaldo -->
+<div id="backupModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-database" style="font-size: 50px; color: var(--azul-naval);"></i>
+        <h3>Respaldo de Datos</h3>
+        <p>Ingresa la contraseña de desarrollador para exportar/importar datos</p>
+        <input type="password" id="backupPassword" placeholder="Contraseña de desarrollador">
+        <div class="modal-buttons">
+            <button class="btn btn-primary" onclick="exportarRespaldoCompleto()">Exportar Respaldo</button>
+            <button class="btn btn-warning" onclick="abrirImportarRespaldo()">Importar Respaldo</button>
+            <button class="btn btn-secondary" onclick="cerrarModalBackup()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Input oculto para importar archivo -->
+<input type="file" id="importFile" style="display: none;" accept=".json" onchange="importarRespaldoCompleto(this)">
 
 <div class="container">
     <div id="loginContainer">
@@ -291,9 +376,8 @@
                     <p style="font-size: 14px; margin-top: 5px;">Códigos únicos globales</p>
                 </div>
                 <div class="card-body">
-                    <!-- Logo en el login -->
-                    <div class="logo-login">
-                        <img src="imagenes/logo-login.png" alt="Dprofer Logo" onerror="this.style.display='none'">
+                    <div class="logo-login text-center mb-3">
+                        <img src="imagenes/logo-login.png" alt="Dprofer Logo" style="width: 100px; border-radius: 25px;" onerror="this.style.display='none'">
                     </div>
                     <div id="loginError" class="alert" style="display: none;"></div>
                     <div class="form-group">
@@ -317,8 +401,8 @@
 
     <div id="appContainer" class="hidden">
         <div class="user-header">
-            <div class="logo-header">
-                <img src="imagenes/logo-header.png" alt="Dprofer Logo" onerror="this.style.display='none'">
+            <div class="logo-header" style="display: flex; align-items: center; gap: 15px;">
+                <img src="imagenes/logo-header.png" alt="Dprofer Logo" style="width: 50px; border-radius: 12px;" onerror="this.style.display='none'">
                 <div>
                     <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
                     <p>Código único global | Busca productos existentes | Datos en la nube</p>
@@ -328,6 +412,22 @@
                 <span><i class="fas fa-user-circle"></i> <strong id="userDisplay"></strong></span>
                 <button class="btn btn-danger" onclick="cerrarSesion()" style="margin-left: 15px;">
                     <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </div>
+
+        <!-- Botones de administración (solo visibles para desarrollador) -->
+        <div id="adminButtons" class="alert alert-info" style="display: none;">
+            <i class="fas fa-crown"></i> <strong>Panel de Administración</strong>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                <button class="btn btn-dark" onclick="abrirModalBackup()">
+                    <i class="fas fa-database"></i> Respaldo de Datos
+                </button>
+                <button class="btn btn-warning" onclick="mostrarDashboardAdmin()">
+                    <i class="fas fa-chart-line"></i> Dashboard Ejecutivo
+                </button>
+                <button class="btn btn-secondary" onclick="exportarExcelProfesional()">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
                 </button>
             </div>
         </div>
@@ -436,31 +536,82 @@
                     <button class="btn btn-secondary" onclick="limpiarFormulario()">
                         <i class="fas fa-eraser"></i> Limpiar
                     </button>
-                    <button class="btn btn-success" onclick="exportarExcelProfesional()">
-                        <i class="fas fa-file-excel"></i> Exportar a Excel
-                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-box"></i> Inventario Actual (Orden Alfabético)
-            </div>
-            <div class="card-body">
-                <div class="form-group">
-                    <input type="text" id="buscador" placeholder="Buscar por código o nombre..." onkeyup="filtrarProductos()">
+        <!-- Pestañas para Inventario y Dashboard Admin -->
+        <div class="tabs">
+            <div class="tab active" onclick="cambiarTab('inventario')">📋 Inventario</div>
+            <div id="adminTab" class="tab" style="display: none;" onclick="cambiarTab('dashboard')">📊 Dashboard Admin</div>
+        </div>
+
+        <!-- Contenido Inventario -->
+        <div id="tabInventario" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-box"></i> Inventario Actual (Orden Alfabético)
                 </div>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr><th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Rentabilidad</th><th>Estado</th><th>Acciones</th></thead>
-                        <tbody id="tablaInventario"></tbody>
-                    </table>
+                <div class="card-body">
+                    <div class="form-group">
+                        <input type="text" id="buscador" placeholder="Buscar por código o nombre..." onkeyup="filtrarProductos()">
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr><th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Rentabilidad</th><th>Estado</th><th>Acciones</th></thead>
+                            <tbody id="tablaInventario"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Contenido Dashboard Admin -->
+        <div id="tabDashboard" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i> Dashboard Ejecutivo
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <i class="fas fa-chart-simple"></i>
+                                <h3 id="adminTotalProductos">0</h3>
+                                <p>Total Productos</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <i class="fas fa-dollar-sign"></i>
+                                <h3 id="adminValorInventario">$0</h3>
+                                <p>Valor Inventario</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <i class="fas fa-chart-line"></i>
+                                <h3 id="adminGananciaTotal">$0</h3>
+                                <p>Ganancia Potencial</p>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="categoriasChart"></canvas>
+                    <canvas id="topProductosChart"></canvas>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary" onclick="exportarExcelProfesional()">
+                            <i class="fas fa-file-excel"></i> Exportar a Excel
+                        </button>
+                        <button class="btn btn-dark" onclick="abrirModalBackup()">
+                            <i class="fas fa-database"></i> Respaldo de Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Movimientos -->
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-history"></i> Historial de Movimientos
@@ -479,7 +630,7 @@
 </div>
 
 <script type="module">
-    // ==================== CONFIGURACIÓN DE FIREBASE ====================
+    // ==================== CONFIGURACIÓN ====================
     const firebaseConfig = {
         apiKey: "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",
         authDomain: "dprofer-7bea9.firebaseapp.com",
@@ -492,6 +643,10 @@
     
     const DESARROLLADOR_PASSWORD = "dprofer2024";
     let productoAEliminar = null;
+    let productoAEditar = null;
+    let usuarioEsDesarrollador = false;
+    let categoriasChart = null;
+    let topProductosChart = null;
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -581,7 +736,7 @@
         document.getElementById('codigo').value = codigoGenerado;
     };
     
-    // ==================== MODAL DE ELIMINACIÓN ====================
+    // ==================== MODALES DE ELIMINACIÓN Y EDICIÓN ====================
     window.mostrarModalEliminar = function(codigo) {
         productoAEliminar = codigo;
         document.getElementById('deleteModal').style.display = 'block';
@@ -604,6 +759,79 @@
         }
     };
     
+    window.mostrarModalEditar = function(codigo) {
+        productoAEditar = codigo;
+        document.getElementById('editModal').style.display = 'block';
+        document.getElementById('editPassword').value = '';
+    };
+    
+    window.cerrarModalEdicion = function() {
+        document.getElementById('editModal').style.display = 'none';
+        productoAEditar = null;
+    };
+    
+    window.verificarYMostrarEdicion = function() {
+        const password = document.getElementById('editPassword').value;
+        if (password === DESARROLLADOR_PASSWORD) {
+            cerrarModalEdicion();
+            const producto = productos.find(p => p.codigo === productoAEditar);
+            if (producto) {
+                document.getElementById('editNombre').value = producto.nombre;
+                document.getElementById('editCategoria').value = producto.categoria || 'Herramientas';
+                document.getElementById('editCosto').value = producto.costo;
+                document.getElementById('editPrecio').value = producto.precioVenta;
+                document.getElementById('editStock').value = producto.stock;
+                document.getElementById('editStockMinimo').value = producto.stockMinimo || 5;
+                document.getElementById('editarProductoModal').style.display = 'block';
+            }
+        } else {
+            alert('Contraseña incorrecta. No tienes permisos para editar productos.');
+            cerrarModalEdicion();
+        }
+    };
+    
+    window.cerrarEditarProductoModal = function() {
+        document.getElementById('editarProductoModal').style.display = 'none';
+        productoAEditar = null;
+    };
+    
+    window.guardarEdicionProducto = async function() {
+        if (!productoAEditar) return;
+        
+        const nuevoNombre = document.getElementById('editNombre').value.trim();
+        const nuevaCategoria = document.getElementById('editCategoria').value;
+        const nuevoCosto = parseFloat(document.getElementById('editCosto').value) || 0;
+        const nuevoPrecio = parseFloat(document.getElementById('editPrecio').value) || 0;
+        const nuevoStock = parseInt(document.getElementById('editStock').value) || 0;
+        const nuevoStockMinimo = parseInt(document.getElementById('editStockMinimo').value) || 5;
+        
+        if (!nuevoNombre) {
+            alert('El nombre del producto es obligatorio');
+            return;
+        }
+        
+        mostrarLoading(true);
+        try {
+            const productoRef = doc(db, 'usuarios', usuarioActual.uid, 'productos', productoAEditar);
+            await updateDoc(productoRef, {
+                nombre: nuevoNombre,
+                categoria: nuevaCategoria,
+                costo: nuevoCosto,
+                precioVenta: nuevoPrecio,
+                stock: nuevoStock,
+                stockMinimo: nuevoStockMinimo,
+                actualizado: Timestamp.now()
+            });
+            
+            await cargarDatosDesdeFirebase();
+            cerrarEditarProductoModal();
+            mostrarNotificacion('Producto actualizado correctamente');
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+        mostrarLoading(false);
+    };
+    
     async function ejecutarEliminacion(codigo) {
         if (!codigo) return;
         mostrarLoading(true);
@@ -617,57 +845,165 @@
         mostrarLoading(false);
     }
     
-    // ==================== EXPORTAR A EXCEL ====================
-    window.exportarExcelProfesional = function() {
-        if (!productos || productos.length === 0) {
-            alert('No hay productos para exportar');
+    // ==================== RESPALDO DE DATOS ====================
+    window.abrirModalBackup = function() {
+        document.getElementById('backupModal').style.display = 'block';
+        document.getElementById('backupPassword').value = '';
+    };
+    
+    window.cerrarModalBackup = function() {
+        document.getElementById('backupModal').style.display = 'none';
+    };
+    
+    window.exportarRespaldoCompleto = function() {
+        const password = document.getElementById('backupPassword').value;
+        if (password !== DESARROLLADOR_PASSWORD) {
+            alert('Contraseña incorrecta. Solo el desarrollador puede exportar respaldos.');
             return;
         }
         
-        const productosOrdenados = ordenarProductosAlfabeticamente(productos);
-        const datos = [];
-        datos.push(['INFORME DE INVENTARIO DPROFER']);
-        datos.push(['Fecha de exportación:', new Date().toLocaleString()]);
-        datos.push(['Usuario:', usuarioActual?.email || '']);
-        datos.push([]);
-        datos.push(['#', 'Código', 'Producto', 'Categoría', 'Stock', 'Precio Venta', 'Costo', 'Rentabilidad Unidad', 'Valor Total']);
+        const respaldo = {
+            fecha: new Date().toLocaleString(),
+            usuario: usuarioActual?.email,
+            productos: productos,
+            movimientos: movimientos
+        };
         
-        let gananciaTotalGeneral = 0;
-        let valorTotalInventario = 0;
-        
-        productosOrdenados.forEach((p, idx) => {
-            const rentabilidad = (p.precioVenta || 0) - (p.costo || 0);
-            const valorTotal = (p.precioVenta || 0) * (p.stock || 0);
-            gananciaTotalGeneral += rentabilidad * (p.stock || 0);
-            valorTotalInventario += (p.costo || 0) * (p.stock || 0);
-            datos.push([
-                idx + 1,
-                p.codigo || '',
-                p.nombre || '',
-                p.categoria || 'General',
-                p.stock || 0,
-                `$${(p.precioVenta || 0).toFixed(2)}`,
-                `$${(p.costo || 0).toFixed(2)}`,
-                `$${rentabilidad.toFixed(2)}`,
-                `$${valorTotal.toFixed(2)}`
-            ]);
-        });
-        
-        datos.push([]);
-        datos.push(['RESUMEN FINAL', '', '', '', '', '', '', '', '']);
-        datos.push(['Total de productos:', productos.length]);
-        datos.push(['Productos con stock bajo:', productos.filter(p => p.stock <= (p.stockMinimo || 5)).length]);
-        datos.push(['Valor total del inventario:', `$${valorTotalInventario.toFixed(2)}`]);
-        datos.push(['Ganancia potencial total:', `$${gananciaTotalGeneral.toFixed(2)}`]);
-        
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(datos);
-        ws['!cols'] = [{wch:5},{wch:12},{wch:25},{wch:15},{wch:8},{wch:12},{wch:12},{wch:15},{wch:12}];
-        XLSX.utils.book_append_sheet(wb, ws, 'Inventario Dprofer');
-        XLSX.writeFile(wb, `Inventario_Dprofer_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
-        mostrarNotificacion('Reporte exportado a Excel correctamente');
+        const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `respaldo_dprofer_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarNotificacion('Respaldo exportado correctamente');
+        cerrarModalBackup();
     };
     
+    window.abrirImportarRespaldo = function() {
+        const password = document.getElementById('backupPassword').value;
+        if (password !== DESARROLLADOR_PASSWORD) {
+            alert('Contraseña incorrecta. Solo el desarrollador puede importar respaldos.');
+            return;
+        }
+        document.getElementById('importFile').click();
+        cerrarModalBackup();
+    };
+    
+    window.importarRespaldoCompleto = async function(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const respaldo = JSON.parse(e.target.result);
+                if (respaldo.productos && respaldo.movimientos) {
+                    if (confirm('¿Importar respaldo? Esto reemplazará todos los datos actuales.')) {
+                        mostrarLoading(true);
+                        // Eliminar datos actuales
+                        const productosRef = collection(db, 'usuarios', usuarioActual.uid, 'productos');
+                        const productosSnap = await getDocs(productosRef);
+                        for (const docSnap of productosSnap.docs) {
+                            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', docSnap.id));
+                        }
+                        
+                        const movimientosRef = collection(db, 'usuarios', usuarioActual.uid, 'movimientos');
+                        const movimientosSnap = await getDocs(movimientosRef);
+                        for (const docSnap of movimientosSnap.docs) {
+                            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'movimientos', docSnap.id));
+                        }
+                        
+                        // Importar nuevos datos
+                        for (const p of respaldo.productos) {
+                            await setDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', p.codigo), p);
+                        }
+                        for (const m of respaldo.movimientos) {
+                            await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), m);
+                        }
+                        
+                        await cargarDatosDesdeFirebase();
+                        mostrarNotificacion('Respaldo importado correctamente');
+                        mostrarLoading(false);
+                    }
+                } else {
+                    alert('Archivo de respaldo no válido');
+                }
+            } catch (error) {
+                alert('Error al leer el archivo: ' + error.message);
+            }
+        };
+        reader.readAsText(file);
+        input.value = '';
+    };
+    
+    // ==================== DASHBOARD ADMIN ====================
+    window.mostrarDashboardAdmin = function() {
+        cambiarTab('dashboard');
+        actualizarDashboardAdmin();
+    };
+    
+    function actualizarDashboardAdmin() {
+        document.getElementById('adminTotalProductos').textContent = productos.length;
+        const valorInventario = productos.reduce((s, p) => s + (p.costo * p.stock), 0);
+        const gananciaTotal = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * p.stock), 0);
+        document.getElementById('adminValorInventario').textContent = `$${valorInventario.toFixed(2)}`;
+        document.getElementById('adminGananciaTotal').textContent = `$${gananciaTotal.toFixed(2)}`;
+        
+        // Gráfico por categorías
+        const categorias = [...new Set(productos.map(p => p.categoria || 'General'))];
+        const stockPorCategoria = categorias.map(cat => 
+            productos.filter(p => (p.categoria || 'General') === cat).reduce((sum, p) => sum + p.stock, 0)
+        );
+        
+        if (categoriasChart) categoriasChart.destroy();
+        const ctxCat = document.getElementById('categoriasChart').getContext('2d');
+        categoriasChart = new Chart(ctxCat, {
+            type: 'pie',
+            data: {
+                labels: categorias,
+                datasets: [{
+                    data: stockPorCategoria,
+                    backgroundColor: ['#1e3c72', '#2a5298', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6c757d']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+        
+        // Top 5 productos más valiosos
+        const topProductos = [...productos].sort((a, b) => (b.precioVenta * b.stock) - (a.precioVenta * a.stock)).slice(0, 5);
+        if (topProductosChart) topProductosChart.destroy();
+        const ctxTop = document.getElementById('topProductosChart').getContext('2d');
+        topProductosChart = new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: topProductos.map(p => p.nombre),
+                datasets: [{
+                    label: 'Valor en inventario ($)',
+                    data: topProductos.map(p => p.precioVenta * p.stock),
+                    backgroundColor: '#2a5298'
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+    
+    // ==================== PESTAÑAS ====================
+    window.cambiarTab = function(tab) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        if (tab === 'inventario') {
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('tabInventario').classList.add('active');
+        } else if (tab === 'dashboard') {
+            document.getElementById('adminTab').classList.add('active');
+            document.getElementById('tabDashboard').classList.add('active');
+            actualizarDashboardAdmin();
+        }
+    };
+    
+    // ==================== FUNCIONES COMUNES ====================
     function ordenarProductosAlfabeticamente(lista) {
         return [...lista].sort((a, b) => {
             const nombreA = (a.nombre || '').toLowerCase();
@@ -865,6 +1201,7 @@
         actualizarAlertas();
         actualizarTabla(productosOrdenados);
         actualizarMovimientos();
+        if (usuarioEsDesarrollador) actualizarDashboardAdmin();
     }
     
     function actualizarEstadisticas() {
@@ -905,7 +1242,10 @@
                     <td>$${(p.precioVenta || 0).toFixed(2)}</td>
                     <td style="color: ${rentabilidad >= 0 ? '#28a745' : '#dc3545'}">$${rentabilidad.toFixed(2)}</td>
                     <td>${estado}</td>
-                    <td><button class="btn btn-danger" style="padding:5px 10px;" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button></td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="mostrarModalEditar('${p.codigo}')" style="margin-right: 5px;"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button>
+                    </td>
                 </tr>
             `;
         }).join('');
@@ -932,6 +1272,57 @@
             `;
         }).join('');
     }
+    
+    // ==================== EXPORTAR A EXCEL ====================
+    window.exportarExcelProfesional = function() {
+        if (!productos || productos.length === 0) {
+            alert('No hay productos para exportar');
+            return;
+        }
+        
+        const productosOrdenados = ordenarProductosAlfabeticamente(productos);
+        const datos = [];
+        datos.push(['INFORME DE INVENTARIO DPROFER']);
+        datos.push(['Fecha de exportación:', new Date().toLocaleString()]);
+        datos.push(['Usuario:', usuarioActual?.email || '']);
+        datos.push([]);
+        datos.push(['#', 'Código', 'Producto', 'Categoría', 'Stock', 'Precio Venta', 'Costo', 'Rentabilidad Unidad', 'Valor Total']);
+        
+        let gananciaTotalGeneral = 0;
+        let valorTotalInventario = 0;
+        
+        productosOrdenados.forEach((p, idx) => {
+            const rentabilidad = (p.precioVenta || 0) - (p.costo || 0);
+            const valorTotal = (p.precioVenta || 0) * (p.stock || 0);
+            gananciaTotalGeneral += rentabilidad * (p.stock || 0);
+            valorTotalInventario += (p.costo || 0) * (p.stock || 0);
+            datos.push([
+                idx + 1,
+                p.codigo || '',
+                p.nombre || '',
+                p.categoria || 'General',
+                p.stock || 0,
+                `$${(p.precioVenta || 0).toFixed(2)}`,
+                `$${(p.costo || 0).toFixed(2)}`,
+                `$${rentabilidad.toFixed(2)}`,
+                `$${valorTotal.toFixed(2)}`
+            ]);
+        });
+        
+        datos.push([]);
+        datos.push(['RESUMEN FINAL', '', '', '', '', '', '', '', '']);
+        datos.push(['Total de productos:', productos.length]);
+        datos.push(['Productos con stock bajo:', productos.filter(p => p.stock <= (p.stockMinimo || 5)).length]);
+        datos.push(['Valor total del inventario:', `$${valorTotalInventario.toFixed(2)}`]);
+        datos.push(['Ganancia potencial total:', `$${gananciaTotalGeneral.toFixed(2)}`]);
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        ws['!cols'] = [{wch:5},{wch:12},{wch:25},{wch:15},{wch:8},{wch:12},{wch:12},{wch:15},{wch:12}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Inventario Dprofer');
+        XLSX.writeFile(wb, `Inventario_Dprofer_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+        mostrarNotificacion('Reporte exportado a Excel correctamente');
+    };
     
     // ==================== FILTROS ====================
     window.filtrarProductos = function() {
@@ -1002,6 +1393,19 @@
             document.getElementById('userDisplay').innerHTML = user.email;
             document.getElementById('loginContainer').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
+            
+            // Verificar si es desarrollador (puedes definir un email específico)
+            const emailsDesarrollador = ['dproferventas@gmail.com', 'tuemail@gmail.com'];
+            if (emailsDesarrollador.includes(user.email)) {
+                usuarioEsDesarrollador = true;
+                document.getElementById('adminButtons').style.display = 'block';
+                document.getElementById('adminTab').style.display = 'block';
+            } else {
+                usuarioEsDesarrollador = false;
+                document.getElementById('adminButtons').style.display = 'none';
+                document.getElementById('adminTab').style.display = 'none';
+            }
+            
             await cargarDatosDesdeFirebase();
         } else {
             document.getElementById('loginContainer').classList.remove('hidden');
