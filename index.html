@@ -7,6 +7,7 @@
     <title>Dprofer Cloud - Inventario Automático</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -149,11 +150,7 @@
             color: var(--azul-naval);
         }
         
-        /* Estilos para el autocompletado */
-        .autocomplete-container {
-            position: relative;
-        }
-        
+        .autocomplete-container { position: relative; }
         .autocomplete-list {
             position: absolute;
             top: 100%;
@@ -167,25 +164,15 @@
             z-index: 1000;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        
         .autocomplete-item {
             padding: 10px 15px;
             cursor: pointer;
             border-bottom: 1px solid var(--gris-claro);
             transition: background 0.2s;
         }
-        
-        .autocomplete-item:hover {
-            background: var(--blanco-humo);
-        }
-        
-        .autocomplete-item strong {
-            color: var(--azul-naval);
-        }
-        
-        .autocomplete-item small {
-            color: var(--gris-medio);
-        }
+        .autocomplete-item:hover { background: var(--blanco-humo); }
+        .autocomplete-item strong { color: var(--azul-naval); }
+        .autocomplete-item small { color: var(--gris-medio); }
         
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -205,7 +192,6 @@
             align-items: center;
             z-index: 9999;
         }
-        
         .spinner {
             width: 50px;
             height: 50px;
@@ -214,17 +200,52 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
         @keyframes spin { to { transform: rotate(360deg); } }
         
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--gris-claro); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: var(--azul-naval); border-radius: 10px; }
+        
+        /* Modales */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: var(--blanco);
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 350px;
+            text-align: center;
+        }
+        .modal input {
+            width: 100%;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
 
 <div id="loading" class="loading"><div class="spinner"></div></div>
+
+<!-- Modal para verificar eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-shield-alt" style="font-size: 50px; color: var(--azul-naval);"></i>
+        <h3>Verificación de seguridad</h3>
+        <p>Ingresa la contraseña de desarrollador para eliminar este producto</p>
+        <input type="password" id="deletePassword" placeholder="Contraseña de desarrollador">
+        <button class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
+        <button class="btn btn-secondary" onclick="cerrarModalEliminar()">Cancelar</button>
+    </div>
+</div>
 
 <div class="container">
     <div id="loginContainer">
@@ -232,7 +253,7 @@
             <div class="card">
                 <div class="card-header text-center">
                     <i class="fas fa-store"></i> Dprofer Cloud
-                    <p style="font-size: 14px; margin-top: 5px;">Sistema de Inventario Automático</p>
+                    <p style="font-size: 14px; margin-top: 5px;">Códigos únicos globales</p>
                 </div>
                 <div class="card-body">
                     <div id="loginError" class="alert" style="display: none;"></div>
@@ -259,7 +280,7 @@
         <div class="user-header">
             <div>
                 <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
-                <p>Código automático | Busca productos existentes | Datos en la nube</p>
+                <p>Código único global | Busca productos existentes | Datos en la nube</p>
             </div>
             <div>
                 <span><i class="fas fa-user-circle"></i> <strong id="userDisplay"></strong></span>
@@ -302,9 +323,9 @@
                 <div class="row">
                     <div class="col-6">
                         <div class="form-group">
-                            <label><i class="fas fa-barcode"></i> Código (Automático o existente)</label>
+                            <label><i class="fas fa-barcode"></i> Código (Automático)</label>
                             <input type="text" id="codigo" class="codigo-auto" readonly placeholder="Se genera automáticamente">
-                            <small class="text-muted">Se genera con las 3 primeras letras + número secuencial único</small>
+                            <small class="text-muted">Formato: 3 letras + número único global</small>
                         </div>
                         <div class="form-group autocomplete-container">
                             <label><i class="fas fa-tag"></i> Nombre del Producto *</label>
@@ -338,8 +359,8 @@
                         <div class="form-group">
                             <label><i class="fas fa-exchange-alt"></i> Tipo de Movimiento</label>
                             <select id="tipoMovimiento">
-                                <option value="entrada">📥 Entrada (Comprar más stock)</option>
-                                <option value="salida">📤 Salida (Vender o retirar)</option>
+                                <option value="entrada">Entrada (Comprar más stock)</option>
+                                <option value="salida">Salida (Vender o retirar)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -373,8 +394,8 @@
                     <button class="btn btn-secondary" onclick="limpiarFormulario()">
                         <i class="fas fa-eraser"></i> Limpiar
                     </button>
-                    <button class="btn btn-success" onclick="exportarReporte()">
-                        <i class="fas fa-file-excel"></i> Exportar Reporte
+                    <button class="btn btn-success" onclick="exportarExcelProfesional()">
+                        <i class="fas fa-file-excel"></i> Exportar a Excel
                     </button>
                 </div>
             </div>
@@ -406,7 +427,7 @@
                 <div class="table-container" style="max-height: 300px;">
                     <table class="table">
                         <thead>
-                            发展<th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
+                            <tr><th>Fecha</th><th>Tipo</th><th>Código</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Observación</th></thead>
                         <tbody id="tablaMovimientos"></tbody>
                     </table>
                 </div>
@@ -426,7 +447,10 @@
         appId: "1:788368470526:web:8644b343b056b9e6f150af",
         measurementId: "G-TFD1EGQ829"
     };
-    // =====================================================================
+    
+    // Contraseña de desarrollador (solo quien sabe puede eliminar)
+    const DESARROLLADOR_PASSWORD = "dprofer2024";
+    let productoAEliminar = null;
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
@@ -480,13 +504,10 @@
             document.getElementById('stockMinimo').value = producto.stockMinimo || 5;
             document.getElementById('autocompleteList').classList.add('hidden');
             calcularAutomatico();
-            
-            // Mostrar mensaje de éxito
             mostrarNotificacion(`Producto "${producto.nombre}" cargado. Stock actual: ${producto.stock}`);
         }
     };
     
-    // Cerrar autocompletado al hacer clic fuera
     document.addEventListener('click', function(e) {
         const container = document.getElementById('autocompleteList');
         const input = document.getElementById('nombre');
@@ -505,30 +526,113 @@
             return;
         }
         
-        // Si ya hay un código (producto seleccionado), no generar nuevo
         if (codigoActual && productos.find(p => p.codigo === codigoActual)) {
             return;
         }
         
+        const totalProductos = productos.length;
+        const siguienteNumero = totalProductos + 1;
+        
         let prefijo = nombre.substring(0, 3).toUpperCase();
         prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         
-        const productosConPrefijo = productos.filter(p => 
-            p.codigo && p.codigo.startsWith(prefijo + '-')
-        );
+        const codigoGenerado = `${prefijo}-${siguienteNumero.toString().padStart(3, '0')}`;
+        document.getElementById('codigo').value = codigoGenerado;
+    };
+    
+    // ==================== MODAL DE ELIMINACIÓN ====================
+    window.mostrarModalEliminar = function(codigo) {
+        productoAEliminar = codigo;
+        document.getElementById('deleteModal').style.display = 'block';
+        document.getElementById('deletePassword').value = '';
+    };
+    
+    window.cerrarModalEliminar = function() {
+        document.getElementById('deleteModal').style.display = 'none';
+        productoAEliminar = null;
+    };
+    
+    window.confirmarEliminacion = function() {
+        const password = document.getElementById('deletePassword').value;
+        if (password === DESARROLLADOR_PASSWORD) {
+            ejecutarEliminacion(productoAEliminar);
+            cerrarModalEliminar();
+        } else {
+            alert('Contraseña incorrecta. No tienes permisos para eliminar productos.');
+            cerrarModalEliminar();
+        }
+    };
+    
+    async function ejecutarEliminacion(codigo) {
+        if (!codigo) return;
+        mostrarLoading(true);
+        try {
+            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', codigo));
+            await cargarDatosDesdeFirebase();
+            mostrarNotificacion('Producto eliminado correctamente');
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+        mostrarLoading(false);
+    }
+    
+    // ==================== EXPORTAR A EXCEL PROFESIONAL ====================
+    window.exportarExcelProfesional = function() {
+        if (!productos || productos.length === 0) {
+            alert('No hay productos para exportar');
+            return;
+        }
         
-        let maxNumero = 0;
-        productosConPrefijo.forEach(p => {
-            const partes = p.codigo.split('-');
-            if (partes.length === 2) {
-                const num = parseInt(partes[1]);
-                if (!isNaN(num) && num > maxNumero) maxNumero = num;
-            }
+        const productosOrdenados = ordenarProductosAlfabeticamente(productos);
+        
+        // Preparar datos para Excel
+        const datos = [];
+        datos.push(['INFORME DE INVENTARIO DPROFER']);
+        datos.push(['Fecha de exportación:', new Date().toLocaleString()]);
+        datos.push(['Usuario:', usuarioActual?.email || '']);
+        datos.push([]);
+        datos.push(['#', 'Código', 'Producto', 'Categoría', 'Stock', 'Precio Venta', 'Costo', 'Rentabilidad Unidad', 'Valor Total']);
+        
+        let gananciaTotalGeneral = 0;
+        let valorTotalInventario = 0;
+        
+        productosOrdenados.forEach((p, idx) => {
+            const rentabilidad = (p.precioVenta || 0) - (p.costo || 0);
+            const valorTotal = (p.precioVenta || 0) * (p.stock || 0);
+            gananciaTotalGeneral += rentabilidad * (p.stock || 0);
+            valorTotalInventario += (p.costo || 0) * (p.stock || 0);
+            datos.push([
+                idx + 1,
+                p.codigo || '',
+                p.nombre || '',
+                p.categoria || 'General',
+                p.stock || 0,
+                `$${(p.precioVenta || 0).toFixed(2)}`,
+                `$${(p.costo || 0).toFixed(2)}`,
+                `$${rentabilidad.toFixed(2)}`,
+                `$${valorTotal.toFixed(2)}`
+            ]);
         });
         
-        const nuevoNumero = maxNumero + 1;
-        const codigoGenerado = `${prefijo}-${nuevoNumero.toString().padStart(3, '0')}`;
-        document.getElementById('codigo').value = codigoGenerado;
+        datos.push([]);
+        datos.push(['RESUMEN FINAL', '', '', '', '', '', '', '', '']);
+        datos.push(['Total de productos:', productos.length]);
+        datos.push(['Productos con stock bajo:', productos.filter(p => p.stock <= (p.stockMinimo || 5)).length]);
+        datos.push(['Valor total del inventario:', `$${valorTotalInventario.toFixed(2)}`]);
+        datos.push(['Ganancia potencial total:', `$${gananciaTotalGeneral.toFixed(2)}`]);
+        
+        // Crear libro de Excel
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        
+        // Estilos básicos
+        ws['!cols'] = [{wch:5},{wch:12},{wch:25},{wch:15},{wch:8},{wch:12},{wch:12},{wch:15},{wch:12}];
+        
+        XLSX.utils.book_append_sheet(wb, ws, 'Inventario Dprofer');
+        
+        // Descargar
+        XLSX.writeFile(wb, `Inventario_Dprofer_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+        mostrarNotificacion('Reporte exportado a Excel correctamente');
     };
     
     function ordenarProductosAlfabeticamente(lista) {
@@ -664,48 +768,38 @@
         mostrarLoading(true);
         try {
             let codigoFinal = codigo;
-            const existente = productos.find(p => p.codigo === codigoFinal);
+            const productoExistente = productos.find(p => p.codigo === codigoFinal);
             
-            // Si no hay código o el producto no existe, generar nuevo código
-            if (!codigoFinal || !existente) {
+            if (!codigoFinal || !productoExistente) {
+                const totalProductos = productos.length;
+                const siguienteNumero = totalProductos + 1;
                 let prefijo = nombre.substring(0, 3).toUpperCase();
                 prefijo = prefijo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                const mismosPrefijo = productos.filter(p => p.codigo && p.codigo.startsWith(prefijo + '-'));
-                let maxNumero = 0;
-                mismosPrefijo.forEach(p => {
-                    const partes = p.codigo.split('-');
-                    if (partes.length === 2) {
-                        const num = parseInt(partes[1]);
-                        if (!isNaN(num) && num > maxNumero) maxNumero = num;
-                    }
-                });
-                const nuevoNumero = maxNumero + 1;
-                codigoFinal = `${prefijo}-${nuevoNumero.toString().padStart(3, '0')}`;
+                codigoFinal = `${prefijo}-${siguienteNumero.toString().padStart(3, '0')}`;
                 document.getElementById('codigo').value = codigoFinal;
             }
             
             const productoRef = doc(db, 'usuarios', usuarioActual.uid, 'productos', codigoFinal);
-            const productoExistente = productos.find(p => p.codigo === codigoFinal);
+            const existente = productos.find(p => p.codigo === codigoFinal);
             
-            if (productoExistente) {
-                // Actualizar producto existente
-                let nuevoStock = productoExistente.stock;
+            if (existente) {
+                let nuevoStock = existente.stock;
                 if (tipo === 'entrada') {
                     nuevoStock += cantidad;
+                    mostrarNotificacion(`Stock aumentado: ${existente.nombre} | +${cantidad} = ${nuevoStock}`);
                 } else {
-                    if (productoExistente.stock < cantidad) {
-                        throw new Error(`Stock insuficiente. Stock actual: ${productoExistente.stock}`);
+                    if (existente.stock < cantidad) {
+                        throw new Error(`Stock insuficiente. Stock actual: ${existente.stock}`);
                     }
                     nuevoStock -= cantidad;
+                    mostrarNotificacion(`Stock reducido: ${existente.nombre} | -${cantidad} = ${nuevoStock}`);
                 }
                 await updateDoc(productoRef, {
                     nombre, costo, precioVenta: precio, categoria,
                     stock: nuevoStock, stockMinimo,
                     actualizado: Timestamp.now()
                 });
-                mostrarNotificacion(`Stock actualizado: ${productoExistente.nombre} - Nuevo stock: ${nuevoStock}`);
             } else {
-                // Crear nuevo producto
                 if (tipo === 'salida') {
                     throw new Error('No se puede registrar salida de producto inexistente');
                 }
@@ -714,10 +808,9 @@
                     stock: cantidad, stockMinimo,
                     creado: Timestamp.now()
                 });
-                mostrarNotificacion(`Nuevo producto creado: ${nombre} - Código: ${codigoFinal}`);
+                mostrarNotificacion(`Nuevo producto creado: ${nombre} | Código: ${codigoFinal}`);
             }
             
-            // Registrar movimiento
             await setDoc(doc(collection(db, 'usuarios', usuarioActual.uid, 'movimientos')), {
                 fecha: Timestamp.now(),
                 tipo, producto: nombre, codigo: codigoFinal, cantidad,
@@ -726,19 +819,6 @@
             
             await cargarDatosDesdeFirebase();
             limpiarFormulario();
-        } catch (error) {
-            alert(`Error: ${error.message}`);
-        }
-        mostrarLoading(false);
-    };
-    
-    window.eliminarProducto = async (codigo) => {
-        if (!confirm('¿Eliminar este producto permanentemente?')) return;
-        mostrarLoading(true);
-        try {
-            await deleteDoc(doc(db, 'usuarios', usuarioActual.uid, 'productos', codigo));
-            await cargarDatosDesdeFirebase();
-            mostrarNotificacion('Producto eliminado');
         } catch (error) {
             alert(`Error: ${error.message}`);
         }
@@ -777,7 +857,7 @@
     function actualizarTabla(lista) {
         const tbody = document.getElementById('tablaInventario');
         if (!tbody) return;
-        if (!lista || lista.length === 0) { tbody.innerHTML = ' credencial<td colspan="9" class="text-center">No hay productos registrados</td> </tr>'; return; }
+        if (!lista || lista.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay productos registrados</td></tr>'; return; }
         
         tbody.innerHTML = lista.map((p, index) => {
             const rentabilidad = (p.precioVenta || 0) - (p.costo || 0);
@@ -792,7 +872,7 @@
                     <td>$${(p.precioVenta || 0).toFixed(2)}</td>
                     <td style="color: ${rentabilidad >= 0 ? '#28a745' : '#dc3545'}">$${rentabilidad.toFixed(2)}</td>
                     <td>${estado}</td>
-                    <td><button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${p.codigo}')"><i class="fas fa-trash"></i></button></td>
+                    <td><button class="btn btn-danger" style="padding:5px 10px;" onclick="mostrarModalEliminar('${p.codigo}')"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `;
         }).join('');
@@ -802,17 +882,22 @@
         const tbody = document.getElementById('tablaMovimientos');
         if (!tbody) return;
         if (!movimientos || movimientos.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay movimientos registrados</td></tr>'; return; }
-        tbody.innerHTML = movimientos.slice(0, 30).map(m => `
-            <tr>
-                <td><small>${m.fecha ? new Date(m.fecha.seconds * 1000).toLocaleString() : ''}</small></td>
-                <td><span style="background:${m.tipo === 'entrada' ? '#28a745' : '#dc3545'}; color:white; padding:3px 8px; border-radius:15px;">${m.tipo === 'entrada' ? 'Entrada' : 'Salida'}</span></td>
-                <td><code>${m.codigo || ''}</code></td>
-                <td>${m.producto || ''}</td>
-                <td>${m.cantidad || 0}</td>
-                <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
-                <td><small>${m.observacion || ''}</small></td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = movimientos.slice(0, 30).map(m => {
+            const fecha = m.fecha ? new Date(m.fecha.seconds * 1000).toLocaleString() : '';
+            const tipoTexto = m.tipo === 'entrada' ? 'Entrada' : 'Salida';
+            const tipoColor = m.tipo === 'entrada' ? '#28a745' : '#dc3545';
+            return `
+                <tr>
+                    <td><small>${fecha}</small></td>
+                    <td><span style="background:${tipoColor}; color:white; padding:3px 8px; border-radius:15px;">${tipoTexto}</span></td>
+                    <td><code>${m.codigo || ''}</code></td>
+                    <td>${m.producto || ''}</td>
+                    <td>${m.cantidad || 0}</td>
+                    <td><strong>$${(m.total || 0).toFixed(2)}</strong></td>
+                    <td><small>${m.observacion || ''}</small></td>
+                </tr>
+            `;
+        }).join('');
     }
     
     // ==================== FILTROS ====================
@@ -852,6 +937,8 @@
         }
     }
     
+    window.generarCodigoAutomatico = generarCodigoAutomatico;
+    
     window.limpiarFormulario = function() {
         const campos = ['nombre', 'costo', 'precioVenta', 'cantidad', 'observacion'];
         campos.forEach(id => {
@@ -866,26 +953,6 @@
         calcularAutomatico();
         const nombreInput = document.getElementById('nombre');
         if (nombreInput) nombreInput.focus();
-    };
-    
-    window.exportarReporte = function() {
-        if (!productos || productos.length === 0) { alert('No hay productos para exportar'); return; }
-        const productosOrdenados = ordenarProductosAlfabeticamente(productos);
-        let texto = "=== REPORTE DE INVENTARIO DPROFER ===\nFecha: " + new Date().toLocaleString() + "\nUsuario: " + (usuarioActual?.email || '') + "\n" + "=".repeat(60) + "\n\n#\tCODIGO\tPRODUCTO\tSTOCK\tPRECIO\tRENTABILIDAD\n" + "-".repeat(80) + "\n";
-        productosOrdenados.forEach((p, idx) => { 
-            const rentabilidad = (p.precioVenta || 0) - (p.costo || 0); 
-            texto += `${idx+1}\t${p.codigo || ''}\t${p.nombre || ''}\t${p.stock || 0}\t$${(p.precioVenta || 0).toFixed(2)}\t$${rentabilidad.toFixed(2)}\n`; 
-        });
-        const gananciaTotal = productos.reduce((s, p) => s + (((p.precioVenta || 0) - (p.costo || 0)) * (p.stock || 0)), 0);
-        texto += "\n" + "=".repeat(60) + "\nGANANCIA TOTAL: $" + gananciaTotal.toFixed(2) + "\n" + "=".repeat(60);
-        const blob = new Blob([texto], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `reporte_dprofer_${new Date().toISOString().slice(0, 19)}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        alert('Reporte exportado correctamente');
     };
     
     const costoInput = document.getElementById('costo');
