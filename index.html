@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo&libraries=places&callback=initMapAutocomplete" async defer></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; font-family: 'Segoe UI', sans-serif; }
@@ -35,13 +34,13 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: white; margin: 5% auto; padding: 25px; border-radius: 20px; width: 500px; max-width: 90%; }
+        .modal-content { background-color: white; margin: 5% auto; padding: 25px; border-radius: 20px; width: 600px; max-width: 90%; }
         .admin-only { display: none; }
         .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid white; border-top-color: #2a5298; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2,1fr); } .row { flex-direction: column; } .col-6 { width: 100%; } }
-        .coordenadas-info { font-size: 12px; color: #666; margin-top: 5px; }
+        .carrito-item { background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -51,30 +50,6 @@
 <!-- Modales -->
 <div id="editModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><p>Ingresa contraseña de administrador</p><input type="password" id="editPassword" class="form-control"><div class="mt-3"><button class="btn btn-primary" onclick="verificarEdicion()">Verificar</button><button class="btn btn-secondary" onclick="cerrarModal('editModal')">Cancelar</button></div></div></div>
 <div id="editarProductoModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><div class="form-group"><label>Nombre</label><input type="text" id="editNombre" class="form-control"></div><div class="form-group"><label>Categoría</label><select id="editCategoria" class="form-control"><option>Herramientas</option><option>Pinturas</option><option>Eléctrico</option><option>Ferretería</option></select></div><div class="row"><div class="col-6"><label>Costo</label><input type="number" id="editCosto" class="form-control" step="0.01"></div><div class="col-6"><label>Precio Venta</label><input type="number" id="editPrecio" class="form-control" step="0.01"></div></div><div class="row"><div class="col-6"><label>Stock</label><input type="number" id="editStock" class="form-control"></div><div class="col-6"><label>Stock Mínimo</label><input type="number" id="editStockMinimo" class="form-control"></div></div><div class="mt-3"><button class="btn btn-success" onclick="guardarEdicion()">Guardar</button><button class="btn btn-secondary" onclick="cerrarModal('editarProductoModal')">Cancelar</button></div></div></div>
-
-<!-- Modal para registrar cliente con mapa -->
-<div id="clienteModal" class="modal">
-    <div class="modal-content">
-        <h3><i class="fas fa-user-plus"></i> Registrar Cliente</h3>
-        <div class="form-group">
-            <label>Nombre completo</label>
-            <input type="text" id="clienteNombre" class="form-control" placeholder="Ej: Juan Pérez">
-        </div>
-        <div class="form-group">
-            <label>Dirección</label>
-            <input type="text" id="clienteDireccion" class="form-control" placeholder="Escribe la dirección y selecciona">
-            <div class="coordenadas-info"><i class="fas fa-map-marker-alt"></i> Las coordenadas se obtienen automáticamente al seleccionar una dirección</div>
-        </div>
-        <div class="form-group">
-            <label>Coordenadas (se llenan solas)</label>
-            <input type="text" id="clienteCoord" class="form-control" readonly placeholder="Latitud, Longitud">
-        </div>
-        <div class="mt-3">
-            <button class="btn btn-success" onclick="guardarCliente()"><i class="fas fa-save"></i> Guardar Cliente</button>
-            <button class="btn btn-secondary" onclick="cerrarModal('clienteModal')">Cancelar</button>
-        </div>
-    </div>
-</div>
 
 <div class="container">
     <!-- Login -->
@@ -103,7 +78,6 @@
         <!-- Panel Admin -->
         <div id="adminPanel" class="alert alert-info"><i class="fas fa-crown"></i> Panel Administrador 
             <button class="btn btn-sm btn-dark" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar Excel</button>
-            <button class="btn btn-sm btn-warning" onclick="mostrarDashboard()"><i class="fas fa-chart-line"></i> Dashboard</button>
         </div>
 
         <!-- Estadísticas -->
@@ -143,12 +117,11 @@
         <div class="tabs">
             <div class="tab active" onclick="cambiarTab('inventario')">📦 Inventario</div>
             <div class="tab" onclick="cambiarTab('pedidos')">🛒 Pedidos</div>
-            <div class="tab" onclick="cambiarTab('clientes')">👥 Clientes</div>
         </div>
 
         <!-- Inventario -->
         <div id="tabInventario" class="tab-content active">
-            <div class="card"><div class="card-header">Inventario Actual</div><div class="card-body"><input type="text" id="buscador" class="form-control mb-2" placeholder="Buscar..." onkeyup="filtrarProductos()"><div class="table-container"><table class="table"><thead><tr><th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaInventario"></tbody></table></div></div></div>
+            <div class="card"><div class="card-header">Inventario Actual</div><div class="card-body"><input type="text" id="buscador" class="form-control mb-2" placeholder="Buscar..." onkeyup="filtrarProductos()"><div class="table-container"><table class="table"><thead>运河<th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tablaInventario"></tbody></table></div></div></div>
         </div>
 
         <!-- Pedidos -->
@@ -158,42 +131,41 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
-                            <div class="form-group"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select><button class="btn btn-sm btn-link" onclick="abrirRegistroCliente()">+ Nuevo Cliente</button></div>
-                            <div class="form-group"><label>Producto</label><select id="productoSeleccion" class="form-control" onchange="calcularTotalPedido()"></select></div>
-                            <div class="form-group"><label>Cantidad</label><input type="number" id="cantidadPedido" class="form-control" value="1" min="1" oninput="calcularTotalPedido()"></div>
+                            <div class="form-group"><label>Seleccionar Cliente</label><select id="clienteSeleccion" class="form-control"></select></div>
                         </div>
                         <div class="col-6">
-                            <div class="alert alert-info">
-                                <strong>Resumen</strong><br>
-                                Subtotal: $<span id="subtotalPedido">0.00</span><br>
-                                Distancia: <span id="distanciaKm">0.00</span> km<br>
-                                Costo logístico: $<span id="costoLogistico">0.00</span><br>
-                                <strong>Total: $<span id="totalPedido">0.00</span></strong>
+                            <div class="form-group"><label>Agregar Producto</label>
+                                <div class="row">
+                                    <div class="col-7"><select id="productoAgregar" class="form-control"></select></div>
+                                    <div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1" min="1"></div>
+                                    <div class="col-2"><button class="btn btn-primary" onclick="agregarAlCarrito()"><i class="fas fa-plus"></i></button></div>
+                                </div>
                             </div>
-                            <button class="btn btn-primary" onclick="confirmarPedidoVenta()"><i class="fas fa-shopping-cart"></i> Realizar Venta</button>
                         </div>
                     </div>
+                    
+                    <div class="mt-3"><h5>Carrito de Compra</h5><div id="carritoContainer" class="table-container"><table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Acciones</th></thead><tbody id="carritoBody"></tbody></table></div></div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <strong>Resumen del Pedido</strong><br>
+                        Subtotal productos: $<span id="subtotalProductos">0.00</span><br>
+                        Distancia al cliente: <span id="distanciaKm">0.00</span> km<br>
+                        Costo logístico (0.02/km): $<span id="costoLogistico">0.00</span><br>
+                        <strong>Total a pagar: $<span id="totalPedido">0.00</span></strong>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="confirmarPedido()"><i class="fas fa-check-circle"></i> Confirmar Venta</button>
                 </div>
             </div>
             <div class="card">
                 <div class="card-header">Historial de Pedidos</div>
-                <div class="card-body"><div class="table-container"><table class="table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Subtotal</th><th>Logística</th><th>Total</th></tr></thead><tbody id="tablaPedidos"></tbody></table></div></div>
-            </div>
-        </div>
-
-        <!-- Clientes -->
-        <div id="tabClientes" class="tab-content">
-            <div class="card">
-                <div class="card-header">Clientes Registrados</div>
-                <div class="card-body">
-                    <div class="table-container"><table class="table"><thead><tr><th>Nombre</th><th>Dirección</th><th>Coordenadas</th><th>Acciones</th></tr></thead><tbody id="tablaClientes"></tbody></table></div>
-                    <button class="btn btn-success mt-2" onclick="abrirRegistroCliente()"><i class="fas fa-user-plus"></i> Nuevo Cliente</button>
-                </div>
+                <div class="card-body"><div class="table-container"><table class="table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Total</th></tr></thead><tbody id="tablaPedidos"></tbody></table></div></div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="clientes.js"></script>
 <script type="module">
     // ==================== CONFIGURACIÓN FIREBASE ====================
     const firebaseConfig = {
@@ -214,12 +186,12 @@
     const db = getFirestore(app);
     
     const ADMIN_PASSWORD = "dprofer2024";
-    const NEGOCIO_COORD = { lat: -0.2785643, lng: -79.1822373 }; // Tu negocio
+    const NEGOCIO_COORD = { lat: -0.2785643, lng: -79.1822373 };
     let usuarioActual = null;
     let esAdmin = false;
     let productos = [];
-    let clientes = [];
     let pedidos = [];
+    let carrito = [];
     
     // ==================== FUNCIONES DE LOGIN ====================
     window.iniciarSesion = async () => {
@@ -246,20 +218,32 @@
         try {
             const snapProd = await getDocs(collection(db, 'empresa', 'dprofer', 'productos'));
             productos = snapProd.docs.map(d => ({ id: d.id, ...d.data() }));
-            
-            const snapCli = await getDocs(collection(db, 'empresa', 'dprofer', 'clientes'));
-            clientes = snapCli.docs.map(d => ({ id: d.id, ...d.data() }));
-            
             const snapPed = await getDocs(query(collection(db, 'empresa', 'dprofer', 'pedidos'), orderBy('fecha', 'desc'), limit(100)));
             pedidos = snapPed.docs.map(d => d.data());
-            
             actualizarInventario();
             actualizarEstadisticas();
-            actualizarSelects();
-            actualizarTablaClientes();
+            actualizarSelectsProductos();
+            actualizarSelectClientes();
             actualizarTablaPedidos();
         } catch (e) { console.error(e); }
         mostrarLoading(false);
+    }
+    
+    function actualizarSelectClientes() {
+        const select = document.getElementById('clienteSeleccion');
+        if (select && typeof CLIENTES_FIJOS !== 'undefined') {
+            select.innerHTML = '<option value="">Seleccionar Cliente</option>' +
+                CLIENTES_FIJOS.map(c => `<option value="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">${c.nombre} - ${c.direccion}</option>`).join('');
+            select.onchange = recalcularPedido;
+        }
+    }
+    
+    function actualizarSelectsProductos() {
+        const select = document.getElementById('productoAgregar');
+        if (select) {
+            select.innerHTML = '<option value="">Seleccionar Producto</option>' +
+                productos.filter(p => p.stock > 0).map(p => `<option value="${p.codigo}" data-precio="${p.precioVenta}">${p.nombre} - Stock: ${p.stock} - $${p.precioVenta}</option>`).join('');
+        }
     }
     
     // ==================== INVENTARIO ====================
@@ -276,7 +260,7 @@
     
     function actualizarInventario() {
         const tbody = document.getElementById('tablaInventario');
-        if (productos.length === 0) { tbody.innerHTML = '<tr><td colspan="10">No hay productos</td></tr>'; return; }
+        if (productos.length === 0) { tbody.innerHTML = '<td><td colspan="10">No hay productos</td>'    ; return; }
         const ordenados = [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -347,63 +331,12 @@
         `).join('');
     };
     
-    // ==================== EDITAR Y ELIMINAR PRODUCTOS ====================
+    // ==================== EDITAR Y ELIMINAR ====================
     let productoCodigoEditar = null;
-    
-    window.abrirEditarProducto = (codigo) => {
-        if (!esAdmin) { alert('No autorizado'); return; }
-        productoCodigoEditar = codigo;
-        document.getElementById('editModal').style.display = 'block';
-    };
-    
-    window.verificarEdicion = () => {
-        const pass = document.getElementById('editPassword').value;
-        if (pass === ADMIN_PASSWORD) {
-            cerrarModal('editModal');
-            const p = productos.find(p => p.codigo === productoCodigoEditar);
-            if (p) {
-                document.getElementById('editNombre').value = p.nombre;
-                document.getElementById('editCategoria').value = p.categoria;
-                document.getElementById('editCosto').value = p.costo;
-                document.getElementById('editPrecio').value = p.precioVenta;
-                document.getElementById('editStock').value = p.stock;
-                document.getElementById('editStockMinimo').value = p.stockMinimo || 5;
-                document.getElementById('editarProductoModal').style.display = 'block';
-            }
-        } else {
-            alert('Contraseña incorrecta');
-            cerrarModal('editModal');
-        }
-    };
-    
-    window.guardarEdicion = async () => {
-        const nombre = document.getElementById('editNombre').value;
-        const categoria = document.getElementById('editCategoria').value;
-        const costo = parseFloat(document.getElementById('editCosto').value);
-        const precio = parseFloat(document.getElementById('editPrecio').value);
-        const stock = parseInt(document.getElementById('editStock').value);
-        const stockMin = parseInt(document.getElementById('editStockMinimo').value);
-        if (!nombre) { alert('Nombre requerido'); return; }
-        mostrarLoading(true);
-        await updateDoc(doc(db, 'empresa', 'dprofer', 'productos', productoCodigoEditar), {
-            nombre, categoria, costo, precioVenta: precio, stock, stockMinimo: stockMin, actualizado: Timestamp.now()
-        });
-        await cargarDatos();
-        cerrarModal('editarProductoModal');
-        mostrarLoading(false);
-    };
-    
-    window.eliminarProducto = async (codigo) => {
-        if (!esAdmin) { alert('No autorizado'); return; }
-        const pass = prompt('Contraseña de administrador:');
-        if (pass !== ADMIN_PASSWORD) { alert('Contraseña incorrecta'); return; }
-        if (confirm('¿Eliminar producto?')) {
-            mostrarLoading(true);
-            await deleteDoc(doc(db, 'empresa', 'dprofer', 'productos', codigo));
-            await cargarDatos();
-            mostrarLoading(false);
-        }
-    };
+    window.abrirEditarProducto = (codigo) => { if (!esAdmin) return; productoCodigoEditar = codigo; document.getElementById('editModal').style.display = 'block'; };
+    window.verificarEdicion = () => { const pass = document.getElementById('editPassword').value; if (pass === ADMIN_PASSWORD) { cerrarModal('editModal'); const p = productos.find(p => p.codigo === productoCodigoEditar); if (p) { document.getElementById('editNombre').value = p.nombre; document.getElementById('editCategoria').value = p.categoria; document.getElementById('editCosto').value = p.costo; document.getElementById('editPrecio').value = p.precioVenta; document.getElementById('editStock').value = p.stock; document.getElementById('editStockMinimo').value = p.stockMinimo || 5; document.getElementById('editarProductoModal').style.display = 'block'; } } else { alert('Contraseña incorrecta'); cerrarModal('editModal'); } };
+    window.guardarEdicion = async () => { const nombre = document.getElementById('editNombre').value; const categoria = document.getElementById('editCategoria').value; const costo = parseFloat(document.getElementById('editCosto').value); const precio = parseFloat(document.getElementById('editPrecio').value); const stock = parseInt(document.getElementById('editStock').value); const stockMin = parseInt(document.getElementById('editStockMinimo').value); if (!nombre) return; mostrarLoading(true); await updateDoc(doc(db, 'empresa', 'dprofer', 'productos', productoCodigoEditar), { nombre, categoria, costo, precioVenta: precio, stock, stockMinimo: stockMin, actualizado: Timestamp.now() }); await cargarDatos(); cerrarModal('editarProductoModal'); mostrarLoading(false); };
+    window.eliminarProducto = async (codigo) => { if (!esAdmin) return; const pass = prompt('Contraseña de administrador:'); if (pass !== ADMIN_PASSWORD) { alert('Contraseña incorrecta'); return; } if (confirm('¿Eliminar producto?')) { mostrarLoading(true); await deleteDoc(doc(db, 'empresa', 'dprofer', 'productos', codigo)); await cargarDatos(); mostrarLoading(false); } };
     
     // ==================== MOVIMIENTOS ====================
     window.registrarMovimiento = async () => {
@@ -416,10 +349,8 @@
         const cantidad = parseInt(document.getElementById('cantidad').value);
         const stockMin = parseInt(document.getElementById('stockMinimo').value);
         const obs = document.getElementById('observacion').value || (tipo === 'entrada' ? 'Compra' : 'Venta');
-        
         if (!nombre || cantidad <= 0) { alert('Complete datos'); return; }
         mostrarLoading(true);
-        
         let codigoFinal = codigo;
         const existente = productos.find(p => p.codigo === codigoFinal);
         if (!codigoFinal || !existente) {
@@ -429,199 +360,123 @@
             codigoFinal = `${pref}-${sig.toString().padStart(3, '0')}`;
             document.getElementById('codigo').value = codigoFinal;
         }
-        
         const prodRef = doc(db, 'empresa', 'dprofer', 'productos', codigoFinal);
         const pExist = productos.find(p => p.codigo === codigoFinal);
-        
         if (pExist) {
             let nuevoStock = pExist.stock;
             if (tipo === 'entrada') nuevoStock += cantidad;
-            else {
-                if (pExist.stock < cantidad) { alert('Stock insuficiente'); mostrarLoading(false); return; }
-                nuevoStock -= cantidad;
-            }
+            else { if (pExist.stock < cantidad) { alert('Stock insuficiente'); mostrarLoading(false); return; } nuevoStock -= cantidad; }
             await updateDoc(prodRef, { nombre, costo, precioVenta: precio, categoria, stock: nuevoStock, stockMinimo: stockMin });
         } else {
             if (tipo === 'salida') { alert('Producto no existe'); mostrarLoading(false); return; }
-            await setDoc(prodRef, {
-                codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio,
-                stock: cantidad, stockMinimo: stockMin, vendidoTotal: 0
-            });
+            await setDoc(prodRef, { codigo: codigoFinal, nombre, categoria, costo, precioVenta: precio, stock: cantidad, stockMinimo: stockMin, vendidoTotal: 0 });
         }
-        
-        await setDoc(doc(collection(db, 'empresa', 'dprofer', 'movimientos')), {
-            fecha: Timestamp.now(), tipo: tipo === 'entrada' ? 'Entrada' : 'Salida',
-            producto: nombre, codigo: codigoFinal, cantidad, total: precio * cantidad,
-            observacion: obs, empleado: usuarioActual.email
-        });
-        
+        await setDoc(doc(collection(db, 'empresa', 'dprofer', 'movimientos')), { fecha: Timestamp.now(), tipo: tipo === 'entrada' ? 'Entrada' : 'Salida', producto: nombre, codigo: codigoFinal, cantidad, total: precio * cantidad, observacion: obs, empleado: usuarioActual.email });
         await cargarDatos();
         limpiarFormulario();
         mostrarLoading(false);
     };
     
-    function limpiarFormulario() {
-        ['codigo', 'nombre', 'costo', 'precioVenta', 'cantidad', 'observacion'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('stockMinimo').value = '5';
-        document.getElementById('categoria').value = 'Herramientas';
-        calcularAuto();
-    }
+    function limpiarFormulario() { ['codigo','nombre','costo','precioVenta','cantidad','observacion'].forEach(id => document.getElementById(id).value = ''); document.getElementById('stockMinimo').value = '5'; document.getElementById('categoria').value = 'Herramientas'; calcularAuto(); }
+    function calcularAuto() { const costo = parseFloat(document.getElementById('costo').value) || 0; const precio = parseFloat(document.getElementById('precioVenta').value) || 0; const cant = parseInt(document.getElementById('cantidad').value) || 0; document.getElementById('rentabilidadUnidad').value = `$${(precio - costo).toFixed(2)}`; document.getElementById('totalMovimiento').value = `$${(precio * cant).toFixed(2)}`; }
+    window.generarCodigo = () => { const nombre = document.getElementById('nombre').value; if (!nombre) return; const codigoActual = document.getElementById('codigo').value; if (codigoActual && productos.find(p => p.codigo === codigoActual)) return; const sig = productos.length + 1; let pref = nombre.substring(0,3).toUpperCase(); pref = pref.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); document.getElementById('codigo').value = `${pref}-${sig.toString().padStart(3,'0')}`; };
     
-    function calcularAuto() {
-        const costo = parseFloat(document.getElementById('costo').value) || 0;
-        const precio = parseFloat(document.getElementById('precioVenta').value) || 0;
-        const cant = parseInt(document.getElementById('cantidad').value) || 0;
-        document.getElementById('rentabilidadUnidad').value = `$${(precio - costo).toFixed(2)}`;
-        document.getElementById('totalMovimiento').value = `$${(precio * cant).toFixed(2)}`;
-    }
-    
-    window.generarCodigo = () => {
-        const nombre = document.getElementById('nombre').value;
-        if (!nombre) return;
-        const codigoActual = document.getElementById('codigo').value;
-        if (codigoActual && productos.find(p => p.codigo === codigoActual)) return;
-        const sig = productos.length + 1;
-        let pref = nombre.substring(0, 3).toUpperCase();
-        pref = pref.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        document.getElementById('codigo').value = `${pref}-${sig.toString().padStart(3, '0')}`;
+    // ==================== PEDIDOS (CARRITO) ====================
+    window.agregarAlCarrito = () => {
+        const codigo = document.getElementById('productoAgregar').value;
+        const cantidad = parseInt(document.getElementById('cantidadAgregar').value);
+        if (!codigo || cantidad <= 0) { alert('Seleccione un producto y cantidad'); return; }
+        const producto = productos.find(p => p.codigo === codigo);
+        if (!producto) return;
+        if (producto.stock < cantidad) { alert(`Stock insuficiente. Solo quedan ${producto.stock}`); return; }
+        const itemExistente = carrito.find(item => item.codigo === codigo);
+        if (itemExistente) {
+            if (producto.stock < itemExistente.cantidad + cantidad) { alert(`Stock insuficiente. Solo quedan ${producto.stock}`); return; }
+            itemExistente.cantidad += cantidad;
+        } else {
+            carrito.push({ codigo: producto.codigo, nombre: producto.nombre, precio: producto.precioVenta, cantidad: cantidad });
+        }
+        actualizarCarrito();
+        recalcularPedido();
     };
     
-    // ==================== CLIENTES (con geolocalización automática) ====================
-    window.abrirRegistroCliente = () => {
-        document.getElementById('clienteNombre').value = '';
-        document.getElementById('clienteDireccion').value = '';
-        document.getElementById('clienteCoord').value = '';
-        document.getElementById('clienteModal').style.display = 'block';
-    };
+    window.eliminarDelCarrito = (index) => { carrito.splice(index, 1); actualizarCarrito(); recalcularPedido(); };
     
-    window.guardarCliente = async () => {
-        const nombre = document.getElementById('clienteNombre').value.trim();
-        const direccion = document.getElementById('clienteDireccion').value.trim();
-        const coordTexto = document.getElementById('clienteCoord').value.trim();
-        if (!nombre || !direccion) { alert('Complete nombre y dirección'); return; }
-        if (!coordTexto) { alert('Seleccione una dirección válida del mapa'); return; }
-        const [lat, lng] = coordTexto.split(',').map(Number);
-        if (isNaN(lat) || isNaN(lng)) { alert('Coordenadas inválidas'); return; }
-        mostrarLoading(true);
-        await setDoc(doc(collection(db, 'empresa', 'dprofer', 'clientes')), {
-            nombre, direccion, lat, lng, fecha: Timestamp.now()
-        });
-        await cargarDatos();
-        cerrarModal('clienteModal');
-        mostrarLoading(false);
-        alert('Cliente registrado');
-    };
-    
-    function actualizarTablaClientes() {
-        const tbody = document.getElementById('tablaClientes');
-        if (!clientes.length) { tbody.innerHTML = '<tr><td colspan="4">No hay clientes</td></tr>'; return; }
-        tbody.innerHTML = clientes.map(c => `
+    function actualizarCarrito() {
+        const tbody = document.getElementById('carritoBody');
+        if (carrito.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Carrito vacío</td></tr>'; return; }
+        tbody.innerHTML = carrito.map((item, idx) => `
             <tr>
-                <td>${c.nombre}</td>
-                <td>${c.direccion || '-'}</td>
-                <td>${c.lat}, ${c.lng}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="eliminarCliente('${c.id}')">Eliminar</button></td>
+                <td>${item.nombre}</td>
+                <td>${item.cantidad}</td>
+                <td>$${item.precio.toFixed(2)}</td>
+                <td>$${(item.precio * item.cantidad).toFixed(2)}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${idx})">Eliminar</button></td>
             </tr>
         `).join('');
     }
     
-    window.eliminarCliente = async (id) => {
-        if (confirm('¿Eliminar cliente?')) {
-            mostrarLoading(true);
-            await deleteDoc(doc(db, 'empresa', 'dprofer', 'clientes', id));
-            await cargarDatos();
-            mostrarLoading(false);
-        }
-    };
-    
-    // ==================== PEDIDOS ====================
-    function actualizarSelects() {
-        const clienteSelect = document.getElementById('clienteSeleccion');
-        if (clienteSelect) {
-            clienteSelect.innerHTML = '<option value="">Seleccionar Cliente</option>' +
-                clientes.map(c => `<option value="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">${c.nombre}</option>`).join('');
-        }
-        const prodSelect = document.getElementById('productoSeleccion');
-        if (prodSelect) {
-            prodSelect.innerHTML = '<option value="">Seleccionar Producto</option>' +
-                productos.filter(p => p.stock > 0).map(p => `<option value="${p.codigo}" data-precio="${p.precioVenta}">${p.nombre} - Stock: ${p.stock}</option>`).join('');
-        }
+    async function recalcularPedido() {
+        const clienteId = document.getElementById('clienteSeleccion').value;
+        if (!clienteId || carrito.length === 0) return;
+        const cliente = CLIENTES_FIJOS.find(c => c.id == clienteId);
+        if (!cliente) return;
+        const distance = await calcularDistancia(cliente.lat, cliente.lng);
+        const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        const costoLog = distance * 0.02;
+        document.getElementById('subtotalProductos').textContent = subtotal.toFixed(2);
+        document.getElementById('distanciaKm').textContent = distance.toFixed(2);
+        document.getElementById('costoLogistico').textContent = costoLog.toFixed(2);
+        document.getElementById('totalPedido').textContent = (subtotal + costoLog).toFixed(2);
     }
     
-    async function calcularDistancia(coordCliente) {
-        const url = `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${NEGOCIO_COORD.lat},${NEGOCIO_COORD.lng}&destinations=${coordCliente.lat},${coordCliente.lng}&key=FGvQK0IETgIJqR8D5UeNhFMGExMlF9WsvBvHHAyFkAhK9XytvPydizJkjVtkEDzN`;
+    async function calcularDistancia(latCliente, lngCliente) {
+        const url = `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${NEGOCIO_COORD.lat},${NEGOCIO_COORD.lng}&destinations=${latCliente},${lngCliente}&key=FGvQK0IETgIJqR8D5UeNhFMGExMlF9WsvBvHHAyFkAhK9XytvPydizJkjVtkEDzN`;
         try {
             const res = await fetch(url);
             const data = await res.json();
-            if (data.rows[0].elements[0].status === 'OK') {
-                return data.rows[0].elements[0].distance.value / 1000;
-            }
+            if (data.rows[0].elements[0].status === 'OK') return data.rows[0].elements[0].distance.value / 1000;
             return 0;
-        } catch (e) { console.error(e); return 0; }
+        } catch (e) { return 0; }
     }
     
-    window.calcularTotalPedido = async () => {
+    window.confirmarPedido = async () => {
         const clienteId = document.getElementById('clienteSeleccion').value;
-        const prodCodigo = document.getElementById('productoSeleccion').value;
-        const cantidad = parseInt(document.getElementById('cantidadPedido').value) || 0;
-        if (!clienteId || !prodCodigo || cantidad === 0) return;
-        const cliente = clientes.find(c => c.id === clienteId);
-        const producto = productos.find(p => p.codigo === prodCodigo);
-        if (!cliente || !producto) return;
-        const distancia = await calcularDistancia({ lat: cliente.lat, lng: cliente.lng });
-        const subtotal = producto.precioVenta * cantidad;
-        const costoLog = distancia * 0.02;
-        document.getElementById('subtotalPedido').textContent = subtotal.toFixed(2);
-        document.getElementById('distanciaKm').textContent = distancia.toFixed(2);
-        document.getElementById('costoLogistico').textContent = costoLog.toFixed(2);
-        document.getElementById('totalPedido').textContent = (subtotal + costoLog).toFixed(2);
-    };
-    
-    window.confirmarPedidoVenta = async () => {
-        const clienteId = document.getElementById('clienteSeleccion').value;
-        const prodCodigo = document.getElementById('productoSeleccion').value;
-        const cantidad = parseInt(document.getElementById('cantidadPedido').value);
-        if (!clienteId || !prodCodigo || cantidad <= 0) { alert('Complete los datos'); return; }
-        const cliente = clientes.find(c => c.id === clienteId);
-        const producto = productos.find(p => p.codigo === prodCodigo);
-        if (producto.stock < cantidad) { alert(`Stock insuficiente. Solo quedan ${producto.stock}`); return; }
-        const distancia = await calcularDistancia({ lat: cliente.lat, lng: cliente.lng });
-        const subtotal = producto.precioVenta * cantidad;
-        const costoLog = distancia * 0.02;
-        const total = subtotal + costoLog;
+        if (!clienteId) { alert('Seleccione un cliente'); return; }
+        if (carrito.length === 0) { alert('Agregue productos al carrito'); return; }
+        const cliente = CLIENTES_FIJOS.find(c => c.id == clienteId);
+        const distance = await calcularDistancia(cliente.lat, cliente.lng);
+        const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+        const costoLog = distance * 0.02;
         mostrarLoading(true);
-        await updateDoc(doc(db, 'empresa', 'dprofer', 'productos', producto.codigo), {
-            stock: producto.stock - cantidad,
-            vendidoTotal: (producto.vendidoTotal || 0) + cantidad
-        });
+        for (const item of carrito) {
+            const producto = productos.find(p => p.codigo === item.codigo);
+            await updateDoc(doc(db, 'empresa', 'dprofer', 'productos', item.codigo), {
+                stock: producto.stock - item.cantidad,
+                vendidoTotal: (producto.vendidoTotal || 0) + item.cantidad
+            });
+        }
+        const productosTexto = carrito.map(item => `${item.nombre} x${item.cantidad}`).join(', ');
         await setDoc(doc(collection(db, 'empresa', 'dprofer', 'pedidos')), {
-            fecha: Timestamp.now(),
-            cliente: cliente.nombre,
-            producto: producto.nombre,
-            codigo: producto.codigo,
-            cantidad,
-            subtotal,
-            costoLogistico: costoLog,
-            total,
-            distanciaKm: distancia,
-            empleado: usuarioActual.email
+            fecha: Timestamp.now(), cliente: cliente.nombre, productos: productosTexto, subtotal: subtotal,
+            costoLogistico: costoLog, total: subtotal + costoLog, distanciaKm: distance, empleado: usuarioActual.email
         });
+        carrito = [];
+        actualizarCarrito();
         await cargarDatos();
         mostrarLoading(false);
         alert('Pedido realizado con éxito');
+        recalcularPedido();
     };
     
     function actualizarTablaPedidos() {
         const tbody = document.getElementById('tablaPedidos');
-        if (!pedidos.length) { tbody.innerHTML = '<tr><td colspan="7">No hay pedidos</td></tr>'; return; }
+        if (!pedidos.length) { tbody.innerHTML = '<tr><td colspan="4">No hay pedidos</td></tr>'; return; }
         tbody.innerHTML = pedidos.map(p => `
             <tr>
                 <td>${p.fecha ? new Date(p.fecha.seconds * 1000).toLocaleString() : ''}</td>
                 <td>${p.cliente}</td>
-                <td>${p.producto}</td>
-                <td>${p.cantidad}</td>
-                <td>$${p.subtotal.toFixed(2)}</td>
-                <td>$${p.costoLogistico.toFixed(2)}</td>
+                <td>${p.productos}</td>
                 <td>$${p.total.toFixed(2)}</td>
             </tr>
         `).join('');
@@ -632,49 +487,19 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
         document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-        if (tab === 'pedidos') {
-            actualizarSelects();
-            document.getElementById('subtotalPedido').textContent = '0.00';
-            document.getElementById('distanciaKm').textContent = '0.00';
-            document.getElementById('costoLogistico').textContent = '0.00';
-            document.getElementById('totalPedido').textContent = '0.00';
-        }
-        if (tab === 'clientes') actualizarTablaClientes();
+        if (tab === 'pedidos') { actualizarSelectsProductos(); actualizarSelectClientes(); recalcularPedido(); }
     };
     
     window.exportarExcel = () => {
         if (!productos.length) { alert('No hay datos'); return; }
-        const data = [['Código', 'Producto', 'Categoría', 'Stock', 'Vendido', 'Precio', 'Costo', 'Ganancia Unidad']];
-        productos.forEach(p => {
-            data.push([p.codigo, p.nombre, p.categoria, p.stock, p.vendidoTotal || 0, p.precioVenta, p.costo, p.precioVenta - p.costo]);
-        });
-        const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
-        XLSX.writeFile(wb, `inventario_dprofer.xlsx`);
-    };
-    
-    window.mostrarDashboard = () => {
-        alert('Dashboard: Próximamente gráficos avanzados');
+        const data = [['Código', 'Producto', 'Categoría', 'Stock', 'Vendido', 'Precio', 'Costo']];
+        productos.forEach(p => data.push([p.codigo, p.nombre, p.categoria, p.stock, p.vendidoTotal || 0, p.precioVenta, p.costo]));
+        const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(data); XLSX.utils.book_append_sheet(wb, ws, 'Inventario'); XLSX.writeFile(wb, `inventario_dprofer.xlsx`);
     };
     
     function mostrarLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
     function mostrarError(msg) { const err = document.getElementById('loginError'); err.style.display = 'block'; err.innerText = msg; setTimeout(() => err.style.display = 'none', 3000); }
     window.cerrarModal = (id) => { document.getElementById(id).style.display = 'none'; };
-    
-    // Inicializar Google Maps Autocomplete
-    window.initMapAutocomplete = () => {
-        const input = document.getElementById('clienteDireccion');
-        if (input) {
-            const autocomplete = new google.maps.places.Autocomplete(input);
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                if (place.geometry) {
-                    document.getElementById('clienteCoord').value = `${place.geometry.location.lat()}, ${place.geometry.location.lng()}`;
-                }
-            });
-        }
-    };
     
     document.getElementById('costo').addEventListener('input', calcularAuto);
     document.getElementById('precioVenta').addEventListener('input', calcularAuto);
