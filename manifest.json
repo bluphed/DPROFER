@@ -3,7 +3,7 @@
   "name": "Dprofer Inventario",
   "short_name": "Dprofer",
   "description": "Sistema de Inventario profesional para ferretería",
-  "start_url": ".",
+  "start_url": "https://bluphed.github.io/DPROFER/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1e3c72",
