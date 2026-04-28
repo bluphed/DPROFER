@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Dprofer Cloud - Inventario </title>
+    <meta name="theme-color" content="#1e3c72">
+    <title>Dprofer Cloud - Inventario y Pedidos</title>
+    
+    <!-- Iconos y logos -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icono-touch-apple-180x180.png">
+    <link rel="manifest" href="manifest.json">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -30,14 +38,14 @@
         .stat-card i { font-size: 40px; color: #1e3c72; }
         .stat-card h3 { font-size: 28px; font-weight: bold; margin: 10px 0; color: #1e3c72; }
         .stat-card p { color: #666; margin: 0; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
-        .tab { padding: 12px 25px; cursor: pointer; border-radius: 12px 12px 0 0; transition: 0.3s; font-weight: bold; font-size: 16px; }
-        .tab:hover { background: #e9ecef; }
-        .tab.active { background: #2a5298; color: white; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab { padding: 12px 25px; cursor: pointer; border-radius: 12px; transition: 0.3s; font-weight: bold; font-size: 16px; background: #e9ecef; color: #1e3c72; border: none; }
+        .tab:hover { background: #cfe2ff; transform: translateY(-2px); }
+        .tab.active { background: #2a5298; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: white; margin: 5% auto; padding: 25px; border-radius: 20px; width: 600px; max-width: 90%; }
+        .modal-content { background-color: white; margin: 5% auto; padding: 25px; border-radius: 20px; width: 600px; max-width: 95%; }
         .admin-only { display: none; }
         .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 9999; }
         .spinner { width: 50px; height: 50px; border: 5px solid white; border-top-color: #2a5298; border-radius: 50%; animation: spin 1s linear infinite; }
@@ -47,7 +55,12 @@
         .pedido-row:hover { background: #e8f0fe !important; }
         .top-productos-card { background: white; border-radius: 20px; margin-bottom: 25px; overflow: hidden; }
         .top-productos-card .card-header { background: #ffc107; color: #1e3c72; }
-        .resumen-pedido { background: #e8f0fe; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+        .resumen-pedido { background: #e8f0fe; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 5px solid #2a5298; }
+        .cliente-stats { background: #d4edda; border-radius: 15px; padding: 15px; margin-top: 15px; border-left: 5px solid #28a745; }
+        .logo-login { text-align: center; margin-bottom: 20px; }
+        .logo-login img { width: 100px; border-radius: 25px; object-fit: cover; }
+        .logo-header { display: flex; align-items: center; gap: 15px; }
+        .logo-header img { width: 50px; border-radius: 12px; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -56,7 +69,7 @@
 
 <!-- Modales -->
 <div id="editModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><p>Ingresa contraseña de administrador</p><input type="password" id="editPassword" class="form-control"><div class="mt-3"><button class="btn btn-primary" onclick="verificarEdicion()">Verificar</button><button class="btn btn-secondary" onclick="cerrarModal('editModal')">Cancelar</button></div></div></div>
-<div id="editarProductoModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><div class="form-group"><label>Nombre</label><input type="text" id="editNombre" class="form-control"></div><div class="form-group"><label>Categoría</label><select id="editCategoria" class="form-control"><option>Herramientas</option><option>Pinturas</option><option>Electrico</option><option>Ferreteria</option></select></div><div class="row"><div class="col-6"><label>Costo</label><input type="number" id="editCosto" class="form-control" step="0.01"></div><div class="col-6"><label>Precio Venta</label><input type="number" id="editPrecio" class="form-control" step="0.01"></div></div><div class="row"><div class="col-6"><label>Stock</label><input type="number" id="editStock" class="form-control"></div><div class="col-6"><label>Stock Minimo</label><input type="number" id="editStockMinimo" class="form-control"></div></div><div class="mt-3"><button class="btn btn-success" onclick="guardarEdicion()">Guardar</button><button class="btn btn-secondary" onclick="cerrarModal('editarProductoModal')">Cancelar</button></div></div></div>
+<div id="editarProductoModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><div class="form-group"><label>Nombre</label><input type="text" id="editNombre" class="form-control"></div><div class="form-group"><label>Categoria</label><select id="editCategoria" class="form-control"><option>Herramientas</option><option>Pinturas</option><option>Electrico</option><option>Ferreteria</option></select></div><div class="row"><div class="col-6"><label>Costo</label><input type="number" id="editCosto" class="form-control" step="0.01"></div><div class="col-6"><label>Precio Venta</label><input type="number" id="editPrecio" class="form-control" step="0.01"></div></div><div class="row"><div class="col-6"><label>Stock</label><input type="number" id="editStock" class="form-control"></div><div class="col-6"><label>Stock Minimo</label><input type="number" id="editStockMinimo" class="form-control"></div></div><div class="mt-3"><button class="btn btn-success" onclick="guardarEdicion()">Guardar</button><button class="btn btn-secondary" onclick="cerrarModal('editarProductoModal')">Cancelar</button></div></div></div>
 
 <div id="detallePedidoModal" class="modal">
     <div class="modal-content">
@@ -73,6 +86,7 @@
             <div class="card">
                 <div class="card-header text-center"><i class="fas fa-store"></i> Dprofer Cloud</div>
                 <div class="card-body">
+                    <div class="logo-login"><img src="android-chrome-192x192.png" alt="Dprofer Logo" onerror="this.style.display='none'"></div>
                     <div id="loginError" class="alert alert-danger" style="display:none"></div>
                     <input type="email" id="loginEmail" class="form-control mb-2" placeholder="dproferventas@gmail.com">
                     <input type="password" id="loginPassword" class="form-control mb-2" placeholder="Contrasena">
@@ -85,7 +99,13 @@
     <!-- App Principal -->
     <div id="appContainer" style="display:none">
         <div class="user-header bg-dark text-white p-3 rounded mb-3 d-flex justify-content-between align-items-center">
-            <div><h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2><p>Inventario + Pedidos + Logistica (0.02/km)</p></div>
+            <div class="logo-header">
+                <img src="android-chrome-192x192.png" alt="Dprofer Logo" onerror="this.style.display='none'">
+                <div>
+                    <h2><i class="fas fa-cloud-upload-alt"></i> Dprofer Cloud</h2>
+                    <p>Inventario + Pedidos + Logistica (0.02/km)</p>
+                </div>
+            </div>
             <div><span id="userDisplay"></span><button class="btn btn-danger ms-2" onclick="cerrarSesion()">Salir</button></div>
         </div>
 
@@ -96,7 +116,7 @@
             <input type="file" id="importExcelInput" style="display:none" accept=".xlsx, .xls, .csv">
         </div>
 
-        <!-- Tarjetas de Estadísticas -->
+        <!-- Tarjetas de Estadisticas -->
         <div class="stats-grid">
             <div class="stat-card" onclick="mostrarTodos()"><i class="fas fa-boxes"></i><h3 id="totalProductos">0</h3><p>Productos</p></div>
             <div class="stat-card" onclick="mostrarStockBajo()"><i class="fas fa-exclamation-triangle"></i><h3 id="stockBajo">0</h3><p>Stock Bajo</p></div>
@@ -107,20 +127,20 @@
 
         <div id="alertasContainer"></div>
 
-        <!-- Top 5 Productos Más Vendidos (Tarjeta independiente) -->
+        <!-- Top 5 Productos Mas Vendidos -->
         <div class="top-productos-card">
-            <div class="card-header"><i class="fas fa-trophy"></i> Top 5 Productos Más Vendidos</div>
+            <div class="card-header"><i class="fas fa-trophy"></i> Top 5 Productos Mas Vendidos</div>
             <div class="card-body">
                 <div class="table-container">
                     <table class="table">
-                        <thead><tr><th>#</th><th>Producto</th><th>Unidades Vendidas</th><th>Total Generado</th></tr></thead>
+                        <thead>发展<th>#</th><th>Producto</th><th>Unidades Vendidas</th><th>Total Generado</th></thead>
                         <tbody id="topProductosBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Formulario de Movimiento (Inventario) -->
+        <!-- Formulario de Movimiento -->
         <div class="card">
             <div class="card-header"><i class="fas fa-exchange-alt"></i> Registrar Movimiento (Inventario)</div>
             <div class="card-body">
@@ -145,8 +165,8 @@
 
         <!-- Pestañas -->
         <div class="tabs">
-            <div class="tab active" onclick="cambiarTab('inventario')">📦 Inventario</div>
-            <div class="tab" onclick="cambiarTab('pedidos')">🛒 Pedidos</div>
+            <div class="tab active" onclick="cambiarTab('inventario')"><i class="fas fa-box"></i> Inventario</div>
+            <div class="tab" onclick="cambiarTab('pedidos')"><i class="fas fa-shopping-cart"></i> Pedidos</div>
         </div>
 
         <!-- Inventario -->
@@ -154,10 +174,10 @@
             <div class="card">
                 <div class="card-header"><i class="fas fa-box"></i> Inventario Actual</div>
                 <div class="card-body">
-                    <input type="text" id="buscador" class="form-control mb-3" placeholder="Buscar por código o nombre..." onkeyup="filtrarProductos()">
+                    <input type="text" id="buscador" class="form-control mb-3" placeholder="Buscar por codigo o nombre..." onkeyup="filtrarProductos()">
                     <div class="table-container">
                         <table class="table">
-                            <thead><tr><th>#</th><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <thead>运河<th>#</th><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></thead>
                             <tbody id="tablaInventario"></tbody>
                         </table>
                     </div>
@@ -173,33 +193,38 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select></div>
+                            <div class="form-group"><label>Cliente</label><select id="clienteSeleccion" class="form-control" onchange="actualizarHistorialCliente(); recalcularPedido();"></select></div>
                             <div class="form-group"><label>Agregar Producto</label>
                                 <div class="row g-2">
                                     <div class="col-7"><select id="productoAgregar" class="form-control"></select></div>
                                     <div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1" min="1"></div>
-                                    <div class="col-2"><button class="btn btn-primary w-100" onclick="agregarAlCarrito()"><i class="fas fa-plus"></i></button></div>
+                                    <div class="col-2"><button class="btn btn-primary w-100" onclick="agregarAlCarrito()"><i class="fas fa-plus"></i> Agregar</button></div>
                                 </div>
                             </div>
                             <div class="mt-4"><h5>Carrito de Compra</h5>
                                 <div class="table-container" style="max-height: 250px;">
                                     <table class="table">
-                                        <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Acciones</th></tr></thead>
+                                        <thead>运河<th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Acciones</th></thead>
                                         <tbody id="carritoBody"></tbody>
                                     </table>
                                 </div>
+                            </div>
+                            <div id="clienteHistorial" class="cliente-stats" style="display:none;">
+                                <h6><i class="fas fa-chart-line"></i> Historial del Cliente</h6>
+                                <p><strong>Compras realizadas:</strong> <span id="clienteCompras">0</span></p>
+                                <p><strong>Total gastado:</strong> $<span id="clienteGastado">0.00</span></p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="resumen-pedido">
                                 <h6><i class="fas fa-receipt"></i> Resumen del Pedido</h6>
-                                <p><strong>Subtotal:</strong> $<span id="subtotalProductos">0.00</span></p>
-                                <p><strong>Distancia:</strong> <span id="distanciaKm">0.00</span> km</p>
+                                <p><strong>Subtotal productos:</strong> $<span id="subtotalProductos">0.00</span></p>
+                                <p><strong>Distancia al cliente:</strong> <span id="distanciaKm">0.00</span> km</p>
                                 <p><strong>Costo logistico (0.02/km):</strong> $<span id="costoLogistico">0.00</span></p>
                                 <hr>
-                                <h5><strong>Total: $<span id="totalPedido">0.00</span></strong></h5>
+                                <h5><strong>TOTAL DEL PEDIDO: $<span id="totalPedido">0.00</span></strong></h5>
                             </div>
-                            <button class="btn btn-success w-100 mt-2" onclick="crearPedidoPendiente()"><i class="fas fa-save"></i> Guardar Pedido Pendiente</button>
+                            <button class="btn btn-pedido w-100 mt-2" onclick="crearPedidoPendiente()" style="background:#ffc107; color:#1e3c72; font-weight:bold;"><i class="fas fa-check-circle"></i> CONFIRMAR PEDIDO</button>
                         </div>
                     </div>
                 </div>
@@ -211,7 +236,7 @@
                 <div class="card-body">
                     <div class="table-container">
                         <table class="table">
-                            <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <thead>运河<th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></thead>
                             <tbody id="pendientesBody"></tbody>
                         </table>
                     </div>
@@ -224,7 +249,7 @@
                 <div class="card-body">
                     <div class="table-container">
                         <table class="table">
-                            <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <thead>运河<th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></thead>
                             <tbody id="atendidosBody"></tbody>
                         </table>
                     </div>
@@ -235,28 +260,10 @@
 </div>
 
 <script>
-// ====================
-    // ====================
-    // ====================
-    // ====================
-    // ==================== CLIENTES FIJOS ====================
+    // Un solo cliente: Gabriel en Guayaquil
     const CLIENTES_FIJOS = [
-        { id: 1, nombre: "Gabriel", direccion: "Av. Principal 123", lat: -0.2546, lng: -79.1724 },
-       { id: 1, nombre: "asdasdasd", direccion: "Av. Principal 123", lat: -2.1350433, lng: -79.9239764 },
+        { id: 1, nombre: "Gabriel", direccion: "Guayaquil", lat: -2.1350433, lng: -79.9214015 }
     ];
-
-
-
-
-
-
-
-
-
- // ====================
-    // ====================
-    // ====================
-    // ====================  
 </script>
 
 <script type="module">
@@ -297,7 +304,21 @@
         }
         select.innerHTML = '<option value="">Seleccionar Cliente</option>' + 
             CLIENTES.map(c => `<option value="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">${c.nombre} - ${c.direccion}</option>`).join('');
-        select.onchange = recalcularPedido;
+    }
+    
+    function actualizarHistorialCliente() {
+        const clienteId = document.getElementById('clienteSeleccion').value;
+        const historialDiv = document.getElementById('clienteHistorial');
+        if (!clienteId) {
+            historialDiv.style.display = 'none';
+            return;
+        }
+        const pedidosCliente = pedidosAtendidos.filter(p => p.clienteId == clienteId);
+        const totalCompras = pedidosCliente.length;
+        const totalGastado = pedidosCliente.reduce((sum, p) => sum + p.total, 0);
+        document.getElementById('clienteCompras').textContent = totalCompras;
+        document.getElementById('clienteGastado').textContent = totalGastado.toFixed(2);
+        historialDiv.style.display = 'block';
     }
     
     function actualizarPedidosPendientesCard() {
@@ -372,15 +393,20 @@
     function actualizarTopProductos() {
         const tbody = document.getElementById('topProductosBody');
         const top5 = [...productos].sort((a, b) => (b.vendidoTotal || 0) - (a.vendidoTotal || 0)).slice(0, 5);
-        if (top5.length === 0) { tbody.innerHTML = '<tr><td colspan="4">No hay datos</td></tr>'; return; }
+        if (top5.length === 0) { tbody.innerHTML = '<td><td colspan="4">No hay datos</tr>'; return; }
         tbody.innerHTML = top5.map((p, idx) => `
-            <tr><td>${idx+1}</td><td>${p.nombre}</td><td>${p.vendidoTotal || 0}</td><td>$${((p.vendidoTotal || 0) * p.precioVenta).toFixed(2)}</td></tr>
+            <tr>
+                <td>${idx+1}</td>
+                <td>${p.nombre}</td>
+                <td>${p.vendidoTotal || 0}</td>
+                <td>$${((p.vendidoTotal || 0) * p.precioVenta).toFixed(2)}</td>
+             </tr>
         `).join('');
     }
     
     function actualizarInventario() {
         const tbody = document.getElementById('tablaInventario');
-        if (productos.length === 0) { tbody.innerHTML = '<tr><td colspan="10">No hay productos</td></tr>'; return; }
+        if (productos.length === 0) { tbody.innerHTML = '<tr><td colspan="10">No hay productos</tr>'; return; }
         const ordenados = [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -394,10 +420,10 @@
                 <td>$${(p.precioVenta - p.costo).toFixed(2)}</td>
                 <td>${p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">Stock Bajo</span>' : '<span class="badge-stock-normal">Normal</span>'}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')" style="background:#ffc107; border:none; padding:5px 10px; border-radius:8px;"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')" style="background:#dc3545; border:none; padding:5px 10px; border-radius:8px; color:white;"><i class="fas fa-trash"></i> Eliminar</button>
                 </td>
-            </tr>
+             </tr>
         `).join('');
     }
     
@@ -405,7 +431,7 @@
         const term = document.getElementById('buscador').value.toLowerCase();
         const filtrados = productos.filter(p => p.codigo.toLowerCase().includes(term) || p.nombre.toLowerCase().includes(term));
         const tbody = document.getElementById('tablaInventario');
-        if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="10">No hay coincidencias</td></tr>'; return; }
+        if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="10">No hay coincidencias</tr>'; return; }
         const ordenados = [...filtrados].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -419,10 +445,10 @@
                 <td>$${(p.precioVenta - p.costo).toFixed(2)}</td>
                 <td>${p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">Stock Bajo</span>' : '<span class="badge-stock-normal">Normal</span>'}</td>
                 <td>
-                    <button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')" style="background:#ffc107; border:none; padding:5px 10px; border-radius:8px;"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')" style="background:#dc3545; border:none; padding:5px 10px; border-radius:8px; color:white;"><i class="fas fa-trash"></i> Eliminar</button>
                 </td>
-            </tr>
+             </tr>
         `).join('');
     };
     
@@ -430,7 +456,7 @@
     window.mostrarStockBajo = function() {
         const bajos = productos.filter(p => p.stock <= (p.stockMinimo || 5));
         const tbody = document.getElementById('tablaInventario');
-        if (!bajos.length) { tbody.innerHTML = '<tr><td colspan="10">No hay productos con stock bajo</td></tr>'; return; }
+        if (!bajos.length) { tbody.innerHTML = '<tr><td colspan="10">No hay productos con stock bajo<tr>'; return; }
         const ordenados = [...bajos].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -444,18 +470,18 @@
                 <td>$${(p.precioVenta - p.costo).toFixed(2)}</td>
                 <td><span class="badge-stock-bajo">Stock Bajo</span></td>
                 <td>
-                    <button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')" style="background:#ffc107; border:none; padding:5px 10px; border-radius:8px;"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')" style="background:#dc3545; border:none; padding:5px 10px; border-radius:8px; color:white;"><i class="fas fa-trash"></i> Eliminar</button>
                 </td>
-            </tr>
+             </tr>
         `).join('');
     };
     
     let productoCodigoEditar = null;
-    window.abrirEditarProducto = (codigo) => { if (!esAdmin) return; productoCodigoEditar = codigo; document.getElementById('editModal').style.display = 'block'; };
+    window.abrirEditarProducto = (codigo) => { if (!esAdmin) { alert('Solo administrador puede editar'); return; } productoCodigoEditar = codigo; document.getElementById('editModal').style.display = 'block'; };
     window.verificarEdicion = () => { const pass = document.getElementById('editPassword').value; if (pass === ADMIN_PASSWORD) { cerrarModal('editModal'); const p = productos.find(p => p.codigo === productoCodigoEditar); if (p) { document.getElementById('editNombre').value = p.nombre; document.getElementById('editCategoria').value = p.categoria; document.getElementById('editCosto').value = p.costo; document.getElementById('editPrecio').value = p.precioVenta; document.getElementById('editStock').value = p.stock; document.getElementById('editStockMinimo').value = p.stockMinimo || 5; document.getElementById('editarProductoModal').style.display = 'block'; } } else { alert('Contrasena incorrecta'); cerrarModal('editModal'); } };
     window.guardarEdicion = async () => { const nombre = document.getElementById('editNombre').value; const categoria = document.getElementById('editCategoria').value; const costo = parseFloat(document.getElementById('editCosto').value); const precio = parseFloat(document.getElementById('editPrecio').value); const stock = parseInt(document.getElementById('editStock').value); const stockMin = parseInt(document.getElementById('editStockMinimo').value); if (!nombre) return; mostrarLoading(true); await updateDoc(doc(db, 'empresa', 'dprofer', 'productos', productoCodigoEditar), { nombre, categoria, costo, precioVenta: precio, stock, stockMinimo: stockMin, actualizado: Timestamp.now() }); await cargarDatos(); cerrarModal('editarProductoModal'); mostrarLoading(false); };
-    window.eliminarProducto = async (codigo) => { if (!esAdmin) return; const pass = prompt('Contrasena de administrador:'); if (pass !== ADMIN_PASSWORD) { alert('Contrasena incorrecta'); return; } if (confirm('Eliminar producto?')) { mostrarLoading(true); await deleteDoc(doc(db, 'empresa', 'dprofer', 'productos', codigo)); await cargarDatos(); mostrarLoading(false); } };
+    window.eliminarProducto = async (codigo) => { if (!esAdmin) { alert('Solo administrador puede eliminar'); return; } const pass = prompt('Contrasena de administrador:'); if (pass !== ADMIN_PASSWORD) { alert('Contrasena incorrecta'); return; } if (confirm('Eliminar producto?')) { mostrarLoading(true); await deleteDoc(doc(db, 'empresa', 'dprofer', 'productos', codigo)); await cargarDatos(); mostrarLoading(false); } };
     
     window.registrarMovimiento = async () => {
         const codigo = document.getElementById('codigo').value.trim();
@@ -497,28 +523,37 @@
     function calcularAuto() { const costo = parseFloat(document.getElementById('costo').value) || 0; const precio = parseFloat(document.getElementById('precioVenta').value) || 0; const cant = parseInt(document.getElementById('cantidad').value) || 0; document.getElementById('rentabilidadUnidad').value = `$${(precio - costo).toFixed(2)}`; document.getElementById('totalMovimiento').value = `$${(precio * cant).toFixed(2)}`; }
     window.generarCodigo = () => { const nombre = document.getElementById('nombre').value; if (!nombre) return; const codigoActual = document.getElementById('codigo').value; if (codigoActual && productos.find(p => p.codigo === codigoActual)) return; const sig = productos.length + 1; let pref = nombre.substring(0,3).toUpperCase(); pref = pref.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); document.getElementById('codigo').value = `${pref}-${sig.toString().padStart(3,'0')}`; };
     
-    async function calcularDistancia(latCliente, lngCliente) {
-        const url = `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${NEGOCIO_COORD.lat},${NEGOCIO_COORD.lng}&destinations=${latCliente},${lngCliente}&key=FGvQK0IETgIJqR8D5UeNhFMGExMlF9WsvBvHHAyFkAhK9XytvPydizJkjVtkEDzN`;
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.rows[0].elements[0].status === 'OK') return data.rows[0].elements[0].distance.value / 1000;
-            return 0;
-        } catch (e) { return 0; }
+    // Calcular distancia usando formula de Haversine
+    function calcularDistancia(latCliente, lngCliente) {
+        const R = 6371;
+        const dLat = (latCliente - NEGOCIO_COORD.lat) * Math.PI / 180;
+        const dLon = (lngCliente - NEGOCIO_COORD.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(NEGOCIO_COORD.lat * Math.PI / 180) * Math.cos(latCliente * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
     }
     
     async function recalcularPedido() {
         const clienteId = document.getElementById('clienteSeleccion').value;
-        if (!clienteId || carrito.length === 0) return;
+        if (!clienteId || carrito.length === 0) {
+            document.getElementById('subtotalProductos').textContent = '0.00';
+            document.getElementById('distanciaKm').textContent = '0.00';
+            document.getElementById('costoLogistico').textContent = '0.00';
+            document.getElementById('totalPedido').textContent = '0.00';
+            return;
+        }
         const cliente = CLIENTES.find(c => c.id == clienteId);
         if (!cliente) return;
-        const distance = await calcularDistancia(cliente.lat, cliente.lng);
+        const distance = calcularDistancia(cliente.lat, cliente.lng);
         const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
         const costoLog = distance * 0.02;
+        const total = subtotal + costoLog;
         document.getElementById('subtotalProductos').textContent = subtotal.toFixed(2);
         document.getElementById('distanciaKm').textContent = distance.toFixed(2);
         document.getElementById('costoLogistico').textContent = costoLog.toFixed(2);
-        document.getElementById('totalPedido').textContent = (subtotal + costoLog).toFixed(2);
+        document.getElementById('totalPedido').textContent = total.toFixed(2);
     }
     
     window.agregarAlCarrito = () => {
@@ -543,14 +578,14 @@
     
     function actualizarCarrito() {
         const tbody = document.getElementById('carritoBody');
-        if (carrito.length === 0) { tbody.innerHTML = '<td><td colspan="5">Carrito vacio</td></tr>'; return; }
+        if (carrito.length === 0) { tbody.innerHTML = '<td><td colspan="5">Carrito vacio</td> </tr>'; return; }
         tbody.innerHTML = carrito.map((item, idx) => `
             <tr>
                 <td>${item.nombre}</td>
                 <td>${item.cantidad}</td>
                 <td>$${item.precio.toFixed(2)}</td>
                 <td>$${(item.precio * item.cantidad).toFixed(2)}</td>
-                <td><button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${idx})"><i class="fas fa-trash"></i></button></td>
+                <td><button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${idx})"><i class="fas fa-trash"></i> Quitar</button></td>
             </tr>
         `).join('');
     }
@@ -560,7 +595,7 @@
         if (!clienteId) { alert('Seleccione un cliente'); return; }
         if (carrito.length === 0) { alert('Agregue productos al carrito'); return; }
         const cliente = CLIENTES.find(c => c.id == clienteId);
-        const distance = await calcularDistancia(cliente.lat, cliente.lng);
+        const distance = calcularDistancia(cliente.lat, cliente.lng);
         const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
         const costoLog = distance * 0.02;
         const total = subtotal + costoLog;
@@ -585,14 +620,22 @@
         actualizarCarrito();
         await cargarDatos();
         mostrarLoading(false);
-        alert('Pedido guardado');
+        alert('Pedido confirmado y guardado!');
         recalcularPedido();
     };
     
     window.marcarComoAtendido = async (pedidoId, pedidoData) => {
-        if (!confirm('Marcar como atendido?')) return;
+        if (!confirm('Marcar este pedido como atendido? Se descontara del inventario.')) return;
         mostrarLoading(true);
         try {
+            for (const item of pedidoData.productos) {
+                const producto = productos.find(p => p.codigo === item.codigo);
+                if (!producto || producto.stock < item.cantidad) {
+                    alert(`Stock insuficiente para ${item.nombre}`);
+                    mostrarLoading(false);
+                    return;
+                }
+            }
             for (const item of pedidoData.productos) {
                 const producto = productos.find(p => p.codigo === item.codigo);
                 const prodRef = doc(db, 'empresa', 'dprofer', 'productos', item.codigo);
@@ -606,7 +649,7 @@
             await setDoc(doc(collection(db, 'empresa', 'dprofer', 'pedidos_atendidos')), atendidoData);
             await deleteDoc(doc(db, 'empresa', 'dprofer', 'pedidos_pendientes', pedidoId));
             await cargarDatos();
-            alert('Pedido atendido');
+            alert('Pedido atendido correctamente');
         } catch (e) { alert('Error: ' + e.message); }
         mostrarLoading(false);
     };
@@ -627,7 +670,7 @@
     
     function actualizarListaPedidos() {
         const pendBody = document.getElementById('pendientesBody');
-        if (pedidosPendientes.length === 0) { pendBody.innerHTML = '<tr><td colspan="6">No hay pedidos pendientes</td></tr>'; }
+        if (pedidosPendientes.length === 0) { pendBody.innerHTML = '<tr><td colspan="6">No hay pedidos pendientes</td> </tr>'; }
         else {
             pendBody.innerHTML = pedidosPendientes.map(p => `
                 <tr class="pedido-row" ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
@@ -637,11 +680,11 @@
                     <td>$${p.total.toFixed(2)}</td>
                     <td><span class="badge-pendiente">Pendiente</span></td>
                     <td><button class="btn btn-sm btn-success" onclick='marcarComoAtendido("${p.id}", ${JSON.stringify(p).replace(/'/g, "&#39;")})'>Atender</button></td>
-                </tr>
+                </table>
             `).join('');
         }
         const atendBody = document.getElementById('atendidosBody');
-        if (pedidosAtendidos.length === 0) { atendBody.innerHTML = '<tr><td colspan="6">No hay pedidos atendidos</td></td>'; }
+        if (pedidosAtendidos.length === 0) { atendBody.innerHTML = '<tr><td colspan="6">No hay pedidos atendidos</td> </tr>'; }
         else {
             atendBody.innerHTML = pedidosAtendidos.map(p => `
                 <tr class="pedido-row" ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
@@ -703,7 +746,7 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
         document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-        if (tab === 'pedidos') { actualizarSelectProductos(); actualizarSelectClientes(); recalcularPedido(); }
+        if (tab === 'pedidos') { actualizarSelectProductos(); actualizarSelectClientes(); recalcularPedido(); actualizarHistorialCliente(); }
     };
     
     function mostrarLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
