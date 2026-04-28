@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Dprofer - Inventario + Ventas + Logística</title>
+    <title>Dprofer - Inventario + Pedidos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -12,8 +12,7 @@
         body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; font-family: 'Segoe UI', sans-serif; }
         .container { max-width: 1400px; margin: 0 auto; }
         .card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 25px; overflow: hidden; border: none; }
-        .card-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 15px 20px; font-weight: bold; cursor: pointer; }
-        .card-header i { margin-right: 8px; }
+        .card-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 15px 20px; font-weight: bold; }
         .btn { border-radius: 10px; font-weight: bold; transition: all 0.3s; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .table-container { overflow-x: auto; max-height: 500px; overflow-y: auto; border-radius: 15px; }
@@ -29,9 +28,9 @@
         .stat-card:hover { transform: translateY(-5px); }
         .stat-card i { font-size: 40px; color: #1e3c72; }
         .stat-card h3 { font-size: 28px; font-weight: bold; margin: 10px 0; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; flex-wrap: wrap; }
-        .tab { padding: 10px 20px; cursor: pointer; border-radius: 10px 10px 0 0; transition: 0.3s; }
-        .tab:hover { background: #e2e8f0; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
+        .tab { padding: 10px 20px; cursor: pointer; border-radius: 10px 10px 0 0; transition: 0.3s; font-weight: bold; }
+        .tab:hover { background: #e9ecef; }
         .tab.active { background: #2a5298; color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -69,7 +68,6 @@
             <div class="card">
                 <div class="card-header text-center"><i class="fas fa-store"></i> Dprofer Cloud</div>
                 <div class="card-body">
-                    <div class="text-center mb-3"><img src="imagenes/logo-login.png" style="width:100px; border-radius:25px;" onerror="this.style.display='none'"></div>
                     <div id="loginError" class="alert alert-danger" style="display:none"></div>
                     <input type="email" id="loginEmail" class="form-control mb-2" placeholder="dproferventas@gmail.com">
                     <input type="password" id="loginPassword" class="form-control mb-2" placeholder="Contrasena">
@@ -99,8 +97,6 @@
             <div class="stat-card" onclick="mostrarStockBajo()"><i class="fas fa-exclamation-triangle"></i><h3 id="stockBajo">0</h3><p>Stock Bajo</p></div>
             <div class="stat-card"><i class="fas fa-chart-line"></i><h3 id="ventasTotales">0</h3><p>Unidades Vendidas</p></div>
             <div class="stat-card"><i class="fas fa-dollar-sign"></i><h3 id="gananciaTotal">$0</h3><p>Ganancia</p></div>
-            <div class="stat-card"><i class="fas fa-calendar-alt"></i><h3 id="ventasMes">0</h3><p>Ventas del Mes</p></div>
-            <div class="stat-card"><i class="fas fa-trophy"></i><h3 id="gananciaMes">$0</h3><p>Ganancia del Mes</p></div>
         </div>
 
         <div id="alertasContainer"></div>
@@ -149,55 +145,55 @@
         <div id="tabPedidos" class="tab-content">
             <!-- Nuevo Pedido -->
             <div class="card">
-                <div class="card-header" data-bs-toggle="collapse" data-bs-target="#nuevoPedidoCollapse"><i class="fas fa-plus-circle"></i> Nuevo Pedido</div>
-                <div id="nuevoPedidoCollapse" class="collapse show">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group"><label>Seleccionar Cliente</label><select id="clienteSeleccion" class="form-control"></select></div>
-                                <div class="form-group"><label>Agregar Producto</label><div class="row"><div class="col-7"><select id="productoAgregar" class="form-control"></select></div><div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1" min="1"></div><div class="col-2"><button class="btn btn-primary" onclick="agregarAlCarrito()"><i class="fas fa-plus"></i></button></div></div></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="alert alert-info">
-                                    <strong>Resumen del Pedido</strong><br>
-                                    Subtotal productos: $<span id="subtotalProductos">0.00</span><br>
-                                    Distancia al cliente: <span id="distanciaKm">0.00</span> km<br>
-                                    Costo logistico (0.02/km): $<span id="costoLogistico">0.00</span><br>
-                                    <strong>Total a pagar: $<span id="totalPedido">0.00</span></strong>
+                <div class="card-header">Nuevo Pedido</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select></div>
+                            <div class="form-group"><label>Agregar Producto</label>
+                                <div class="row">
+                                    <div class="col-7"><select id="productoAgregar" class="form-control"></select></div>
+                                    <div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1" min="1"></div>
+                                    <div class="col-2"><button class="btn btn-primary" onclick="agregarAlCarrito()"><i class="fas fa-plus"></i></button></div>
                                 </div>
-                                <button class="btn btn-success" onclick="crearPedidoPendiente()"><i class="fas fa-save"></i> Guardar Pedido Pendiente</button>
                             </div>
+                            <div class="mt-3"><h5>Carrito</h5><div class="table-container"><table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Acciones</th></tr></thead><tbody id="carritoBody"></tbody></table></div></div>
                         </div>
-                        <div class="mt-3"><h5>Carrito de Compra</h5><div class="table-container"><table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Acciones</th></tr></thead><tbody id="carritoBody"></tbody></table></div></div>
+                        <div class="col-6">
+                            <div class="alert alert-info">
+                                <strong>Resumen</strong><br>
+                                Subtotal: $<span id="subtotalProductos">0.00</span><br>
+                                Distancia: <span id="distanciaKm">0.00</span> km<br>
+                                Costo logistico: $<span id="costoLogistico">0.00</span><br>
+                                <strong>Total: $<span id="totalPedido">0.00</span></strong>
+                            </div>
+                            <button class="btn btn-success w-100" onclick="crearPedidoPendiente()"><i class="fas fa-save"></i> Guardar Pedido</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Pedidos Pendientes -->
             <div class="card">
-                <div class="card-header"><i class="fas fa-clock"></i> Pedidos Pendientes</div>
+                <div class="card-header">Pedidos Pendientes</div>
                 <div class="card-body">
                     <div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="pendientesBody"></tbody></table></div>
                 </div>
             </div>
 
-            <!-- Historial de Atendidos -->
+            <!-- Atendidos -->
             <div class="card">
-                <div class="card-header"><i class="fas fa-check-circle"></i> Pedidos Atendidos</div>
+                <div class="card-header">Pedidos Atendidos</div>
                 <div class="card-body">
-                    <div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Fecha Atencion</th><th>Acciones</th></tr></thead><tbody id="atendidosBody"></tbody></table></div>
+                    <div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="atendidosBody"></tbody></table></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="clientes.js"></script>
 <script type="module">
-    // Clientes Fijos
-    const CLIENTES_FIJOS = [
-
-    ];
-
     // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",
@@ -224,6 +220,24 @@
     let pedidosPendientes = [];
     let pedidosAtendidos = [];
     let carrito = [];
+    let CLIENTES_FIJOS = [];
+    
+    // Cargar clientes del archivo externo
+    if (typeof window !== 'undefined' && window.CLIENTES_FIJOS) {
+        CLIENTES_FIJOS = window.CLIENTES_FIJOS;
+    }
+    
+    function actualizarSelectClientes() {
+        const select = document.getElementById('clienteSeleccion');
+        if (!select) return;
+        if (CLIENTES_FIJOS.length === 0) {
+            select.innerHTML = '<option value="">No hay clientes registrados</option>';
+            return;
+        }
+        select.innerHTML = '<option value="">Seleccionar Cliente</option>' + 
+            CLIENTES_FIJOS.map(c => `<option value="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">${c.nombre} - ${c.direccion}</option>`).join('');
+        select.onchange = recalcularPedido;
+    }
     
     // Funciones de Login
     window.iniciarSesion = async () => {
@@ -256,10 +270,19 @@
             actualizarInventario();
             actualizarEstadisticas();
             actualizarTopProductos();
-            actualizarSelects();
+            actualizarSelectProductos();
+            actualizarSelectClientes();
             actualizarListaPedidos();
         } catch (e) { console.error(e); }
         mostrarLoading(false);
+    }
+    
+    function actualizarSelectProductos() {
+        const select = document.getElementById('productoAgregar');
+        if (select) {
+            select.innerHTML = '<option value="">Seleccionar Producto</option>' + 
+                productos.filter(p => p.stock > 0).map(p => `<option value="${p.codigo}" data-precio="${p.precioVenta}">${p.nombre} - Stock: ${p.stock} - $${p.precioVenta}</option>`).join('');
+        }
     }
     
     // Inventario
@@ -268,30 +291,16 @@
         const stockBajo = productos.filter(p => p.stock <= (p.stockMinimo || 5)).length;
         const vendidas = productos.reduce((s, p) => s + (p.vendidoTotal || 0), 0);
         const ganancia = productos.reduce((s, p) => s + ((p.precioVenta - p.costo) * (p.vendidoTotal || 0)), 0);
-        const mesActual = new Date().getMonth();
-        const anioActual = new Date().getFullYear();
-        const ventasMes = pedidosAtendidos.filter(p => {
-            if (!p.fechaAtencion) return false;
-            const fecha = new Date(p.fechaAtencion.seconds * 1000);
-            return fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual;
-        }).reduce((sum, p) => sum + (p.cantidadTotal || 0), 0);
-        const gananciaMes = pedidosAtendidos.filter(p => {
-            if (!p.fechaAtencion) return false;
-            const fecha = new Date(p.fechaAtencion.seconds * 1000);
-            return fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual;
-        }).reduce((sum, p) => sum + (p.gananciaTotal || 0), 0);
         document.getElementById('totalProductos').textContent = total;
         document.getElementById('stockBajo').textContent = stockBajo;
         document.getElementById('ventasTotales').textContent = vendidas;
         document.getElementById('gananciaTotal').textContent = '$' + ganancia.toFixed(2);
-        document.getElementById('ventasMes').textContent = ventasMes;
-        document.getElementById('gananciaMes').textContent = '$' + gananciaMes.toFixed(2);
     }
     
     function actualizarTopProductos() {
         const tbody = document.getElementById('topProductosBody');
         const top5 = [...productos].sort((a, b) => (b.vendidoTotal || 0) - (a.vendidoTotal || 0)).slice(0, 5);
-        if (top5.length === 0) { tbody.innerHTML = '<tr><td colspan="4">No hay datos</td></tr>'; return; }
+        if (top5.length === 0) { tbody.innerHTML = '<td><td colspan="4">No hay datos</td></td>'; return; }
         tbody.innerHTML = top5.map((p, idx) => `
             <tr>
                 <td>${idx+1}</td>
@@ -304,7 +313,7 @@
     
     function actualizarInventario() {
         const tbody = document.getElementById('tablaInventario');
-        if (productos.length === 0) { tbody.innerHTML = '<tr><td colspan="10">No hay productos</td></tr>'; return; }
+        if (productos.length === 0) { tbody.innerHTML = '}<td colspan="10">No hay productos</td>'; return; }
         const ordenados = [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -329,7 +338,7 @@
         const term = document.getElementById('buscador').value.toLowerCase();
         const filtrados = productos.filter(p => p.codigo.toLowerCase().includes(term) || p.nombre.toLowerCase().includes(term));
         const tbody = document.getElementById('tablaInventario');
-        if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="10">No hay coincidencias</td></tr>'; return; }
+        if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="10">No hay coincidencias</td>'; return; }
         const ordenados = [...filtrados].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -354,7 +363,7 @@
     window.mostrarStockBajo = function() {
         const bajos = productos.filter(p => p.stock <= (p.stockMinimo || 5));
         const tbody = document.getElementById('tablaInventario');
-        if (!bajos.length) { tbody.innerHTML = '<tr><td colspan="10">No hay productos con stock bajo</td></tr>'; return; }
+        if (!bajos.length) { tbody.innerHTML = '<tr><td colspan="10">No hay productos con stock bajo</td>'; return; }
         const ordenados = [...bajos].sort((a, b) => a.nombre.localeCompare(b.nombre));
         tbody.innerHTML = ordenados.map((p, i) => `
             <tr>
@@ -424,18 +433,6 @@
     window.generarCodigo = () => { const nombre = document.getElementById('nombre').value; if (!nombre) return; const codigoActual = document.getElementById('codigo').value; if (codigoActual && productos.find(p => p.codigo === codigoActual)) return; const sig = productos.length + 1; let pref = nombre.substring(0,3).toUpperCase(); pref = pref.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); document.getElementById('codigo').value = `${pref}-${sig.toString().padStart(3,'0')}`; };
     
     // Pedidos
-    function actualizarSelects() {
-        const clienteSelect = document.getElementById('clienteSeleccion');
-        if (clienteSelect) {
-            clienteSelect.innerHTML = '<option value="">Seleccionar Cliente</option>' + CLIENTES_FIJOS.map(c => `<option value="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">${c.nombre} - ${c.direccion}</option>`).join('');
-            clienteSelect.onchange = recalcularPedido;
-        }
-        const prodSelect = document.getElementById('productoAgregar');
-        if (prodSelect) {
-            prodSelect.innerHTML = '<option value="">Seleccionar Producto</option>' + productos.filter(p => p.stock > 0).map(p => `<option value="${p.codigo}" data-precio="${p.precioVenta}">${p.nombre} - Stock: ${p.stock} - $${p.precioVenta}</option>`).join('');
-        }
-    }
-    
     async function calcularDistancia(latCliente, lngCliente) {
         const url = `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${NEGOCIO_COORD.lat},${NEGOCIO_COORD.lng}&destinations=${latCliente},${lngCliente}&key=FGvQK0IETgIJqR8D5UeNhFMGExMlF9WsvBvHHAyFkAhK9XytvPydizJkjVtkEDzN`;
         try {
@@ -503,8 +500,6 @@
         const subtotal = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
         const costoLog = distance * 0.02;
         const total = subtotal + costoLog;
-        const cantidadTotal = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-        const gananciaTotal = carrito.reduce((sum, item) => sum + ((item.precio - (productos.find(p => p.codigo === item.codigo)?.costo || 0)) * item.cantidad), 0);
         const pedidoData = {
             fecha: Timestamp.now(),
             clienteId: cliente.id,
@@ -518,8 +513,6 @@
             costoLogistico: costoLog,
             distanciaKm: distance,
             total: total,
-            cantidadTotal: cantidadTotal,
-            gananciaTotal: gananciaTotal,
             estado: 'pendiente'
         };
         mostrarLoading(true);
@@ -528,22 +521,14 @@
         actualizarCarrito();
         await cargarDatos();
         mostrarLoading(false);
-        alert('Pedido guardado como pendiente');
+        alert('Pedido guardado');
         recalcularPedido();
     };
     
     window.marcarComoAtendido = async (pedidoId, pedidoData) => {
-        if (!confirm('Marcar este pedido como atendido? Se descontara del inventario.')) return;
+        if (!confirm('Marcar como atendido?')) return;
         mostrarLoading(true);
         try {
-            for (const item of pedidoData.productos) {
-                const producto = productos.find(p => p.codigo === item.codigo);
-                if (!producto || producto.stock < item.cantidad) {
-                    alert(`Stock insuficiente para ${item.nombre}. Stock actual: ${producto?.stock || 0}`);
-                    mostrarLoading(false);
-                    return;
-                }
-            }
             for (const item of pedidoData.productos) {
                 const producto = productos.find(p => p.codigo === item.codigo);
                 const prodRef = doc(db, 'empresa', 'dprofer', 'productos', item.codigo);
@@ -552,38 +537,26 @@
                     vendidoTotal: (producto.vendidoTotal || 0) + item.cantidad
                 });
             }
-            const atendidoData = {
-                ...pedidoData,
-                fechaAtencion: Timestamp.now(),
-                estado: 'atendido',
-                atendidoPor: usuarioActual.email
-            };
+            const atendidoData = { ...pedidoData, fechaAtencion: Timestamp.now(), estado: 'atendido', atendidoPor: usuarioActual.email };
             delete atendidoData.id;
             await setDoc(doc(collection(db, 'empresa', 'dprofer', 'pedidos_atendidos')), atendidoData);
             await deleteDoc(doc(db, 'empresa', 'dprofer', 'pedidos_pendientes', pedidoId));
             await cargarDatos();
-            mostrarLoading(false);
-            alert('Pedido marcado como atendido');
-        } catch (e) { alert('Error: ' + e.message); mostrarLoading(false); }
+            alert('Pedido atendido');
+        } catch (e) { alert('Error: ' + e.message); }
+        mostrarLoading(false);
     };
     
     function verDetallePedido(pedido) {
-        const productosHtml = pedido.productos ? pedido.productos.map(p => `<li>${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toFixed(2)}</li>`).join('') : '<li>No hay productos</li>';
-        const fecha = pedido.fecha ? new Date(pedido.fecha.seconds * 1000).toLocaleString() : '';
-        const fechaAtencion = pedido.fechaAtencion ? new Date(pedido.fechaAtencion.seconds * 1000).toLocaleString() : '-';
+        const productosHtml = pedido.productos ? pedido.productos.map(p => `<li>${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toFixed(2)}</li>`).join('') : '';
         document.getElementById('detallePedidoContent').innerHTML = `
-            <p><strong>ID:</strong> ${pedido.id}</p>
-            <p><strong>Fecha:</strong> ${fecha}</p>
             <p><strong>Cliente:</strong> ${pedido.clienteNombre}</p>
-            <p><strong>Direccion:</strong> ${pedido.direccion || '-'}</p>
-            <p><strong>Distancia:</strong> ${pedido.distanciaKm?.toFixed(2) || 0} km</p>
+            <p><strong>Direccion:</strong> ${pedido.direccion}</p>
+            <p><strong>Distancia:</strong> ${(pedido.distanciaKm || 0).toFixed(2)} km</p>
             <p><strong>Costo Logistico:</strong> $${(pedido.costoLogistico || 0).toFixed(2)}</p>
-            <p><strong>Productos:</strong></p>
-            <ul>${productosHtml}</ul>
+            <p><strong>Productos:</strong></p><ul>${productosHtml}</ul>
             <p><strong>Subtotal:</strong> $${(pedido.subtotal || 0).toFixed(2)}</p>
             <p><strong>Total:</strong> $${(pedido.total || 0).toFixed(2)}</p>
-            ${pedido.fechaAtencion ? `<p><strong>Fecha Atencion:</strong> ${fechaAtencion}</p>` : ''}
-            ${pedido.atendidoPor ? `<p><strong>Atendido por:</strong> ${pedido.atendidoPor}</p>` : ''}
         `;
         document.getElementById('detallePedidoModal').style.display = 'block';
     }
@@ -593,28 +566,28 @@
         if (pedidosPendientes.length === 0) { pendBody.innerHTML = '<tr><td colspan="6">No hay pedidos pendientes</tr>'; }
         else {
             pendBody.innerHTML = pedidosPendientes.map(p => `
-                <tr class="pedido-row" ondblclick="verDetallePedido(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+                <tr class="pedido-row" ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
                     <td>${p.id.slice(-6)}</td>
                     <td>${p.fecha ? new Date(p.fecha.seconds * 1000).toLocaleString() : ''}</td>
                     <td>${p.clienteNombre}</td>
                     <td>$${p.total.toFixed(2)}</td>
-                    <td><span class="badge-pendiente"><i class="fas fa-clock"></i> Pendiente</span></td>
-                    <td><button class="btn btn-sm btn-success" onclick="marcarComoAtendido('${p.id}', ${JSON.stringify(p).replace(/"/g, '&quot;')})"><i class="fas fa-check"></i> Atender</button></td>
-                </tr>
+                    <td><span class="badge-pendiente">Pendiente</span></td>
+                    <td><button class="btn btn-sm btn-success" onclick='marcarComoAtendido("${p.id}", ${JSON.stringify(p).replace(/'/g, "&#39;")})'>Atender</button></td>
+                 </tr>
             `).join('');
         }
         const atendBody = document.getElementById('atendidosBody');
         if (pedidosAtendidos.length === 0) { atendBody.innerHTML = '<tr><td colspan="6">No hay pedidos atendidos</tr>'; }
         else {
             atendBody.innerHTML = pedidosAtendidos.map(p => `
-                <tr class="pedido-row" ondblclick="verDetallePedido(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+                <tr class="pedido-row" ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
                     <td>${p.id.slice(-6)}</td>
                     <td>${p.fecha ? new Date(p.fecha.seconds * 1000).toLocaleString() : ''}</td>
                     <td>${p.clienteNombre}</td>
                     <td>$${p.total.toFixed(2)}</td>
-                    <td><span class="badge-atendido"><i class="fas fa-check-circle"></i> Atendido</span></td>
-                    <td><button class="btn btn-sm btn-info" onclick="verDetallePedido(${JSON.stringify(p).replace(/"/g, '&quot;')})"><i class="fas fa-eye"></i> Ver</button></td>
-                </tr>
+                    <td><span class="badge-atendido">Atendido</span></td>
+                    <td><button class="btn btn-sm btn-info" onclick='verDetallePedido(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Ver</button></td>
+                 </tr>
             `).join('');
         }
     }
@@ -668,7 +641,7 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
         document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-        if (tab === 'pedidos') { actualizarSelects(); recalcularPedido(); }
+        if (tab === 'pedidos') { actualizarSelectProductos(); actualizarSelectClientes(); recalcularPedido(); }
     };
     
     function mostrarLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
