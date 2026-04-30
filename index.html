@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dprofer Cloud - Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,92 +24,163 @@
         .stat-card:hover{transform:translateY(-5px)}
         .stat-card i{font-size:40px;color:#1e3c72}
         .stat-card h3{font-size:28px;font-weight:bold;margin:10px 0}
-        .tabs{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap}
-        .tab{padding:12px 25px;cursor:pointer;border-radius:12px;font-weight:bold;background:#e9ecef;color:#1e3c72}
+        .tabs{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap;border-bottom:2px solid #dee2e6}
+        .tab{padding:12px 25px;cursor:pointer;border-radius:12px 12px 0 0;font-weight:bold;background:#e9ecef;color:#1e3c72}
         .tab.active{background:#2a5298;color:white}
-        .tab-content{display:none}
+        .tab-content{display:none;padding-top:20px}
         .tab-content.active{display:block}
         .modal{display:none;position:fixed;z-index:10000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
         .modal-content{background:white;margin:5% auto;padding:25px;border-radius:20px;width:500px;max-width:95%}
         .loading{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:9999}
         .spinner{width:50px;height:50px;border:5px solid white;border-top-color:#2a5298;border-radius:50%;animation:spin 1s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
-        .admin-only{display:none}
         .logo-header{display:flex;align-items:center;gap:15px}
         .logo-header img{width:50px;border-radius:12px}
-        .cliente-stats{background:#d4edda;border-radius:15px;padding:15px;margin-top:15px}
+        .password-wrapper{position:relative}
+        .password-wrapper input{padding-right:40px}
+        .password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#666}
+        .login-box{max-width:450px;margin:80px auto}
         .resumen-pedido{background:#e8f0fe;border-radius:15px;padding:15px;margin-bottom:15px;border-left:5px solid #2a5298}
-        .progress-bar-container{width:100%;background:#e0e0e0;border-radius:10px;margin:10px 0}
-        .progress-bar{width:0%;height:20px;background:#28a745;border-radius:10px;transition:width 0.3s}
-        .preview-table{max-height:300px;overflow-y:auto;margin-top:15px}
-        .preview-table table{font-size:12px}
     </style>
 </head>
 <body>
 
 <div id="loading" class="loading"><div class="spinner"></div></div>
 
-<div id="editModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><input type="password" id="editPassword" class="form-control" placeholder="Contraseña"><div class="mt-3"><button class="btn btn-primary" onclick="verificarEdicion()">Verificar</button><button class="btn btn-secondary" onclick="cerrarModal('editModal')">Cancelar</button></div></div></div>
-<div id="editarProductoModal" class="modal"><div class="modal-content"><h3>Editar Producto</h3><input type="text" id="editNombre" class="form-control mb-2" placeholder="Nombre"><select id="editCategoria" class="form-control mb-2"><option>Herramientas</option><option>Pinturas</option><option>Electrico</option><option>Ferreteria</option><option>Plomería</option></select><div class="row"><div class="col-6"><input type="number" id="editCosto" class="form-control" placeholder="Costo"></div><div class="col-6"><input type="number" id="editPrecio" class="form-control" placeholder="Precio"></div></div><div class="row"><div class="col-6"><input type="number" id="editStock" class="form-control" placeholder="Stock"></div><div class="col-6"><input type="number" id="editStockMinimo" class="form-control" placeholder="Stock Minimo"></div></div><div class="mt-3"><button class="btn btn-success" onclick="guardarEdicion()">Guardar</button><button class="btn btn-secondary" onclick="cerrarModal('editarProductoModal')">Cancelar</button></div></div></div>
-<div id="detallePedidoModal" class="modal"><div class="modal-content"><h3>Detalle del Pedido</h3><div id="detallePedidoContent"></div><div class="mt-3"><button class="btn btn-secondary" onclick="cerrarModal('detallePedidoModal')">Cerrar</button></div></div></div>
-
-<div class="container">
-    <div id="loginContainer">
-        <div class="card" style="max-width:450px;margin:80px auto">
+<div id="loginContainer">
+    <div class="login-box">
+        <div class="card">
             <div class="card-header text-center">Dprofer Cloud</div>
             <div class="card-body">
                 <div class="text-center mb-3"><img src="android-chrome-192x192.png" style="width:100px;border-radius:25px" onerror="this.style.display='none'"></div>
                 <div id="loginError" class="alert alert-danger" style="display:none"></div>
-                <input type="email" id="loginEmail" class="form-control mb-2" placeholder="dproferventas@gmail.com">
-                <input type="password" id="loginPassword" class="form-control mb-2" placeholder="Contraseña">
-                <button class="btn btn-primary w-100" onclick="iniciarSesion()">Iniciar Sesión</button>
+                <div class="mb-2">
+                    <input type="email" id="loginEmail" class="form-control" placeholder="Correo electronico" value="dproferventas@gmail.com">
+                </div>
+                <div class="mb-2 password-wrapper">
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Contrasena" value="//Dprofer*">
+                    <i class="fas fa-eye password-toggle" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+                </div>
+                <button class="btn btn-primary w-100" onclick="iniciarSesion()">Iniciar Sesion</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="appContainer" style="display:none">
+<div id="appContainer" style="display:none">
+    <div class="container">
         <div class="user-header bg-dark text-white p-3 rounded mb-3 d-flex justify-content-between align-items-center">
-            <div class="logo-header"><img src="android-chrome-192x192.png" onerror="this.style.display='none'"><div><h2>Dprofer Cloud</h2><p>Inventario + Pedidos + Logística (0.02/km)</p></div></div>
+            <div class="logo-header"><img src="android-chrome-192x192.png" onerror="this.style.display='none'"><div><h2>Dprofer Cloud</h2><p>Inventario + Pedidos</p></div></div>
             <div><span id="userDisplay"></span><button class="btn btn-danger ms-2" onclick="cerrarSesion()">Salir</button></div>
         </div>
 
-        <div id="adminPanel" class="alert alert-info"><i class="fas fa-crown"></i> Panel Administrador 
+        <div id="adminPanel" class="alert alert-info">
+            <i class="fas fa-crown"></i> Panel Administrador 
             <button class="btn btn-sm btn-dark" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar</button>
             <button class="btn btn-sm btn-primary" onclick="importarExcel()"><i class="fas fa-file-upload"></i> Importar Excel</button>
             <input type="file" id="importExcelInput" style="display:none" accept=".xlsx, .xls, .csv">
         </div>
 
         <div id="importPreview" class="card" style="display:none; margin-bottom:20px">
-            <div class="card-header">Vista previa de productos a importar</div>
+            <div class="card-header">Vista previa</div>
             <div class="card-body">
-                <div class="progress-bar-container"><div class="progress-bar" id="importProgress"></div></div>
                 <div id="previewContent"></div>
                 <div class="mt-3 text-end">
-                    <button class="btn btn-secondary" onclick="window.cancelarImportacion()">Cancelar</button>
-                    <button class="btn btn-success" onclick="window.confirmarImportacion()">Confirmar Importación</button>
+                    <button class="btn btn-secondary" onclick="cancelarImportacion()">Cancelar</button>
+                    <button class="btn btn-success" onclick="confirmarImportacion()">Confirmar Importacion</button>
                 </div>
             </div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card" onclick="mostrarTodos()"><i class="fas fa-boxes"></i><h3 id="totalProductos">0</h3><p>Productos</p></div>
-            <div class="stat-card" onclick="mostrarStockBajo()"><i class="fas fa-exclamation-triangle"></i><h3 id="stockBajo">0</h3><p>Stock Bajo</p></div>
+            <div class="stat-card"><i class="fas fa-boxes"></i><h3 id="totalProductos">0</h3><p>Total Productos</p></div>
+            <div class="stat-card"><i class="fas fa-exclamation-triangle"></i><h3 id="stockBajo">0</h3><p>Stock Bajo</p></div>
             <div class="stat-card"><i class="fas fa-chart-line"></i><h3 id="ventasTotales">0</h3><p>Unidades Vendidas</p></div>
             <div class="stat-card"><i class="fas fa-dollar-sign"></i><h3 id="gananciaTotal">$0</h3><p>Ganancia</p></div>
-            <div class="stat-card"><i class="fas fa-clock"></i><h3 id="pedidosPendientesCount">0</h3><p>Pedidos Pendientes</p></div>
         </div>
 
-        <div class="card"><div class="card-header">Registrar Movimiento</div><div class="card-body"><div class="row"><div class="col-md-6"><div class="mb-2"><label>Código</label><input type="text" id="codigo" class="form-control" readonly></div><div class="mb-2"><label>Nombre</label><input type="text" id="nombre" class="form-control" onkeyup="generarCodigo()"></div><div class="mb-2"><label>Categoría</label><select id="categoria" class="form-control"><option>Herramientas</option><option>Pinturas</option><option>Electrico</option><option>Ferreteria</option><option>Plomería</option></select></div><div class="row"><div class="col-6"><label>Costo</label><input type="number" id="costo" class="form-control" step="0.01" oninput="calcularAuto()"></div><div class="col-6"><label>Precio Venta</label><input type="number" id="precioVenta" class="form-control" step="0.01" oninput="calcularAuto()"></div></div></div><div class="col-md-6"><div class="mb-2"><label>Tipo</label><select id="tipoMovimiento" class="form-control"><option value="entrada">Entrada</option><option value="salida">Salida</option></select></div><div class="mb-2"><label>Cantidad</label><input type="number" id="cantidad" class="form-control" value="1" oninput="calcularAuto()"></div><div class="mb-2"><label>Stock Mínimo</label><input type="number" id="stockMinimo" class="form-control" value="5"></div><div class="mb-2"><label>Observación</label><input type="text" id="observacion" class="form-control"></div><div class="row"><div class="col-6"><label>Rentabilidad</label><input type="text" id="rentabilidadUnidad" class="form-control" readonly></div><div class="col-6"><label>Total</label><input type="text" id="totalMovimiento" class="form-control" readonly></div></div></div></div><div class="text-center mt-3"><button class="btn btn-primary" onclick="registrarMovimiento()">Guardar</button><button class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button></div></div></div>
+        <div class="card">
+            <div class="card-header">Registrar Movimiento</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-2"><label>Codigo</label><input type="text" id="codigo" class="form-control" readonly></div>
+                        <div class="mb-2"><label>Nombre</label><input type="text" id="nombre" class="form-control" onkeyup="generarCodigo()"></div>
+                        <div class="mb-2"><label>Categoria</label><select id="categoria" class="form-control"><option>Herramientas</option><option>Pinturas</option><option>Electrico</option><option>Ferreteria</option></select></div>
+                        <div class="row"><div class="col-6"><label>Costo</label><input type="number" id="costo" class="form-control" step="0.01"></div><div class="col-6"><label>Precio Venta</label><input type="number" id="precioVenta" class="form-control" step="0.01"></div></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2"><label>Tipo</label><select id="tipoMovimiento" class="form-control"><option value="entrada">Entrada</option><option value="salida">Salida</option></select></div>
+                        <div class="mb-2"><label>Cantidad</label><input type="number" id="cantidad" class="form-control" value="1"></div>
+                        <div class="mb-2"><label>Stock Minimo</label><input type="number" id="stockMinimo" class="form-control" value="5"></div>
+                        <div class="row"><div class="col-6"><label>Rentabilidad</label><input type="text" id="rentabilidadUnidad" class="form-control" readonly></div><div class="col-6"><label>Total</label><input type="text" id="totalMovimiento" class="form-control" readonly></div></div>
+                        <button class="btn btn-primary mt-2" onclick="registrarMovimiento()">Guardar</button>
+                        <button class="btn btn-secondary mt-2" onclick="limpiarFormulario()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="tabs"><div class="tab active" onclick="cambiarTab('inventario')">Inventario</div><div class="tab" onclick="cambiarTab('pedidos')">Pedidos</div></div>
+        <div class="tabs">
+            <div class="tab active" onclick="cambiarTab('inventario')">Inventario</div>
+            <div class="tab" onclick="cambiarTab('pedidos')">Pedidos</div>
+        </div>
 
-        <div id="tabInventario" class="tab-content active"><div class="card"><div class="card-header">Inventario Actual</div><div class="card-body"><input type="text" id="buscador" class="form-control mb-3" placeholder="Buscar..." onkeyup="filtrarProductos()"><div class="table-container"><table class="table"><thead>运河<th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></thead><tbody id="tablaInventario"></tbody></table></div></div></div></div>
+        <div id="tabInventario" class="tab-content active">
+            <div class="card">
+                <div class="card-header">Inventario Actual</div>
+                <div class="card-body">
+                    <input type="text" id="buscador" class="form-control mb-3" placeholder="Buscar..." onkeyup="filtrarProductos()">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>运河<th>#</th><th>Codigo</th><th>Producto</th><th>Categoria</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Estado</th><th>Acciones</th> </thead>
+                            <tbody id="tablaInventario"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div id="tabPedidos" class="tab-content"><div class="card"><div class="card-header">Nuevo Pedido</div><div class="card-body"><div class="row"><div class="col-md-6"><div class="mb-2"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select></div><div class="mb-2"><label>Producto</label><div class="row g-2"><div class="col-7"><select id="productoAgregar" class="form-control"></select></div><div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1"></div><div class="col-2"><button class="btn btn-primary w-100" onclick="agregarAlCarrito()">+</button></div></div></div><div class="mt-3"><h5>Carrito</h5><div class="table-container"><table class="table"><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></thead><tbody id="carritoBody"></tbody>}</div></div><div id="clienteHistorial" class="cliente-stats" style="display:none"><h6>Historial del Cliente</h6><p>Compras: <span id="clienteCompras">0</span> | Total: $<span id="clienteGastado">0</span></p></div></div><div class="col-md-6"><div class="resumen-pedido"><h6>Resumen</h6><p>Subtotal: $<span id="subtotalProductos">0.00</span></p><p>Distancia: <span id="distanciaKm">0.00</span> km</p><p>Logística: $<span id="costoLogistico">0.00</span></p><hr><h5>Total: $<span id="totalPedido">0.00</span></h5></div><button class="btn btn-warning w-100" onclick="crearPedidoPendiente()" style="background:#ffc107;font-weight:bold">Confirmar Pedido</button></div></div></div></div>
-
-        <div class="card"><div class="card-header">Pedidos Pendientes</div><div class="card-body"><div class="table-container"><table class="table"><thead>｜｜DSML｜｜<th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></thead><tbody id="pendientesBody"></tbody>}</div></div></div>
-
-        <div class="card"><div class="card-header">Pedidos Atendidos</div><div class="card-body"><div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></thead><tbody id="atendidosBody"></tbody>}</div></div></div>
+        <div id="tabPedidos" class="tab-content">
+            <div class="card">
+                <div class="card-header">Nuevo Pedido</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select></div>
+                            <div class="mb-2"><label>Producto</label>
+                                <div class="row g-2">
+                                    <div class="col-7"><select id="productoAgregar" class="form-control"></select></div>
+                                    <div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1"></div>
+                                    <div class="col-2"><button class="btn btn-primary" onclick="agregarAlCarrito()">+</button></div>
+                                </div>
+                            </div>
+                            <div class="mt-3"><h5>Carrito</h5>
+                                <div class="table-container">
+                                    <table class="table">
+                                        <thead>运河<th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th> </thead>
+                                        <tbody id="carritoBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="resumen-pedido">
+                                <h6>Resumen</h6>
+                                <p>Subtotal: $<span id="subtotalProductos">0.00</span></p>
+                                <p>Distancia: <span id="distanciaKm">0.00</span> km</p>
+                                <p>Logistica: $<span id="costoLogistico">0.00</span></p>
+                                <hr>
+                                <h5>Total: $<span id="totalPedido">0.00</span></h5>
+                            </div>
+                            <button class="btn btn-warning w-100" onclick="crearPedidoPendiente()">Confirmar Pedido</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card"><div class="card-header">Pedidos Pendientes</div><div class="card-body"><div class="table-container"><table class="table"><thead>运河<th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th> </thead><tbody id="pendientesBody"></tbody>}</div></div></div>
+            <div class="card"><div class="card-header">Pedidos Atendidos</div><div class="card-body"><div class="table-container"><table class="table"><thead>运河<th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th> </thead><tbody id="atendidosBody"></tbody>}</div></div></div>
+        </div>
     </div>
 </div>
 
@@ -117,11 +188,45 @@
     const CLIENTES = [{ id: 1, nombre: "Gabriel", direccion: "Guayaquil", lat: -2.1350433, lng: -79.9214015 }];
     let productosPendientesImportacion = [];
     
-    // Funciones globales para importar
+    const CREDENCIALES = { email: "dproferventas@gmail.com", password: "//Dprofer*" };
+    
+    window.iniciarSesion = function() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (email === CREDENCIALES.email && password === CREDENCIALES.password) {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('userDisplay').innerHTML = email;
+            if (window.cargarDatosGlobal) window.cargarDatosGlobal();
+        } else {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.innerHTML = 'Credenciales incorrectas';
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+    };
+    
+    window.cerrarSesion = function() {
+        window.location.reload();
+    };
+    
+    window.togglePasswordVisibility = function() {
+        const input = document.getElementById('loginPassword');
+        const icon = document.getElementById('togglePassword');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    };
+    
     window.cancelarImportacion = function() {
         document.getElementById('importPreview').style.display = 'none';
         productosPendientesImportacion = [];
-        document.getElementById('importProgress').style.width = '0%';
     };
     
     window.confirmarImportacion = async function() {
@@ -129,105 +234,134 @@
             alert('No hay productos para importar');
             return;
         }
-        
-        // Verificar que firebase esté disponible
-        if (typeof window.db === 'undefined') {
-            alert('Espera a que termine de cargar el sistema antes de importar');
+        if (typeof FirebaseService === 'undefined') {
+            alert('Esperando conexion con Firebase...');
             return;
         }
         
         mostrarLoadingGlobal(true);
-        let actualizados = 0, creados = 0;
-        const dbGlobal = window.db;
-        const productosExistentes = window.productosGlobal || [];
-        
-        for (const prod of productosPendientesImportacion) {
-            try {
-                const prodRef = doc(dbGlobal, 'empresa', 'dprofer', 'productos', prod.codigo);
-                const existente = productosExistentes.find(p => p.codigo === prod.codigo);
-                if (existente) {
-                    await updateDoc(prodRef, {
-                        nombre: prod.nombre,
-                        categoria: prod.categoria,
-                        stock: prod.stock,
-                        precioVenta: prod.precioVenta,
-                        costo: prod.costo,
-                        actualizado: Timestamp.now()
-                    });
-                    actualizados++;
-                } else {
-                    await setDoc(prodRef, {
-                        codigo: prod.codigo,
-                        nombre: prod.nombre,
-                        categoria: prod.categoria,
-                        stock: prod.stock,
-                        precioVenta: prod.precioVenta,
-                        costo: prod.costo,
-                        vendidoTotal: 0,
-                        stockMinimo: 5,
-                        creado: Timestamp.now()
-                    });
-                    creados++;
-                }
-            } catch(e) {
-                console.error('Error importando:', prod.codigo, e);
-            }
-        }
-        
-        // Recargar datos
-        if (window.cargarDatosGlobal) await window.cargarDatosGlobal();
-        
+        let resultados = await FirebaseService.importarProductos(productosPendientesImportacion);
         mostrarLoadingGlobal(false);
-        alert(`✅ Importación completada:\n📦 Actualizados: ${actualizados}\n✨ Creados: ${creados}`);
+        alert(`Importacion completada: ${resultados.actualizados} actualizados, ${resultados.creados} nuevos`);
         window.cancelarImportacion();
+        if (window.cargarDatosGlobal) window.cargarDatosGlobal();
     };
     
     function mostrarLoadingGlobal(show) {
         const loading = document.getElementById('loading');
         if (loading) loading.style.display = show ? 'flex' : 'none';
     }
+    
+    window.importarExcel = () => document.getElementById('importExcelInput').click();
 </script>
 
 <script type="module">
+    // Configuracion de Firebase (usando la que proporcionaste)
     const firebaseConfig = {
         apiKey: "AIzaSyBJo0z_yuermDV-dnO5msGkzM01Tr3feGo",
         authDomain: "dprofer-7bea9.firebaseapp.com",
         projectId: "dprofer-7bea9",
         storageBucket: "dprofer-7bea9.firebasestorage.app",
         messagingSenderId: "788368470526",
-        appId: "1:788368470526:web:8644b343b056b9e6f150af"
+        appId: "1:788368470526:web:8644b343b056b9e6f150af",
+        measurementId: "G-TFD1EGQ829"
     };
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
     
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
     
-    // Hacer db, Timestamp y cargarDatos globales
-    window.db = db;
-    window.Timestamp = Timestamp;
-    window.productosGlobal = [];
-    
-    const ADMIN_PASSWORD = "dprofer2024";
-    const NEGOCIO_COORD = { lat: -0.2785643, lng: -79.1822373 };
-    let usuarioActual = null, esAdmin = false, productos = [], pedidosPendientes = [], pedidosAtendidos = [], carrito = [];
-    
-    // Actualizar productos global
-    function actualizarProductosGlobal() {
-        window.productosGlobal = productos;
-    }
-    
-    window.cargarDatosGlobal = async function() {
-        if (!usuarioActual) return;
-        await cargarDatos();
+    const FirebaseService = {
+        db: db,
+        empresaId: 'dprofer',
+        
+        async importarProductos(productos) {
+            let actualizados = 0, creados = 0;
+            for (const prod of productos) {
+                try {
+                    const prodRef = doc(this.db, 'empresa', this.empresaId, 'productos', prod.codigo);
+                    const existente = await getDocs(collection(this.db, 'empresa', this.empresaId, 'productos'));
+                    const existe = existente.docs.some(d => d.id === prod.codigo);
+                    
+                    if (existe) {
+                        await updateDoc(prodRef, {
+                            nombre: prod.nombre,
+                            categoria: prod.categoria,
+                            stock: prod.stock,
+                            precioVenta: prod.precioVenta,
+                            costo: prod.costo,
+                            actualizado: Timestamp.now()
+                        });
+                        actualizados++;
+                    } else {
+                        await setDoc(prodRef, {
+                            codigo: prod.codigo,
+                            nombre: prod.nombre,
+                            categoria: prod.categoria,
+                            stock: prod.stock,
+                            precioVenta: prod.precioVenta,
+                            costo: prod.costo,
+                            vendidoTotal: 0,
+                            stockMinimo: 5,
+                            creado: Timestamp.now()
+                        });
+                        creados++;
+                    }
+                } catch(e) { console.error('Error importando:', prod.codigo, e); }
+            }
+            return { actualizados, creados };
+        },
+        
+        async cargarProductos() {
+            const productosRef = collection(this.db, 'empresa', this.empresaId, 'productos');
+            const snapshot = await getDocs(productosRef);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+        
+        async cargarPedidosPendientes() {
+            const ref = collection(this.db, 'empresa', this.empresaId, 'pedidos_pendientes');
+            const snapshot = await getDocs(query(ref, orderBy('fecha', 'desc')));
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+        
+        async cargarPedidosAtendidos() {
+            const ref = collection(this.db, 'empresa', this.empresaId, 'pedidos_atendidos');
+            const snapshot = await getDocs(query(ref, orderBy('fechaAtencion', 'desc'), limit(100)));
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+        
+        async guardarProducto(producto) {
+            const ref = doc(this.db, 'empresa', this.empresaId, 'productos', producto.codigo);
+            await setDoc(ref, producto);
+        },
+        
+        async actualizarProducto(codigo, datos) {
+            const ref = doc(this.db, 'empresa', this.empresaId, 'productos', codigo);
+            await updateDoc(ref, datos);
+        },
+        
+        async eliminarProducto(codigo) {
+            const ref = doc(this.db, 'empresa', this.empresaId, 'productos', codigo);
+            await deleteDoc(ref);
+        },
+        
+        async guardarPedidoPendiente(pedido) {
+            const ref = doc(collection(this.db, 'empresa', this.empresaId, 'pedidos_pendientes'));
+            await setDoc(ref, pedido);
+        },
+        
+        async moverPedidoAAtendido(pedidoId, pedidoData) {
+            const atendidoRef = doc(collection(this.db, 'empresa', this.empresaId, 'pedidos_atendidos'));
+            await setDoc(atendidoRef, pedidoData);
+            await deleteDoc(doc(this.db, 'empresa', this.empresaId, 'pedidos_pendientes', pedidoId));
+        }
     };
     
-    // ==================== IMPORTAR EXCEL ====================
-    window.importarExcel = () => document.getElementById('importExcelInput').click();
+    window.FirebaseService = FirebaseService;
     
+    // Importador de Excel
     document.getElementById('importExcelInput').onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -239,206 +373,114 @@
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
                 
-                if (!rows || rows.length < 2) throw new Error("El archivo está vacío");
+                if (!rows || rows.length < 5) throw new Error("Archivo vacio o formato incorrecto");
                 
-                // Buscar la fila donde empiezan los datos
-                let inicioDatos = -1;
-                let columnas = {};
-                
-                for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                const productos = [];
+                for (let i = 4; i < rows.length; i++) {
                     const row = rows[i];
-                    if (!row) continue;
-                    for (let j = 0; j < row.length; j++) {
-                        const cell = String(row[j] || "").toLowerCase().trim();
-                        if (cell === "código" || cell === "codigo") {
-                            inicioDatos = i + 1;
-                            columnas = { codigo: j };
-                            break;
-                        }
-                        if (cell === "producto") columnas.producto = j;
-                        if (cell === "categoría") columnas.categoria = j;
-                        if (cell === "stock") columnas.stock = j;
-                        if (cell === "precio venta") columnas.precioVenta = j;
-                        if (cell === "costo") columnas.costo = j;
-                    }
-                    if (inicioDatos !== -1) break;
+                    if (!row || row.length < 7) continue;
+                    
+                    let codigo = row[1] ? String(row[1]).trim().toUpperCase() : "";
+                    if (!codigo || codigo === "RESUMEN FINAL" || codigo.includes("RESUMEN")) break;
+                    if (!codigo.includes('-')) continue;
+                    
+                    let nombre = row[2] ? String(row[2]).trim() : "";
+                    let categoria = row[3] ? String(row[3]).trim() : "General";
+                    let stock = parseFloat(String(row[4]).replace(/[^0-9.-]/g, '')) || 0;
+                    let precioVenta = parseFloat(String(row[5]).replace(/[^0-9.-]/g, '')) || 0;
+                    let costo = parseFloat(String(row[6]).replace(/[^0-9.-]/g, '')) || 0;
+                    
+                    productos.push({ codigo, nombre, categoria, stock, precioVenta, costo });
                 }
                 
-                if (inicioDatos === -1) {
-                    columnas = { codigo: 1, producto: 2, categoria: 3, stock: 4, precioVenta: 5, costo: 6 };
-                    inicioDatos = 4;
+                if (productos.length === 0) throw new Error("No se encontraron productos");
+                
+                productosPendientesImportacion = productos;
+                let previewHtml = '<div style="max-height:300px;overflow:auto"><table class="table table-sm"><thead>运河<th>Codigo</th><th>Producto</th><th>Categoria</th><th>Stock</th><th>Precio</th><th>Costo</th> </thead><tbody>';
+                for (const p of productos) {
+                    previewHtml += `<tr><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>$${p.precioVenta.toFixed(2)}</td><td>$${p.costo.toFixed(2)}</td></tr>`;
                 }
-                
-                const productosEncontrados = [];
-                
-                for (let i = inicioDatos; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length === 0) continue;
-                    
-                    let codigo = columnas.codigo !== undefined ? row[columnas.codigo] : null;
-                    if (codigo && typeof codigo === 'string') codigo = codigo.trim().toUpperCase();
-                    
-                    if (!codigo || codigo === "RESUMEN FINAL" || codigo === "RESUMEN" || codigo.startsWith("RESUMEN")) break;
-                    if (codigo && !codigo.includes('-')) continue;
-                    
-                    let nombre = columnas.producto !== undefined ? row[columnas.producto] : (row[2] || "");
-                    if (nombre && typeof nombre === 'string') nombre = nombre.trim();
-                    if (!nombre) continue;
-                    
-                    let categoria = columnas.categoria !== undefined ? row[columnas.categoria] : (row[3] || "General");
-                    if (categoria && typeof categoria === 'string') categoria = categoria.trim();
-                    
-                    let stock = 0;
-                    const stockVal = columnas.stock !== undefined ? row[columnas.stock] : (row[4] || 0);
-                    if (stockVal) stock = parseInt(String(stockVal).replace(/[^0-9-]/g, "")) || 0;
-                    
-                    let precioVenta = 0;
-                    const precioVal = columnas.precioVenta !== undefined ? row[columnas.precioVenta] : (row[5] || 0);
-                    if (precioVal) {
-                        let precioStr = String(precioVal).replace(/[^0-9.,-]/g, "").replace(",", ".");
-                        precioVenta = parseFloat(precioStr) || 0;
-                    }
-                    
-                    let costo = 0;
-                    const costoVal = columnas.costo !== undefined ? row[columnas.costo] : (row[6] || 0);
-                    if (costoVal) {
-                        let costoStr = String(costoVal).replace(/[^0-9.,-]/g, "").replace(",", ".");
-                        costo = parseFloat(costoStr) || 0;
-                    }
-                    
-                    productosEncontrados.push({
-                        codigo, nombre, categoria, stock, precioVenta, costo
-                    });
-                }
-                
-                if (productosEncontrados.length === 0) throw new Error("No se encontraron productos en el archivo");
-                
-                productosPendientesImportacion = productosEncontrados;
-                const previewHtml = `
-                    <div class="preview-table">
-                        <table class="table table-sm">
-                            <thead>运河<th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Costo</th> </thead>
-                            <tbody>
-                                ${productosEncontrados.map(p => `<tr><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>$${p.precioVenta.toFixed(2)}</td><td>$${p.costo.toFixed(2)}</td></tr>`).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                    <p><strong>Total productos encontrados: ${productosEncontrados.length}</strong></p>
-                `;
+                previewHtml += '</tbody></table></div><p class="mt-2"><strong>Total: ' + productos.length + ' productos</strong></p>';
                 document.getElementById('previewContent').innerHTML = previewHtml;
                 document.getElementById('importPreview').style.display = 'block';
-                document.getElementById('importProgress').style.width = '100%';
                 mostrarLoading(false);
-                
             } catch (error) {
                 mostrarLoading(false);
-                alert("Error al leer el archivo: " + error.message);
+                alert("Error: " + error.message);
             }
         };
         reader.readAsArrayBuffer(file);
         e.target.value = "";
     };
     
-    // ==================== FUNCIONES BASE ====================
-    function actualizarSelectClientes() {
-        const select = document.getElementById('clienteSeleccion');
-        if (select) select.innerHTML = '<option value="">Seleccionar Cliente</option>' + CLIENTES.map(c => `<option value="${c.id}" data-lat="${c.lat}" data-lng="${c.lng}">${c.nombre} - ${c.direccion}</option>`).join('');
-    }
+    let productos = [], pedidosPendientes = [], pedidosAtendidos = [], carrito = [];
+    const NEGOCIO_COORD = { lat: -0.2785643, lng: -79.1822373 };
     
-    function actualizarPedidosPendientesCard() {
-        const count = pedidosPendientes.length;
-        document.getElementById('pedidosPendientesCount').textContent = count;
-    }
-    
-    window.iniciarSesion = async () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const pass = document.getElementById('loginPassword').value;
-        if (!email || !pass) { mostrarError('Complete campos'); return; }
-        mostrarLoading(true);
-        try { await signInWithEmailAndPassword(auth, email, pass); }
-        catch (e) { mostrarError(e.message); }
-        mostrarLoading(false);
-    };
-    
-    window.cerrarSesion = async () => {
-        await signOut(auth);
-        location.reload();
-    };
-    
-    async function cargarDatos() {
-        if (!usuarioActual) return;
+    window.cargarDatosGlobal = async function() {
         mostrarLoading(true);
         try {
-            const productosRef = collection(db, 'empresa', 'dprofer', 'productos');
-            const productosSnap = await getDocs(productosRef);
-            productos = productosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            actualizarProductosGlobal();
-            
-            const pendRef = collection(db, 'empresa', 'dprofer', 'pedidos_pendientes');
-            const pendSnap = await getDocs(query(pendRef, orderBy('fecha', 'desc')));
-            pedidosPendientes = pendSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            
-            const atendRef = collection(db, 'empresa', 'dprofer', 'pedidos_atendidos');
-            const atendSnap = await getDocs(query(atendRef, orderBy('fechaAtencion', 'desc'), limit(100)));
-            pedidosAtendidos = atendSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            
+            productos = await FirebaseService.cargarProductos();
+            pedidosPendientes = await FirebaseService.cargarPedidosPendientes();
+            pedidosAtendidos = await FirebaseService.cargarPedidosAtendidos();
             actualizarInventario();
             actualizarEstadisticas();
-            actualizarSelectProductos();
-            actualizarSelectClientes();
+            actualizarSelects();
             actualizarListaPedidos();
             actualizarPedidosPendientesCard();
         } catch(e) { console.error(e); }
         mostrarLoading(false);
-    }
+    };
     
-    function actualizarSelectProductos() {
-        const select = document.getElementById('productoAgregar');
-        if(select) select.innerHTML = '<option value="">Seleccionar</option>' + productos.filter(p=>p.stock>0).map(p=>`<option value="${p.codigo}" data-precio="${p.precioVenta}">${p.nombre} - Stock: ${p.stock}</option>`).join('');
+    function actualizarSelects() {
+        const clienteSelect = document.getElementById('clienteSeleccion');
+        if (clienteSelect) clienteSelect.innerHTML = '<option value="">Seleccionar Cliente</option>' + CLIENTES.map(c => `<option value="${c.id}">${c.nombre} - ${c.direccion}</option>`).join('');
+        const prodSelect = document.getElementById('productoAgregar');
+        if (prodSelect) prodSelect.innerHTML = '<option value="">Seleccionar</option>' + productos.filter(p=>p.stock>0).map(p=>`<option value="${p.codigo}">${p.nombre} - Stock: ${p.stock}</option>`).join('');
     }
     
     function actualizarEstadisticas() {
-        const total = productos.length;
-        const stockBajo = productos.filter(p => p.stock <= (p.stockMinimo || 5)).length;
-        const vendidas = productos.reduce((s,p)=>s+(p.vendidoTotal||0),0);
-        const ganancia = productos.reduce((s,p)=>s+((p.precioVenta-p.costo)*(p.vendidoTotal||0)),0);
-        document.getElementById('totalProductos').textContent = total;
-        document.getElementById('stockBajo').textContent = stockBajo;
-        document.getElementById('ventasTotales').textContent = vendidas;
-        document.getElementById('gananciaTotal').textContent = '$'+ganancia.toFixed(2);
+        document.getElementById('totalProductos').textContent = productos.length;
+        document.getElementById('stockBajo').textContent = productos.filter(p => p.stock <= (p.stockMinimo || 5)).length;
+        document.getElementById('ventasTotales').textContent = productos.reduce((s,p)=>s+(p.vendidoTotal||0),0);
+        document.getElementById('gananciaTotal').textContent = '$' + productos.reduce((s,p)=>s+((p.precioVenta-p.costo)*(p.vendidoTotal||0)),0).toFixed(2);
     }
     
     function actualizarInventario() {
         const tbody = document.getElementById('tablaInventario');
-        if(!productos.length){ tbody.innerHTML='运河<td colspan="10">No hay productos</td>'; return; }
-        const ordenados = [...productos].sort((a,b)=>a.nombre.localeCompare(b.nombre));
-        tbody.innerHTML = ordenados.map((p,i)=>`<tr><td>${i+1}</td><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>${p.vendidoTotal||0}</td><td>$${p.precioVenta.toFixed(2)}</td><td>$${(p.precioVenta-p.costo).toFixed(2)}</td><td>${p.stock<=(p.stockMinimo||5)?'<span class="badge-stock-bajo">Stock Bajo</span>':'<span class="badge-stock-normal">Normal</span>'}</td><td><button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> ${esAdmin?`<button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button>`:''}</td></tr>`).join('');
+        if(!productos.length){ tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay productos</td></tr>'; return; }
+        let html = '';
+        for(let i=0; i<productos.length; i++) {
+            const p = productos[i];
+            const estado = p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">Stock Bajo</span>' : '<span class="badge-stock-normal">Normal</span>';
+            html += `<tr><td>${i+1}</td><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>${p.vendidoTotal||0}</td><td>$${p.precioVenta.toFixed(2)}</td><td>${estado}</td><td><button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button></td></tr>`;
+        }
+        tbody.innerHTML = html;
     }
     
     window.filtrarProductos = function() {
         const term = document.getElementById('buscador').value.toLowerCase();
         const filtrados = productos.filter(p=>p.codigo.toLowerCase().includes(term)||p.nombre.toLowerCase().includes(term));
         const tbody = document.getElementById('tablaInventario');
-        if(!filtrados.length){ tbody.innerHTML='运河<td colspan="10">No hay coincidencias</td>'; return; }
-        const ordenados = [...filtrados].sort((a,b)=>a.nombre.localeCompare(b.nombre));
-        tbody.innerHTML = ordenados.map((p,i)=>`<tr><td>${i+1}</td><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>${p.vendidoTotal||0}</td><td>$${p.precioVenta.toFixed(2)}</td><td>$${(p.precioVenta-p.costo).toFixed(2)}</td><td>${p.stock<=(p.stockMinimo||5)?'<span class="badge-stock-bajo">Stock Bajo</span>':'<span class="badge-stock-normal">Normal</span>'}</td><td><button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> ${esAdmin?`<button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button>`:''}</td></tr>`).join('');
+        if(!filtrados.length){ tbody.innerHTML = '<tr><td colspan="9" class="text-center">No hay coincidencias</td></tr>'; return; }
+        let html = '';
+        for(let i=0; i<filtrados.length; i++) {
+            const p = filtrados[i];
+            const estado = p.stock <= (p.stockMinimo || 5) ? '<span class="badge-stock-bajo">Stock Bajo</span>' : '<span class="badge-stock-normal">Normal</span>';
+            html += `<tr><td>${i+1}</td><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>${p.vendidoTotal||0}</td><td>$${p.precioVenta.toFixed(2)}</td><td>${estado}</td><td><button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> <button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button></td></tr>`;
+        }
+        tbody.innerHTML = html;
     };
     
     window.mostrarTodos = () => { document.getElementById('buscador').value=''; actualizarInventario(); };
-    window.mostrarStockBajo = () => {
-        const bajos = productos.filter(p=>p.stock<=(p.stockMinimo||5));
-        const tbody = document.getElementById('tablaInventario');
-        if(!bajos.length){ tbody.innerHTML='运河<td colspan="10">No hay stock bajo</td>'; return; }
-        tbody.innerHTML = bajos.map((p,i)=>`<tr>晚了${i+1}</td>晚了${p.codigo}</td>晚了${p.nombre}</td>晚了${p.categoria}</td>晚了${p.stock}</td>晚了${p.vendidoTotal||0}</td>晚了$${p.precioVenta.toFixed(2)}</td>晚了$${(p.precioVenta-p.costo).toFixed(2)}</td>晚了<span class="badge-stock-bajo">Stock Bajo</span></td>晚了<button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> ${esAdmin?`<button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button>`:''}一筹`).join('');
-    };
     
     let productoCodigoEditar = null;
-    window.abrirEditarProducto = (codigo) => { if(!esAdmin) return; productoCodigoEditar=codigo; document.getElementById('editModal').style.display='block'; };
-    window.verificarEdicion = () => { const pass=document.getElementById('editPassword').value; if(pass===ADMIN_PASSWORD){ cerrarModal('editModal'); const p=productos.find(p=>p.codigo===productoCodigoEditar); if(p){ document.getElementById('editNombre').value=p.nombre; document.getElementById('editCategoria').value=p.categoria; document.getElementById('editCosto').value=p.costo; document.getElementById('editPrecio').value=p.precioVenta; document.getElementById('editStock').value=p.stock; document.getElementById('editStockMinimo').value=p.stockMinimo||5; document.getElementById('editarProductoModal').style.display='block'; } } else{ alert('Contraseña incorrecta'); cerrarModal('editModal'); } };
-    window.guardarEdicion = async () => { const nombre=document.getElementById('editNombre').value, categoria=document.getElementById('editCategoria').value, costo=parseFloat(document.getElementById('editCosto').value), precio=parseFloat(document.getElementById('editPrecio').value), stock=parseInt(document.getElementById('editStock').value), stockMin=parseInt(document.getElementById('editStockMinimo').value); if(!nombre) return; mostrarLoading(true); await updateDoc(doc(db,'empresa','dprofer','productos',productoCodigoEditar),{nombre,categoria,costo,precioVenta:precio,stock,stockMinimo:stockMin}); await cargarDatos(); cerrarModal('editarProductoModal'); mostrarLoading(false); };
-    window.eliminarProducto = async (codigo) => { if(!esAdmin) return; const pass=prompt('Contraseña:'); if(pass!==ADMIN_PASSWORD) return; if(confirm('Eliminar?')){ mostrarLoading(true); await deleteDoc(doc(db,'empresa','dprofer','productos',codigo)); await cargarDatos(); mostrarLoading(false); } };
+    window.abrirEditarProducto = (codigo) => { productoCodigoEditar=codigo; document.getElementById('editModal').style.display='block'; };
+    window.verificarEdicion = () => { const pass=prompt('Contraseña de administrador:'); if(pass==='dprofer2024'){ window.editarProductoModal(); } else{ alert('Contraseña incorrecta'); } };
+    window.editarProductoModal = () => { const p=productos.find(p=>p.codigo===productoCodigoEditar); if(p){ document.getElementById('editNombre').value=p.nombre; document.getElementById('editCategoria').value=p.categoria; document.getElementById('editCosto').value=p.costo; document.getElementById('editPrecio').value=p.precioVenta; document.getElementById('editStock').value=p.stock; document.getElementById('editStockMinimo').value=p.stockMinimo||5; document.getElementById('editarProductoModal').style.display='block'; } };
+    window.guardarEdicion = async () => { const nombre=document.getElementById('editNombre').value, categoria=document.getElementById('editCategoria').value, costo=parseFloat(document.getElementById('editCosto').value), precio=parseFloat(document.getElementById('editPrecio').value), stock=parseInt(document.getElementById('editStock').value), stockMin=parseInt(document.getElementById('editStockMinimo').value); if(!nombre) return; mostrarLoading(true); await FirebaseService.actualizarProducto(productoCodigoEditar,{nombre,categoria,costo,precioVenta:precio,stock,stockMinimo:stockMin}); await window.cargarDatosGlobal(); cerrarModal('editarProductoModal'); mostrarLoading(false); };
+    window.eliminarProducto = async (codigo) => { if(confirm('Eliminar?')){ mostrarLoading(true); await FirebaseService.eliminarProducto(codigo); await window.cargarDatosGlobal(); mostrarLoading(false); } };
     
     window.registrarMovimiento = async () => {
         let codigo=document.getElementById('codigo').value.trim(), nombre=document.getElementById('nombre').value.trim(), categoria=document.getElementById('categoria').value, costo=parseFloat(document.getElementById('costo').value), precio=parseFloat(document.getElementById('precioVenta').value), tipo=document.getElementById('tipoMovimiento').value, cantidad=parseInt(document.getElementById('cantidad').value), stockMin=parseInt(document.getElementById('stockMinimo').value);
@@ -450,27 +492,50 @@
             codigoFinal=`${pref}-${sig.toString().padStart(3,'0')}`;
             document.getElementById('codigo').value=codigoFinal;
         }
-        const ref=doc(db,'empresa','dprofer','productos',codigoFinal);
         const existente=productos.find(p=>p.codigo===codigoFinal);
         if(existente){
             let ns=existente.stock;
             if(tipo==='entrada') ns+=cantidad;
             else{ if(existente.stock<cantidad){ alert('Stock insuficiente'); mostrarLoading(false); return; } ns-=cantidad; }
-            await updateDoc(ref,{nombre,costo,precioVenta:precio,categoria,stock:ns,stockMinimo:stockMin});
+            await FirebaseService.actualizarProducto(codigoFinal,{nombre,costo,precioVenta:precio,categoria,stock:ns,stockMinimo:stockMin});
         } else {
             if(tipo==='salida'){ alert('Producto no existe'); mostrarLoading(false); return; }
-            await setDoc(ref,{codigo:codigoFinal,nombre,categoria,costo,precioVenta:precio,stock:cantidad,stockMinimo:stockMin,vendidoTotal:0});
+            await FirebaseService.guardarProducto({codigo:codigoFinal,nombre,categoria,costo,precioVenta:precio,stock:cantidad,stockMinimo:stockMin,vendidoTotal:0});
         }
-        await cargarDatos();
+        await window.cargarDatosGlobal();
         limpiarFormulario();
         mostrarLoading(false);
     };
     
-    function limpiarFormulario(){ ['codigo','nombre','costo','precioVenta','cantidad','observacion'].forEach(id=>document.getElementById(id).value=''); document.getElementById('stockMinimo').value='5'; document.getElementById('categoria').value='Herramientas'; calcularAuto(); }
-    function calcularAuto(){ const costo=parseFloat(document.getElementById('costo').value)||0, precio=parseFloat(document.getElementById('precioVenta').value)||0, cant=parseInt(document.getElementById('cantidad').value)||0; document.getElementById('rentabilidadUnidad').value=`$${(precio-costo).toFixed(2)}`; document.getElementById('totalMovimiento').value=`$${(precio*cant).toFixed(2)}`; }
+    function limpiarFormulario(){ ['codigo','nombre','costo','precioVenta','cantidad','observacion'].forEach(id=>document.getElementById(id).value=''); document.getElementById('stockMinimo').value='5'; document.getElementById('categoria').value='Herramientas'; }
     window.generarCodigo = () => { const nombre=document.getElementById('nombre').value; if(!nombre) return; if(document.getElementById('codigo').value&&productos.find(p=>p.codigo===document.getElementById('codigo').value)) return; const sig=productos.length+1; let pref=nombre.substring(0,3).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); document.getElementById('codigo').value=`${pref}-${sig.toString().padStart(3,'0')}`; };
     
     function calcularDistancia(lat,lng){ const R=6371, dLat=(lat-NEGOCIO_COORD.lat)*Math.PI/180, dLon=(lng-NEGOCIO_COORD.lng)*Math.PI/180, a=Math.sin(dLat/2)**2+Math.cos(NEGOCIO_COORD.lat*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)**2, c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); return R*c; }
+    
+    window.agregarAlCarrito = () => {
+        const cod=document.getElementById('productoAgregar').value, cant=parseInt(document.getElementById('cantidadAgregar').value);
+        if(!cod||!cant) return alert('Seleccione producto');
+        const prod=productos.find(p=>p.codigo===cod);
+        if(!prod||prod.stock<cant) return alert(`Stock insuficiente`);
+        const exist=carrito.find(i=>i.codigo===cod);
+        if(exist){ if(prod.stock<exist.cantidad+cant) return alert(`Stock insuficiente`); exist.cantidad+=cant; }
+        else carrito.push({codigo:cod,nombre:prod.nombre,precio:prod.precioVenta,cantidad:cant});
+        actualizarCarrito();
+        recalcularPedido();
+    };
+    
+    window.eliminarDelCarrito = idx => { carrito.splice(idx,1); actualizarCarrito(); recalcularPedido(); };
+    
+    function actualizarCarrito(){
+        const tbody=document.getElementById('carritoBody');
+        if(!carrito.length){ tbody.innerHTML='运河<td colspan="5" class="text-center">Carrito vacio</div>'; return; }
+        let html='';
+        for(let i=0;i<carrito.length;i++){
+            const item=carrito[i];
+            html += `</td>晚${item.nombre}晚晚${item.cantidad}晚晚$${item.precio.toFixed(2)}晚晚$${(item.precio*item.cantidad).toFixed(2)}晚晚<button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${i})">Quitar</button>筹`;
+        }
+        tbody.innerHTML = html;
+    }
     
     async function recalcularPedido(){
         const id=document.getElementById('clienteSeleccion').value;
@@ -484,37 +549,21 @@
         document.getElementById('totalPedido').textContent=(sub+log).toFixed(2);
     }
     
-    window.agregarAlCarrito = () => {
-        const cod=document.getElementById('productoAgregar').value, cant=parseInt(document.getElementById('cantidadAgregar').value);
-        if(!cod||!cant) return alert('Seleccione producto');
-        const prod=productos.find(p=>p.codigo===cod);
-        if(!prod||prod.stock<cant) return alert(`Stock insuficiente. Solo ${prod?.stock||0}`);
-        const exist=carrito.find(i=>i.codigo===cod);
-        if(exist){ if(prod.stock<exist.cantidad+cant) return alert(`Stock insuficiente`); exist.cantidad+=cant; }
-        else carrito.push({codigo:prod.codigo,nombre:prod.nombre,precio:prod.precioVenta,cantidad:cant});
-        actualizarCarrito();
-        recalcularPedido();
-    };
-    
-    window.eliminarDelCarrito = idx => { carrito.splice(idx,1); actualizarCarrito(); recalcularPedido(); };
-    
-    function actualizarCarrito(){
-        const tbody=document.getElementById('carritoBody');
-        if(!carrito.length){ tbody.innerHTML='运河<td colspan="5">Carrito vacío</div>'; return; }
-        tbody.innerHTML=carrito.map((i,idx)=>`<tr> <td>${i.nombre}</td> <td>${i.cantidad}</td> <td>$${i.precio.toFixed(2)}</td> <td>$${(i.precio*i.cantidad).toFixed(2)}</td> <td><button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${idx})">Quitar</button></td> </tr>`).join('');
-    }
-    
     window.crearPedidoPendiente = async () => {
         const id=document.getElementById('clienteSeleccion').value;
-        if(!id||!carrito.length) return alert('Complete cliente y carrito');
+        if(!id||!carrito.length) return alert('Complete datos');
         const cli=CLIENTES.find(c=>c.id==id);
         const dist=calcularDistancia(cli.lat,cli.lng), sub=carrito.reduce((s,i)=>s+(i.precio*i.cantidad),0), log=dist*0.02;
-        const data={ fecha:Timestamp.now(), clienteId:cli.id, clienteNombre:cli.nombre, direccion:cli.direccion, lat:cli.lat, lng:cli.lng, productos:carrito.map(i=>({codigo:i.codigo,nombre:i.nombre,cantidad:i.cantidad,precio:i.precio})), productosTexto:carrito.map(i=>`${i.nombre} x${i.cantidad}`).join(', '), subtotal:sub, costoLogistico:log, distanciaKm:dist, total:sub+log, estado:'pendiente' };
+        const pedido = {
+            fecha: Timestamp.now(), clienteId:cli.id, clienteNombre:cli.nombre, direccion:cli.direccion,
+            lat:cli.lat, lng:cli.lng, productos:carrito.map(i=>({codigo:i.codigo,nombre:i.nombre,cantidad:i.cantidad,precio:i.precio})),
+            subtotal:sub, costoLogistico:log, distanciaKm:dist, total:sub+log, estado:'pendiente'
+        };
         mostrarLoading(true);
-        await setDoc(doc(collection(db,'empresa','dprofer','pedidos_pendientes')),data);
-        carrito=[]; actualizarCarrito(); await cargarDatos();
+        await FirebaseService.guardarPedidoPendiente(pedido);
+        carrito=[]; actualizarCarrito(); await window.cargarDatosGlobal();
         mostrarLoading(false);
-        alert('Pedido confirmado');
+        alert('Pedido guardado');
         recalcularPedido();
     };
     
@@ -523,79 +572,56 @@
         mostrarLoading(true);
         for(const item of data.productos){
             const prod=productos.find(p=>p.codigo===item.codigo);
-            if(!prod||prod.stock<item.cantidad){ alert(`Stock insuficiente para ${item.nombre}`); mostrarLoading(false); return; }
+            if(!prod||prod.stock<item.cantidad){ alert(`Stock insuficiente`); mostrarLoading(false); return; }
         }
         for(const item of data.productos){
             const prod=productos.find(p=>p.codigo===item.codigo);
-            await updateDoc(doc(db,'empresa','dprofer','productos',item.codigo),{ stock:prod.stock-item.cantidad, vendidoTotal:(prod.vendidoTotal||0)+item.cantidad });
+            await FirebaseService.actualizarProducto(item.codigo,{ stock:prod.stock-item.cantidad, vendidoTotal:(prod.vendidoTotal||0)+item.cantidad });
         }
-        const atendido={...data, fechaAtencion:Timestamp.now(), estado:'atendido', atendidoPor:usuarioActual.email};
-        delete atendido.id;
-        await setDoc(doc(collection(db,'empresa','dprofer','pedidos_atendidos')),atendido);
-        await deleteDoc(doc(db,'empresa','dprofer','pedidos_pendientes',id));
-        await cargarDatos();
-        alert('Atendido');
+        const atendido = {...data, fechaAtencion:Timestamp.now(), estado:'atendido', atendidoPor:'admin'};
+        await FirebaseService.moverPedidoAAtendido(id, atendido);
+        await window.cargarDatosGlobal();
+        alert('Pedido atendido');
         mostrarLoading(false);
     };
     
     function verDetallePedido(p){
-        const prodHtml=p.productos?p.productos.map(i=>`<li>${i.nombre} x${i.cantidad} = $${(i.precio*i.cantidad).toFixed(2)}</li>`).join(''):'';
-        document.getElementById('detallePedidoContent').innerHTML=`
-            <p><strong>Cliente:</strong> ${p.clienteNombre}</p>
-            <p><strong>Dirección:</strong> ${p.direccion}</p>
-            <p><strong>Distancia:</strong> ${(p.distanciaKm||0).toFixed(2)} km</p>
-            <p><strong>Costo Logístico:</strong> $${(p.costoLogistico||0).toFixed(2)}</p>
-            <ul>${prodHtml}</ul>
-            <p><strong>Subtotal:</strong> $${(p.subtotal||0).toFixed(2)}</p>
-            <p><strong>Total:</strong> $${(p.total||0).toFixed(2)}</p>
-        `;
+        let html = `<p><strong>Cliente:</strong> ${p.clienteNombre}</p><p><strong>Direccion:</strong> ${p.direccion}</p><p><strong>Distancia:</strong> ${(p.distanciaKm||0).toFixed(2)} km</p><p><strong>Logistica:</strong> $${(p.costoLogistico||0).toFixed(2)}</p><p><strong>Productos:</strong></p><ul>`;
+        if(p.productos) for(const i of p.productos) html += `<li>${i.nombre} x${i.cantidad} = $${(i.precio*i.cantidad).toFixed(2)}</li>`;
+        html += `</ul><p><strong>Subtotal:</strong> $${(p.subtotal||0).toFixed(2)}</p><p><strong>Total:</strong> $${(p.total||0).toFixed(2)}</p>`;
+        document.getElementById('detallePedidoContent').innerHTML = html;
         document.getElementById('detallePedidoModal').style.display='block';
     }
     
     function actualizarListaPedidos(){
-        const pendBody=document.getElementById('pendientesBody');
-        if(!pedidosPendientes.length) pendBody.innerHTML='<tr><td colspan="6">No hay pedidos pendientes</td></tr>';
-        else pendBody.innerHTML=pedidosPendientes.map(p=>`<tr ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'><td>${p.id.slice(-6)}</td><td>${p.fecha?new Date(p.fecha.seconds*1000).toLocaleString():''}</td><td>${p.clienteNombre}</td><td>$${p.total.toFixed(2)}</td><td><span class="badge-pendiente">Pendiente</span></td><td><button class="btn btn-sm btn-success" onclick='marcarComoAtendido("${p.id}",${JSON.stringify(p).replace(/'/g,"&#39;")})'>Atender</button></td></tr>`).join('');
-        const atendBody=document.getElementById('atendidosBody');
-        if(!pedidosAtendidos.length) atendBody.innerHTML='<tr><td colspan="6">No hay pedidos atendidos</td></tr>';
-        else atendBody.innerHTML=pedidosAtendidos.map(p=>`<tr ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'><td>${p.id.slice(-6)}</td><td>${p.fecha?new Date(p.fecha.seconds*1000).toLocaleString():''}</td><td>${p.clienteNombre}</td><td>$${p.total.toFixed(2)}</td><td><span class="badge-atendido">Atendido</span></td><td><button class="btn btn-sm btn-info" onclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Ver</button></td></tr>`).join('');
+        let pendHtml = '';
+        for(const p of pedidosPendientes) pendHtml += `<tr ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'>晚${p.id.slice(-6)}晚晚${p.fecha?new Date(p.fecha.seconds*1000).toLocaleString():''}晚晚${p.clienteNombre}晚晚$${p.total.toFixed(2)}晚晚<span class="badge-pendiente">Pendiente</span>晚晚<button class="btn btn-sm btn-success" onclick='marcarComoAtendido("${p.id}",${JSON.stringify(p).replace(/'/g,"&#39;")})'>Atender</button>筹`;
+        document.getElementById('pendientesBody').innerHTML = pendHtml || '<tr><td colspan="6" class="text-center">No hay pedidos pendientes</div>';
+        let atendHtml = '';
+        for(const p of pedidosAtendidos) atendHtml += `<tr ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'>晚${p.id.slice(-6)}晚晚${p.fecha?new Date(p.fecha.seconds*1000).toLocaleString():''}晚晚${p.clienteNombre}晚晚$${p.total.toFixed(2)}晚晚<span class="badge-atendido">Atendido</span>晚晚<button class="btn btn-sm btn-info" onclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Ver</button>筹`;
+        document.getElementById('atendidosBody').innerHTML = atendHtml || '<tr><td colspan="6" class="text-center">No hay pedidos atendidos</div>';
     }
+    
+    function actualizarPedidosPendientesCard() { document.getElementById('pedidosPendientesCount').textContent = pedidosPendientes.length; }
     
     window.exportarExcel = () => {
         if(!productos.length) return alert('Sin datos');
-        const data=[['Código','Producto','Categoría','Stock','Vendido','Precio','Costo']];
-        productos.forEach(p=>data.push([p.codigo,p.nombre,p.categoria,p.stock,p.vendidoTotal||0,p.precioVenta,p.costo]));
+        const data=[['Codigo','Producto','Categoria','Stock','Vendido','Precio','Costo']];
+        for(const p of productos) data.push([p.codigo,p.nombre,p.categoria,p.stock,p.vendidoTotal||0,p.precioVenta,p.costo]);
         const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),'Inventario'); XLSX.writeFile(wb,`inventario.xlsx`);
     };
     
     window.cambiarTab = (tab) => {
         document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
-        document.getElementById(`tab${tab.charAt(0).toUpperCase()+tab.slice(1)}`).classList.add('active');
-        if(tab==='pedidos'){ actualizarSelectProductos(); actualizarSelectClientes(); recalcularPedido(); }
+        if(tab==='inventario'){ document.querySelector('.tab').classList.add('active'); document.getElementById('tabInventario').classList.add('active'); }
+        else if(tab==='pedidos'){ document.querySelectorAll('.tab')[1].classList.add('active'); document.getElementById('tabPedidos').classList.add('active'); actualizarSelects(); recalcularPedido(); }
     };
     
     function mostrarLoading(show){ document.getElementById('loading').style.display=show?'flex':'none'; }
-    function mostrarError(msg){ const err=document.getElementById('loginError'); err.style.display='block'; err.innerText=msg; setTimeout(()=>err.style.display='none',3000); }
     window.cerrarModal=(id)=>{ document.getElementById(id).style.display='none'; };
     
-    document.getElementById('costo').addEventListener('input',calcularAuto);
-    document.getElementById('precioVenta').addEventListener('input',calcularAuto);
-    document.getElementById('cantidad').addEventListener('input',calcularAuto);
-    
-    onAuthStateChanged(auth, async (user) => {
-        if(user){
-            usuarioActual=user;
-            esAdmin=user.email==='dproferventas@gmail.com';
-            document.getElementById('userDisplay').innerHTML=user.email;
-            document.getElementById('loginContainer').style.display='none';
-            document.getElementById('appContainer').style.display='block';
-            await cargarDatos();
-        } else {
-            document.getElementById('appContainer').style.display='none';
-            document.getElementById('loginContainer').style.display='block';
-        }
-    });
+    window.cargarDatosGlobal();
 </script>
 </body>
 </html>
