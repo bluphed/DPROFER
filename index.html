@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Dprofer Cloud - Recuperación de Inventario</title>
+    <title>Dprofer Cloud - Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -85,8 +85,8 @@
                 <div class="progress-bar-container"><div class="progress-bar" id="importProgress"></div></div>
                 <div id="previewContent"></div>
                 <div class="mt-3 text-end">
-                    <button class="btn btn-secondary" onclick="cancelarImportacion()">Cancelar</button>
-                    <button class="btn btn-success" onclick="confirmarImportacion()">Confirmar Importación</button>
+                    <button class="btn btn-secondary" onclick="window.cancelarImportacion()">Cancelar</button>
+                    <button class="btn btn-success" onclick="window.confirmarImportacion()">Confirmar Importación</button>
                 </div>
             </div>
         </div>
@@ -103,19 +103,89 @@
 
         <div class="tabs"><div class="tab active" onclick="cambiarTab('inventario')">Inventario</div><div class="tab" onclick="cambiarTab('pedidos')">Pedidos</div></div>
 
-        <div id="tabInventario" class="tab-content active"><div class="card"><div class="card-header">Inventario Actual</div><div class="card-body"><input type="text" id="buscador" class="form-control mb-3" placeholder="Buscar..." onkeyup="filtrarProductos()"><div class="table-container"><table class="table"><thead><tr><th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></thead><tbody id="tablaInventario"></tbody></table></div></div></div></div>
+        <div id="tabInventario" class="tab-content active"><div class="card"><div class="card-header">Inventario Actual</div><div class="card-body"><input type="text" id="buscador" class="form-control mb-3" placeholder="Buscar..." onkeyup="filtrarProductos()"><div class="table-container"><table class="table"><thead>运河<th>#</th><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Vendido</th><th>Precio</th><th>Rentab.</th><th>Estado</th><th>Acciones</th></thead><tbody id="tablaInventario"></tbody></table></div></div></div></div>
 
-        <div id="tabPedidos" class="tab-content"><div class="card"><div class="card-header">Nuevo Pedido</div><div class="card-body"><div class="row"><div class="col-md-6"><div class="mb-2"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select></div><div class="mb-2"><label>Producto</label><div class="row g-2"><div class="col-7"><select id="productoAgregar" class="form-control"></select></div><div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1"></div><div class="col-2"><button class="btn btn-primary w-100" onclick="agregarAlCarrito()">+</button></div></div></div><div class="mt-3"><h5>Carrito</h5><div class="table-container"><table class="table"><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></thead><tbody id="carritoBody"></tbody></table></div></div><div id="clienteHistorial" class="cliente-stats" style="display:none"><h6>Historial del Cliente</h6><p>Compras: <span id="clienteCompras">0</span> | Total: $<span id="clienteGastado">0</span></p></div></div><div class="col-md-6"><div class="resumen-pedido"><h6>Resumen</h6><p>Subtotal: $<span id="subtotalProductos">0.00</span></p><p>Distancia: <span id="distanciaKm">0.00</span> km</p><p>Logística: $<span id="costoLogistico">0.00</span></p><hr><h5>Total: $<span id="totalPedido">0.00</span></h5></div><button class="btn btn-warning w-100" onclick="crearPedidoPendiente()" style="background:#ffc107;font-weight:bold">Confirmar Pedido</button></div></div></div></div>
+        <div id="tabPedidos" class="tab-content"><div class="card"><div class="card-header">Nuevo Pedido</div><div class="card-body"><div class="row"><div class="col-md-6"><div class="mb-2"><label>Cliente</label><select id="clienteSeleccion" class="form-control"></select></div><div class="mb-2"><label>Producto</label><div class="row g-2"><div class="col-7"><select id="productoAgregar" class="form-control"></select></div><div class="col-3"><input type="number" id="cantidadAgregar" class="form-control" value="1"></div><div class="col-2"><button class="btn btn-primary w-100" onclick="agregarAlCarrito()">+</button></div></div></div><div class="mt-3"><h5>Carrito</h5><div class="table-container"><table class="table"><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></thead><tbody id="carritoBody"></tbody>}</div></div><div id="clienteHistorial" class="cliente-stats" style="display:none"><h6>Historial del Cliente</h6><p>Compras: <span id="clienteCompras">0</span> | Total: $<span id="clienteGastado">0</span></p></div></div><div class="col-md-6"><div class="resumen-pedido"><h6>Resumen</h6><p>Subtotal: $<span id="subtotalProductos">0.00</span></p><p>Distancia: <span id="distanciaKm">0.00</span> km</p><p>Logística: $<span id="costoLogistico">0.00</span></p><hr><h5>Total: $<span id="totalPedido">0.00</span></h5></div><button class="btn btn-warning w-100" onclick="crearPedidoPendiente()" style="background:#ffc107;font-weight:bold">Confirmar Pedido</button></div></div></div></div>
 
-        <div class="card"><div class="card-header">Pedidos Pendientes</div><div class="card-body"><div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></thead><tbody id="pendientesBody"></tbody></table></div></div></div>
+        <div class="card"><div class="card-header">Pedidos Pendientes</div><div class="card-body"><div class="table-container"><table class="table"><thead>｜｜DSML｜｜<th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></thead><tbody id="pendientesBody"></tbody>}</div></div></div>
 
-        <div class="card"><div class="card-header">Pedidos Atendidos</div><div class="card-body"><div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></thead><tbody id="atendidosBody"></tbody></table></div></div></div>
+        <div class="card"><div class="card-header">Pedidos Atendidos</div><div class="card-body"><div class="table-container"><table class="table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></thead><tbody id="atendidosBody"></tbody>}</div></div></div>
     </div>
 </div>
 
 <script>
     const CLIENTES = [{ id: 1, nombre: "Gabriel", direccion: "Guayaquil", lat: -2.1350433, lng: -79.9214015 }];
     let productosPendientesImportacion = [];
+    
+    // Funciones globales para importar
+    window.cancelarImportacion = function() {
+        document.getElementById('importPreview').style.display = 'none';
+        productosPendientesImportacion = [];
+        document.getElementById('importProgress').style.width = '0%';
+    };
+    
+    window.confirmarImportacion = async function() {
+        if (!productosPendientesImportacion.length) {
+            alert('No hay productos para importar');
+            return;
+        }
+        
+        // Verificar que firebase esté disponible
+        if (typeof window.db === 'undefined') {
+            alert('Espera a que termine de cargar el sistema antes de importar');
+            return;
+        }
+        
+        mostrarLoadingGlobal(true);
+        let actualizados = 0, creados = 0;
+        const dbGlobal = window.db;
+        const productosExistentes = window.productosGlobal || [];
+        
+        for (const prod of productosPendientesImportacion) {
+            try {
+                const prodRef = doc(dbGlobal, 'empresa', 'dprofer', 'productos', prod.codigo);
+                const existente = productosExistentes.find(p => p.codigo === prod.codigo);
+                if (existente) {
+                    await updateDoc(prodRef, {
+                        nombre: prod.nombre,
+                        categoria: prod.categoria,
+                        stock: prod.stock,
+                        precioVenta: prod.precioVenta,
+                        costo: prod.costo,
+                        actualizado: Timestamp.now()
+                    });
+                    actualizados++;
+                } else {
+                    await setDoc(prodRef, {
+                        codigo: prod.codigo,
+                        nombre: prod.nombre,
+                        categoria: prod.categoria,
+                        stock: prod.stock,
+                        precioVenta: prod.precioVenta,
+                        costo: prod.costo,
+                        vendidoTotal: 0,
+                        stockMinimo: 5,
+                        creado: Timestamp.now()
+                    });
+                    creados++;
+                }
+            } catch(e) {
+                console.error('Error importando:', prod.codigo, e);
+            }
+        }
+        
+        // Recargar datos
+        if (window.cargarDatosGlobal) await window.cargarDatosGlobal();
+        
+        mostrarLoadingGlobal(false);
+        alert(`✅ Importación completada:\n📦 Actualizados: ${actualizados}\n✨ Creados: ${creados}`);
+        window.cancelarImportacion();
+    };
+    
+    function mostrarLoadingGlobal(show) {
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = show ? 'flex' : 'none';
+    }
 </script>
 
 <script type="module">
@@ -136,57 +206,27 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     
+    // Hacer db, Timestamp y cargarDatos globales
+    window.db = db;
+    window.Timestamp = Timestamp;
+    window.productosGlobal = [];
+    
     const ADMIN_PASSWORD = "dprofer2024";
     const NEGOCIO_COORD = { lat: -0.2785643, lng: -79.1822373 };
     let usuarioActual = null, esAdmin = false, productos = [], pedidosPendientes = [], pedidosAtendidos = [], carrito = [];
-    let productosPendientesImportacion = [];
     
-    // ==================== IMPORTAR EXCEL (ESPECIAL PARA ESTE FORMATO) ====================
-    window.importarExcel = () => document.getElementById('importExcelInput').click();
-    
-    function cancelarImportacion() {
-        document.getElementById('importPreview').style.display = 'none';
-        productosPendientesImportacion = [];
+    // Actualizar productos global
+    function actualizarProductosGlobal() {
+        window.productosGlobal = productos;
     }
     
-    async function confirmarImportacion() {
-        if (!productosPendientesImportacion.length) return;
-        mostrarLoading(true);
-        let actualizados = 0, creados = 0;
-        for (const prod of productosPendientesImportacion) {
-            const prodRef = doc(db, 'empresa', 'dprofer', 'productos', prod.codigo);
-            const existente = productos.find(p => p.codigo === prod.codigo);
-            if (existente) {
-                await updateDoc(prodRef, {
-                    nombre: prod.nombre,
-                    categoria: prod.categoria,
-                    stock: prod.stock,
-                    precioVenta: prod.precioVenta,
-                    costo: prod.costo,
-                    actualizado: Timestamp.now()
-                });
-                actualizados++;
-            } else {
-                await setDoc(prodRef, {
-                    codigo: prod.codigo,
-                    nombre: prod.nombre,
-                    categoria: prod.categoria,
-                    stock: prod.stock,
-                    precioVenta: prod.precioVenta,
-                    costo: prod.costo,
-                    vendidoTotal: 0,
-                    stockMinimo: 5,
-                    creado: Timestamp.now()
-                });
-                creados++;
-            }
-        }
+    window.cargarDatosGlobal = async function() {
+        if (!usuarioActual) return;
         await cargarDatos();
-        mostrarLoading(false);
-        alert(`✅ Importación completada:\n📦 Actualizados: ${actualizados}\n✨ Creados: ${creados}`);
-        document.getElementById('importPreview').style.display = 'none';
-        productosPendientesImportacion = [];
-    }
+    };
+    
+    // ==================== IMPORTAR EXCEL ====================
+    window.importarExcel = () => document.getElementById('importExcelInput').click();
     
     document.getElementById('importExcelInput').onchange = async (e) => {
         const file = e.target.files[0];
@@ -203,7 +243,7 @@
                 
                 if (!rows || rows.length < 2) throw new Error("El archivo está vacío");
                 
-                // Buscar la fila donde empiezan los datos reales (donde aparece "Código" o "Producto")
+                // Buscar la fila donde empiezan los datos
                 let inicioDatos = -1;
                 let columnas = {};
                 
@@ -217,29 +257,18 @@
                             columnas = { codigo: j };
                             break;
                         }
-                        if (cell === "producto") {
-                            columnas.producto = j;
-                        }
-                        if (cell === "categoría") {
-                            columnas.categoria = j;
-                        }
-                        if (cell === "stock") {
-                            columnas.stock = j;
-                        }
-                        if (cell === "precio venta") {
-                            columnas.precioVenta = j;
-                        }
-                        if (cell === "costo") {
-                            columnas.costo = j;
-                        }
+                        if (cell === "producto") columnas.producto = j;
+                        if (cell === "categoría") columnas.categoria = j;
+                        if (cell === "stock") columnas.stock = j;
+                        if (cell === "precio venta") columnas.precioVenta = j;
+                        if (cell === "costo") columnas.costo = j;
                     }
                     if (inicioDatos !== -1) break;
                 }
                 
-                // Si no encontró "Código", asumir que los datos están en filas donde hay letras mayúsculas con guión
                 if (inicioDatos === -1) {
                     columnas = { codigo: 1, producto: 2, categoria: 3, stock: 4, precioVenta: 5, costo: 6 };
-                    inicioDatos = 4; // según tu archivo, los datos empiezan en fila 5 (índice 4)
+                    inicioDatos = 4;
                 }
                 
                 const productosEncontrados = [];
@@ -251,9 +280,8 @@
                     let codigo = columnas.codigo !== undefined ? row[columnas.codigo] : null;
                     if (codigo && typeof codigo === 'string') codigo = codigo.trim().toUpperCase();
                     
-                    // Saltar filas sin código o que no parecen productos
                     if (!codigo || codigo === "RESUMEN FINAL" || codigo === "RESUMEN" || codigo.startsWith("RESUMEN")) break;
-                    if (codigo && !codigo.includes('-')) continue; // los códigos tienen guión
+                    if (codigo && !codigo.includes('-')) continue;
                     
                     let nombre = columnas.producto !== undefined ? row[columnas.producto] : (row[2] || "");
                     if (nombre && typeof nombre === 'string') nombre = nombre.trim();
@@ -287,12 +315,11 @@
                 
                 if (productosEncontrados.length === 0) throw new Error("No se encontraron productos en el archivo");
                 
-                // Mostrar vista previa
                 productosPendientesImportacion = productosEncontrados;
                 const previewHtml = `
                     <div class="preview-table">
                         <table class="table table-sm">
-                            <thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Costo</th></tr></thead>
+                            <thead>运河<th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Costo</th> </thead>
                             <tbody>
                                 ${productosEncontrados.map(p => `<tr><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>$${p.precioVenta.toFixed(2)}</td><td>$${p.costo.toFixed(2)}</td></tr>`).join('')}
                             </tbody>
@@ -347,6 +374,7 @@
             const productosRef = collection(db, 'empresa', 'dprofer', 'productos');
             const productosSnap = await getDocs(productosRef);
             productos = productosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            actualizarProductosGlobal();
             
             const pendRef = collection(db, 'empresa', 'dprofer', 'pedidos_pendientes');
             const pendSnap = await getDocs(query(pendRef, orderBy('fecha', 'desc')));
@@ -403,7 +431,7 @@
         const bajos = productos.filter(p=>p.stock<=(p.stockMinimo||5));
         const tbody = document.getElementById('tablaInventario');
         if(!bajos.length){ tbody.innerHTML='运河<td colspan="10">No hay stock bajo</td>'; return; }
-        tbody.innerHTML = bajos.map((p,i)=>`<tr><td>${i+1}</td><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock}</td><td>${p.vendidoTotal||0}</td><td>$${p.precioVenta.toFixed(2)}</td><td>$${(p.precioVenta-p.costo).toFixed(2)}</td><td><span class="badge-stock-bajo">Stock Bajo</span></td><td><button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> ${esAdmin?`<button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button>`:''}</td></tr>`).join('');
+        tbody.innerHTML = bajos.map((p,i)=>`<tr>晚了${i+1}</td>晚了${p.codigo}</td>晚了${p.nombre}</td>晚了${p.categoria}</td>晚了${p.stock}</td>晚了${p.vendidoTotal||0}</td>晚了$${p.precioVenta.toFixed(2)}</td>晚了$${(p.precioVenta-p.costo).toFixed(2)}</td>晚了<span class="badge-stock-bajo">Stock Bajo</span></td>晚了<button class="btn btn-sm btn-warning" onclick="abrirEditarProducto('${p.codigo}')">Editar</button> ${esAdmin?`<button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.codigo}')">Eliminar</button>`:''}一筹`).join('');
     };
     
     let productoCodigoEditar = null;
@@ -472,8 +500,8 @@
     
     function actualizarCarrito(){
         const tbody=document.getElementById('carritoBody');
-        if(!carrito.length){ tbody.innerHTML='运河<td colspan="5">Carrito vacío</td></table>'; return; }
-        tbody.innerHTML=carrito.map((i,idx)=>`<tr><td>${i.nombre}</td><td>${i.cantidad}</td><td>$${i.precio.toFixed(2)}</td><td>$${(i.precio*i.cantidad).toFixed(2)}</td><td><button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${idx})">Quitar</button></td></tr>`).join('');
+        if(!carrito.length){ tbody.innerHTML='运河<td colspan="5">Carrito vacío</div>'; return; }
+        tbody.innerHTML=carrito.map((i,idx)=>`<tr> <td>${i.nombre}</td> <td>${i.cantidad}</td> <td>$${i.precio.toFixed(2)}</td> <td>$${(i.precio*i.cantidad).toFixed(2)}</td> <td><button class="btn btn-sm btn-danger" onclick="eliminarDelCarrito(${idx})">Quitar</button></td> </tr>`).join('');
     }
     
     window.crearPedidoPendiente = async () => {
@@ -512,16 +540,24 @@
     
     function verDetallePedido(p){
         const prodHtml=p.productos?p.productos.map(i=>`<li>${i.nombre} x${i.cantidad} = $${(i.precio*i.cantidad).toFixed(2)}</li>`).join(''):'';
-        document.getElementById('detallePedidoContent').innerHTML=`<p><strong>Cliente:</strong> ${p.clienteNombre}</p><p><strong>Dirección:</strong> ${p.direccion}</p><p><strong>Distancia:</strong> ${(p.distanciaKm||0).toFixed(2)} km</p><p><strong>Costo Logístico:</strong> $${(p.costoLogistico||0).toFixed(2)}</p><ul>${prodHtml}</ul><p><strong>Subtotal:</strong> $${(p.subtotal||0).toFixed(2)}</p><p><strong>Total:</strong> $${(p.total||0).toFixed(2)}</p>`;
+        document.getElementById('detallePedidoContent').innerHTML=`
+            <p><strong>Cliente:</strong> ${p.clienteNombre}</p>
+            <p><strong>Dirección:</strong> ${p.direccion}</p>
+            <p><strong>Distancia:</strong> ${(p.distanciaKm||0).toFixed(2)} km</p>
+            <p><strong>Costo Logístico:</strong> $${(p.costoLogistico||0).toFixed(2)}</p>
+            <ul>${prodHtml}</ul>
+            <p><strong>Subtotal:</strong> $${(p.subtotal||0).toFixed(2)}</p>
+            <p><strong>Total:</strong> $${(p.total||0).toFixed(2)}</p>
+        `;
         document.getElementById('detallePedidoModal').style.display='block';
     }
     
     function actualizarListaPedidos(){
         const pendBody=document.getElementById('pendientesBody');
-        if(!pedidosPendientes.length) pendBody.innerHTML='运河<td colspan="6">No hay pedidos pendientes</td></tr>';
+        if(!pedidosPendientes.length) pendBody.innerHTML='<tr><td colspan="6">No hay pedidos pendientes</td></tr>';
         else pendBody.innerHTML=pedidosPendientes.map(p=>`<tr ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'><td>${p.id.slice(-6)}</td><td>${p.fecha?new Date(p.fecha.seconds*1000).toLocaleString():''}</td><td>${p.clienteNombre}</td><td>$${p.total.toFixed(2)}</td><td><span class="badge-pendiente">Pendiente</span></td><td><button class="btn btn-sm btn-success" onclick='marcarComoAtendido("${p.id}",${JSON.stringify(p).replace(/'/g,"&#39;")})'>Atender</button></td></tr>`).join('');
         const atendBody=document.getElementById('atendidosBody');
-        if(!pedidosAtendidos.length) atendBody.innerHTML='运河<td colspan="6">No hay pedidos atendidos</td></tr>';
+        if(!pedidosAtendidos.length) atendBody.innerHTML='<tr><td colspan="6">No hay pedidos atendidos</td></tr>';
         else atendBody.innerHTML=pedidosAtendidos.map(p=>`<tr ondblclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'><td>${p.id.slice(-6)}</td><td>${p.fecha?new Date(p.fecha.seconds*1000).toLocaleString():''}</td><td>${p.clienteNombre}</td><td>$${p.total.toFixed(2)}</td><td><span class="badge-atendido">Atendido</span></td><td><button class="btn btn-sm btn-info" onclick='verDetallePedido(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Ver</button></td></tr>`).join('');
     }
     
